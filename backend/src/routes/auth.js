@@ -6,8 +6,8 @@ import User from '../models/User.js';
 import PasswordReset from '../models/PasswordReset.js';
 import { signJwt } from '../utils/jwt.js';
 import { sendOtpEmail, sendWelcomeEmail } from '../utils/brevo.js';
-
 import { requireAuth } from '../middleware/auth.js';
+import { cookieOpts } from '../utils/cookieOptions.js';
 
 const router = Router();
 
@@ -28,7 +28,6 @@ router.post('/register', async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: 'Invalid input' });
   const { name, email, phone, age, gender, password } = parsed.data;
 
-  // Separate duplicate checks so we can give a clear error message
   const emailExists = await User.findOne({ email: email.toLowerCase() }).lean();
   if (emailExists) return res.status(409).json({ error: 'This email is already registered. Please log in.' });
 
@@ -40,17 +39,11 @@ router.post('/register', async (req, res) => {
 
   const token = signJwt({ sub: String(user._id) });
 
-  // Fire-and-forget welcome email — log errors clearly
   sendWelcomeEmail({ toEmail: user.email, toName: user.name }).catch((err) =>
     console.error('[Brevo] ❌ Welcome email failed for', user.email, ':', err.message)
   );
 
-  res.cookie('auth_token', token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production'
-  });
-
+  res.cookie('auth_token', token, cookieOpts);
   return res.json({ ok: true });
 });
 
@@ -73,19 +66,14 @@ router.post('/login', async (req, res) => {
   if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
   if (user.isSuspended) {
-    return res.status(403).json({ error: 'You are suspended from administration' });
+    return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
   }
 
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
 
   const token = signJwt({ sub: String(user._id) });
-  res.cookie('auth_token', token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production'
-  });
-
+  res.cookie('auth_token', token, cookieOpts);
   return res.json({ ok: true });
 });
 
@@ -93,17 +81,12 @@ router.post('/login', async (req, res) => {
    LOGOUT
 ──────────────────────────────────────────────── */
 router.post('/logout', (_req, res) => {
-  res.clearCookie('auth_token', {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production'
-  });
+  res.clearCookie('auth_token', cookieOpts);
   return res.json({ ok: true });
 });
 
 /* ────────────────────────────────────────────────
    SEND OTP (authenticated) — for logged-in users changing password
-   Fetches email from DB via JWT, sends OTP to their email
 ──────────────────────────────────────────────── */
 router.post('/send-otp', requireAuth, async (req, res) => {
   const user = await User.findById(req.user.id);
@@ -127,12 +110,11 @@ router.post('/send-otp', requireAuth, async (req, res) => {
   return res.json({ ok: true, expiresInSeconds: 120 });
 });
 
-
 /* ────────────────────────────────────────────────
-   FORGOT PASSWORD — user enters phone → we look up email → send OTP
+   FORGOT PASSWORD
 ──────────────────────────────────────────────── */
 const forgotSchema = z.object({
-  phone: z.string().min(8)   // user enters their registered mobile number
+  phone: z.string().min(8)
 });
 
 router.post('/forgot-password', async (req, res) => {
@@ -142,7 +124,6 @@ router.post('/forgot-password', async (req, res) => {
   const { phone } = parsed.data;
   const user = await User.findOne({ phone }).lean();
 
-  // Always respond 200 — don't reveal if phone exists
   if (!user) {
     console.log('[ForgotPw] Phone not found:', phone);
     return res.json({ ok: true, expiresInSeconds: 120 });
@@ -167,7 +148,7 @@ router.post('/forgot-password', async (req, res) => {
 });
 
 /* ────────────────────────────────────────────────
-   VERIFY OTP — validate code only, don't reset yet
+   VERIFY OTP
 ──────────────────────────────────────────────── */
 const verifyOtpSchema = z.object({
   phone: z.string().min(8),
@@ -196,7 +177,7 @@ router.post('/verify-otp', async (req, res) => {
 });
 
 /* ────────────────────────────────────────────────
-   RESET PASSWORD — requires valid OTP
+   RESET PASSWORD
 ──────────────────────────────────────────────── */
 const resetSchema = z.object({
   phone:       z.string().min(8),

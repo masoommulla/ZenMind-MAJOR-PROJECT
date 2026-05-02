@@ -28,8 +28,8 @@ export async function apiFetch<T>(
   const json = text ? JSON.parse(text) : {};
 
   if (!res.ok) {
-    if (res.status === 403 && json?.error === 'You are suspended from administration') {
-      window.location.reload(); // Instantly reloads, failing session check and kicking user to landing
+    if (res.status === 403 && (json?.error?.includes('suspended'))) {
+      window.location.reload();
     }
     throw new Error((json && json.error) || `Request failed (${res.status})`);
   }

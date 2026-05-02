@@ -1,5 +1,6 @@
 import { verifyJwt } from '../utils/jwt.js';
 import User from '../models/User.js';
+import { cookieOpts } from '../utils/cookieOptions.js';
 
 export async function requireAuth(req, res, next) {
   try {
@@ -11,12 +12,8 @@ export async function requireAuth(req, res, next) {
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
     if (user.isSuspended) {
-      res.clearCookie('auth_token', {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production'
-      });
-      return res.status(403).json({ error: 'You are suspended from administration' });
+      res.clearCookie('auth_token', cookieOpts);
+      return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
     }
 
     req.user = { id: String(user._id) };

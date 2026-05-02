@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import User from '../models/User.js';
 import { requireAuth } from '../middleware/auth.js';
+import { cookieOpts } from '../utils/cookieOptions.js';
 
 const router = Router();
 
@@ -99,12 +100,7 @@ router.delete('/', requireAuth, async (req, res) => {
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
   // Clear auth cookie upon account deletion
-  res.clearCookie('auth_token', {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production'
-  });
-
+  res.clearCookie('auth_token', cookieOpts);
   return res.json({ ok: true });
 });
 

@@ -4,10 +4,14 @@ import { z } from 'zod';
 import jwt from 'jsonwebtoken';
 import Admin from '../models/Admin.js';
 import User from '../models/User.js';
+import { cookieOpts } from '../utils/cookieOptions.js';
 
 const router = Router();
 
-// Middleware to check admin auth
+// Admin cookie uses a different name but same options
+const adminCookieOpts = { ...cookieOpts };
+
+/* ── Middleware: require admin ── */
 export const requireAdmin = async (req, res, next) => {
   try {
     const token = req.cookies.admin_token;
@@ -43,12 +47,7 @@ router.post('/login', async (req, res) => {
     { expiresIn: '7d' }
   );
 
-  res.cookie('admin_token', token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production'
-  });
-
+  res.cookie('admin_token', token, adminCookieOpts);
   return res.json({ ok: true });
 });
 
@@ -61,10 +60,10 @@ router.get('/me', requireAdmin, async (req, res) => {
 /* ── GET /admin/users ── */
 router.get('/users', requireAdmin, async (req, res) => {
   const users = await User.find({}, '-passwordHash').sort({ createdAt: -1 }).lean();
-  
+
   const totalUsers = users.length;
   const suspendedCount = users.filter(u => u.isSuspended).length;
-  
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todaysMembers = users.filter(u => new Date(u.createdAt) >= today).length;
@@ -100,11 +99,7 @@ router.delete('/users/:id', requireAdmin, async (req, res) => {
 
 /* ── POST /admin/logout ── */
 router.post('/logout', (_req, res) => {
-  res.clearCookie('admin_token', {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production'
-  });
+  res.clearCookie('admin_token', adminCookieOpts);
   return res.json({ ok: true });
 });
 
