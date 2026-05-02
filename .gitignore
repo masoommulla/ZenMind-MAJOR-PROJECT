@@ -10,8 +10,8 @@ backend/.env.local
 !.env.example
 !backend/.env.example
 
-# build outputs
-dist
+# build outputs (dist is NOT gitignored — Render needs it for static site publishing)
+# dist
 
 # logs
 *.log
