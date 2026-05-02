@@ -22,7 +22,7 @@ services:
   - type: static
     name: zenmind-frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: ./dist
+    staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
         sync: false
