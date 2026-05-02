@@ -16,3 +16,7 @@ backend/.env.local
 # logs
 *.log
 
+# temp scripts
+patch_dashboard*.py
+patch_dashboard*.ps1
+find_comment.py
