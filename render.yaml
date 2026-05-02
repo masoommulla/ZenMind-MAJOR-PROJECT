@@ -12,22 +12,20 @@ services:
       - key: PORT
         value: 10000
       - key: MONGO_URI
-        sync: false        # Set this in the Render dashboard
+        sync: false
       - key: JWT_SECRET
-        sync: false        # Set this in the Render dashboard
+        sync: false
       - key: FRONTEND_URL
-        sync: false        # Set to your Render frontend URL
+        sync: false
 
   # ─── Frontend: Static Site ───────────────────────────────────────────────────
-  - type: web
+  - type: static
     name: zenmind-frontend
-    runtime: static
-    rootDir: .
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
-        sync: false        # Set to your Render backend URL
+        sync: false
     routes:
       - type: rewrite
         source: /*
