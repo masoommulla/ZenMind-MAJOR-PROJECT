@@ -62,7 +62,17 @@ router.put('/', requireAuth, async (req, res) => {
   if (parsed.data.gender)            user.gender = parsed.data.gender;
 
   await user.save();
-  return res.json({ ok: true });
+
+  // Return the full updated user object (fixes frontend setMe(updated))
+  return res.json({
+    id:     String(user._id),
+    name:   user.name,
+    email:  user.email,
+    phone:  user.phone,
+    age:    user.age,
+    gender: user.gender,
+    avatar: user.avatar?.data ? { mime: user.avatar.mime, data: user.avatar.data } : null
+  });
 });
 
 /* ── PUT /me/avatar ── */
