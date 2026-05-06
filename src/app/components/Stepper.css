@@ -14,6 +14,18 @@
   box-shadow: 0 20px 40px rgba(13, 93, 58, 0.08);
 }
 
+:global(.dark) .stepper-circle-container, html.dark .stepper-circle-container {
+  background: #111111;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  --step-inactive-bg: #1a1a1a;
+  --step-inactive-text: #6b7280;
+  --step-active-bg: #10b981;
+  --step-active-text: #10b981;
+  --step-complete-bg: #10b981;
+  --step-complete-text: #d2f6e2;
+}
+
 .stepper-indicator-row {
   display: flex;
   width: 100%;
@@ -61,6 +73,17 @@
   border-color: rgba(13, 93, 58, 0.45);
 }
 
+:global(.dark) .stepper-back-button, html.dark .stepper-back-button {
+  background: #1a1a1a;
+  color: #9ca3af;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global(.dark) .stepper-back-button:hover, html.dark .stepper-back-button:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #f3f4f6;
+}
+
 .stepper-next-button {
   border-radius: 9999px;
   border: none;
@@ -74,6 +97,15 @@
 
 .stepper-next-button:hover {
   background-color: #0a4a2e;
+}
+
+:global(.dark) .stepper-next-button, html.dark .stepper-next-button {
+  background-color: #10b981;
+  color: #050505;
+}
+
+:global(.dark) .stepper-next-button:hover, html.dark .stepper-next-button:hover {
+  background-color: #34d399;
 }
 
 .stepper-indicator {
@@ -112,7 +144,7 @@
   flex: 1;
   overflow: hidden;
   border-radius: 0.25rem;
-  background-color: #d8e8dc;
+  background-color: var(--step-inactive-bg, #d8e8dc);
 }
 
 .stepper-connector-inner {
@@ -157,10 +189,18 @@
   font-family: 'Syne', sans-serif;
 }
 
+:global(.dark) .stepper-complete-title, html.dark .stepper-complete-title {
+  color: #f3f4f6;
+}
+
 .stepper-complete-desc {
   font-size: 0.9rem;
   color: #4a7c5d;
   max-width: 320px;
+}
+
+:global(.dark) .stepper-complete-desc, html.dark .stepper-complete-desc {
+  color: #9ca3af;
 }
 
 .stepper-restart-button {
@@ -180,5 +220,16 @@
   background: #0d5d3a;
   color: #fff;
   border-color: #0d5d3a;
+}
+
+:global(.dark) .stepper-restart-button, html.dark .stepper-restart-button {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #10b981;
+}
+
+:global(.dark) .stepper-restart-button:hover, html.dark .stepper-restart-button:hover {
+  background: #10b981;
+  color: #050505;
+  border-color: #10b981;
 }
 

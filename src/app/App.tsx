@@ -14,12 +14,13 @@ import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
+import TherapistLogin from './components/TherapistLogin';
+import TherapistDashboard from './components/TherapistDashboard';
 import LoadingScreen from './components/LoadingScreen';
 import { apiFetch } from './api/client';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ── helpers ── */
 const ls = {
   get: (k: string) => { try { return localStorage.getItem(k) === '1'; } catch { return false; } },
   set: (k: string, v: boolean) => { try { v ? localStorage.setItem(k, '1') : localStorage.removeItem(k); } catch {} },
@@ -28,12 +29,29 @@ const ls = {
 export default function App() {
   const mainRef = useRef<HTMLDivElement>(null);
 
-  /* Read from localStorage immediately so UI is stable on refresh */
   const [authed, setAuthed]           = useState(() => ls.get('zm_authed'));
   const [adminAuthed, setAdminAuthed] = useState(() => ls.get('zm_admin'));
+  const [therapistAuthed, setTherapistAuthed] = useState(() => ls.get('zm_therapist'));
+
   const [showAuth, setShowAuth]       = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [checking, setChecking]       = useState(true); // show loader while verifying
+  const [showTherapistLogin, setShowTherapistLogin] = useState(false);
+
+  /* Loading screen state — only for very first render */
+  const [checking, setChecking] = useState(true);   // show loader?
+  const [apiReady, setApiReady] = useState(false);  // backend responded?
+  const isDashboard = adminAuthed || therapistAuthed || authed;
+
+  useEffect(() => {
+    if (!isDashboard) {
+      document.documentElement.classList.remove('dark');
+    } else {
+      const theme = localStorage.getItem('theme');
+      const isDarkMode = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDarkMode) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    }
+  }, [isDashboard]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -49,25 +67,25 @@ export default function App() {
   useEffect(() => {
     let alive = true;
 
-    /* Verify session — if network fails keep cached state; only sign out on 401/403 */
     const verify = async (path: string): Promise<boolean | null> => {
       try {
-        await apiFetch(path, { timeoutMs: 30_000 });
+        await apiFetch(path, { timeoutMs: 55_000 }); // 55s — plenty for Render cold start
         return true;
       } catch (e: any) {
         const msg = String(e?.message ?? '').toLowerCase();
         if (msg.includes('unauthori') || msg.includes('forbidden') || msg.includes('401') || msg.includes('403')) {
-          return false; // definitive — not authenticated
+          return false;
         }
         return null; // network / timeout — keep cached state
       }
     };
 
-    Promise.all([verify('/me'), verify('/admin/me')]).then(([u, a]) => {
+    Promise.all([verify('/me'), verify('/admin/me'), verify('/therapist/me')]).then(([u, a, t]) => {
       if (!alive) return;
       if (u !== null) { setAuthed(!!u);      ls.set('zm_authed', !!u); }
       if (a !== null) { setAdminAuthed(!!a); ls.set('zm_admin', !!a); }
-      setChecking(false);
+      if (t !== null) { setTherapistAuthed(!!t); ls.set('zm_therapist', !!t); }
+      setApiReady(true); // signal LoadingScreen to race to 100
     });
 
     return () => { alive = false; };
@@ -84,8 +102,21 @@ export default function App() {
     setShowAdminLogin(false);
   };
 
-  /* Show full loading screen on first visit / cold start */
-  if (checking) return <LoadingScreen />;
+  const logoutTherapist = async () => {
+    try { await apiFetch('/therapist/logout', { method: 'POST' }); } catch {}
+    setTherapistAuthed(false); ls.set('zm_therapist', false);
+    setShowTherapistLogin(false);
+  };
+
+  /* Show loading screen only during initial check */
+  if (checking) {
+    return (
+      <LoadingScreen
+        apiReady={apiReady}
+        onComplete={() => setChecking(false)}
+      />
+    );
+  }
 
   return (
     <div ref={mainRef} className="w-full overflow-x-hidden bg-background">
@@ -94,7 +125,18 @@ export default function App() {
       ) : showAdminLogin ? (
         <AdminLogin
           onBackHome={() => setShowAdminLogin(false)}
-          onAdminAuthSuccess={() => { setAdminAuthed(true); ls.set('zm_admin', true); setShowAdminLogin(false); }}
+          onAdminAuthSuccess={() => {
+            setAdminAuthed(true); ls.set('zm_admin', true); setShowAdminLogin(false);
+          }}
+        />
+      ) : therapistAuthed ? (
+        <TherapistDashboard onLogout={logoutTherapist} />
+      ) : showTherapistLogin ? (
+        <TherapistLogin
+          onBackHome={() => setShowTherapistLogin(false)}
+          onAuthSuccess={() => {
+            setTherapistAuthed(true); ls.set('zm_therapist', true); setShowTherapistLogin(false);
+          }}
         />
       ) : authed ? (
         <Dashboard onLogout={logoutUser} />
@@ -105,7 +147,7 @@ export default function App() {
         />
       ) : (
         <>
-          <Navigation onGetStarted={() => setShowAuth(true)} onAdminLoginTrigger={() => setShowAdminLogin(true)} />
+          <Navigation onGetStarted={() => setShowAuth(true)} onAdminLoginTrigger={() => setShowAdminLogin(true)} onTherapistLoginTrigger={() => setShowTherapistLogin(true)} />
           <Hero onGetStarted={() => setShowAuth(true)} />
           <Features />
           <HowItWorks />
@@ -113,7 +155,7 @@ export default function App() {
           <Statistics />
           <TherapySection />
           <CTASection onGetStarted={() => setShowAuth(true)} />
-          <Footer />
+          <Footer onTherapistLoginTrigger={() => setShowTherapistLogin(true)} />
         </>
       )}
     </div>

@@ -25,6 +25,7 @@ export default function AdminLogin({ onBackHome, onAdminAuthSuccess }: AdminLogi
       await apiFetch('/admin/login', {
         method: 'POST',
         body: JSON.stringify({ username, password }),
+        timeoutMs: 30000
       });
       onAdminAuthSuccess();
     } catch (err: any) {

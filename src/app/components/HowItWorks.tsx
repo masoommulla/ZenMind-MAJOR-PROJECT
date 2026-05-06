@@ -32,8 +32,8 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[#f8fdf9] to-[#e8f5e9] relative overflow-hidden">
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-80">
+    <section id="how-it-works" className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-[#f8fdf9] to-[#e8f5e9] dark:from-[#050505] dark:to-[#111111] transition-colors duration-300 relative overflow-hidden">
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-80 dark:opacity-40 mix-blend-multiply dark:mix-blend-screen">
         <DotField
           dotRadius={3.4}
           dotSpacing={12}
@@ -59,14 +59,14 @@ export default function HowItWorks() {
           viewport={{ once: true }}
           className="text-center mb-12 sm:mb-16"
         >
-          <span className="text-[#0d5d3a] uppercase tracking-wider text-xs sm:text-sm font-medium">How It Works</span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#0a2617] mt-4 mb-4 sm:mb-6" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
+          <span className="text-[#0d5d3a] dark:text-[#10b981] uppercase tracking-wider text-xs sm:text-sm font-medium">How It Works</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#0a2617] dark:text-white mt-4 mb-4 sm:mb-6" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
             Your Path to{' '}
-            <span className="bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] dark:from-[#10b981] dark:to-[#34d399] bg-clip-text text-transparent">
               Wellness
             </span>
           </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-[#4a7c5d] max-w-2xl mx-auto px-4">
+          <p className="text-base sm:text-lg lg:text-xl text-[#4a7c5d] dark:text-gray-400 max-w-2xl mx-auto px-4">
             Four simple steps to start your transformative journey toward better mental health.
           </p>
         </motion.div>
@@ -90,18 +90,18 @@ export default function HowItWorks() {
                 <Step key={step.number}>
                   <div className="flex flex-col items-center justify-center py-4 text-center min-h-[220px] sm:min-h-[240px]">
                     <span
-                      className="text-5xl sm:text-6xl bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] bg-clip-text text-transparent opacity-20 mb-4"
+                      className="text-5xl sm:text-6xl bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] dark:from-[#10b981] dark:to-[#34d399] bg-clip-text text-transparent opacity-20 dark:opacity-30 mb-4"
                       style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800 }}
                     >
                       {step.number}
                     </span>
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] flex items-center justify-center mb-4 sm:mb-5">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] dark:from-[#10b981] dark:to-[#059669] flex items-center justify-center mb-4 sm:mb-5">
                       <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                     </div>
-                    <h3 className="text-xl sm:text-2xl text-[#0a2617] mb-3" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600 }}>
+                    <h3 className="text-xl sm:text-2xl text-[#0a2617] dark:text-white mb-3" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600 }}>
                       {step.title}
                     </h3>
-                    <p className="text-sm sm:text-base text-[#4a7c5d] leading-relaxed max-w-2xl mx-auto">
+                    <p className="text-sm sm:text-base text-[#4a7c5d] dark:text-gray-400 leading-relaxed max-w-2xl mx-auto">
                       {step.description}
                     </p>
                   </div>

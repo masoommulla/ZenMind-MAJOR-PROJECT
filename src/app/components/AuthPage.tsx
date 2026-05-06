@@ -153,7 +153,7 @@ export default function AuthPage({ onBackHome, onAuthSuccess }: AuthPageProps) {
                         setBusy(true); setFpMsg(null);
                         try {
                           const { apiFetch } = await import('../api/client');
-                          await apiFetch('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ phone: fp.phone }) });
+                          await apiFetch('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ phone: fp.phone }), timeoutMs: 30000 });
                           setOtpSeconds(120);
                           setFp(p => ({ ...p, step: 'verify' }));
                           setFpMsg({ text: 'OTP sent to your registered email ✓', ok: true });
@@ -186,7 +186,7 @@ export default function AuthPage({ onBackHome, onAuthSuccess }: AuthPageProps) {
                         setBusy(true); setFpMsg(null);
                         try {
                           const { apiFetch } = await import('../api/client');
-                          await apiFetch('/auth/verify-otp', { method: 'POST', body: JSON.stringify({ phone: fp.phone, code: fp.code }) });
+                          await apiFetch('/auth/verify-otp', { method: 'POST', body: JSON.stringify({ phone: fp.phone, code: fp.code }), timeoutMs: 30000 });
                           setFp(p => ({ ...p, step: 'reset' }));
                           setFpMsg({ text: 'Code verified ✓', ok: true });
                         } catch (err: any) {
@@ -227,6 +227,7 @@ export default function AuthPage({ onBackHome, onAuthSuccess }: AuthPageProps) {
                           await apiFetch('/auth/reset-password', {
                             method: 'POST',
                             body: JSON.stringify({ phone: fp.phone, code: fp.code, newPassword: fp.newPassword }),
+                            timeoutMs: 30000
                           });
                           resetFp();
                         } catch (err: any) {
@@ -280,7 +281,7 @@ export default function AuthPage({ onBackHome, onAuthSuccess }: AuthPageProps) {
                       setBusy(true); setError(null);
                       try {
                         const { apiFetch } = await import('../api/client');
-                        await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(payload) });
+                        await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(payload), noReloadOnSuspend: true, timeoutMs: 30000 });
                         onAuthSuccess();
                       } catch (err: any) {
                         setError(err.message || 'Signup failed');
@@ -342,7 +343,7 @@ export default function AuthPage({ onBackHome, onAuthSuccess }: AuthPageProps) {
                       setBusy(true); setError(null);
                       try {
                         const { apiFetch } = await import('../api/client');
-                        await apiFetch('/auth/login', { method: 'POST', body: JSON.stringify(payload) });
+                        await apiFetch('/auth/login', { method: 'POST', body: JSON.stringify(payload), noReloadOnSuspend: true, timeoutMs: 30000 });
                         onAuthSuccess();
                       } catch (err: any) {
                         setError(err.message || 'Login failed');

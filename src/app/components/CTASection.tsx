@@ -28,14 +28,14 @@ export default function CTASection({ onGetStarted }: CTASectionProps) {
   }, []);
 
   return (
-    <section id="cta" ref={containerRef} className="py-12 sm:py-16 lg:py-20 bg-white relative overflow-hidden">
+    <section id="cta" ref={containerRef} className="py-12 sm:py-16 lg:py-20 bg-white dark:bg-[#050505] transition-colors duration-300 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="relative overflow-hidden border border-[#0d5d3a]/15 rounded-2xl sm:rounded-3xl lg:rounded-[2.4rem]"
+          className="relative overflow-hidden border border-[#0d5d3a]/15 dark:border-white/10 rounded-2xl sm:rounded-3xl lg:rounded-[2.4rem] shadow-xl dark:shadow-none"
         >
           <div
             ref={(el) => (circlesRef.current[0] = el)}
@@ -65,7 +65,7 @@ export default function CTASection({ onGetStarted }: CTASectionProps) {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#0b2f1d]/35" />
             </div>
 
-            <div className="flex flex-col justify-center items-center text-center p-6 sm:p-10 lg:p-12 bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a]">
+            <div className="flex flex-col justify-center items-center text-center p-6 sm:p-10 lg:p-12 bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] dark:from-[#111111] dark:to-[#1a1a1a]">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -109,7 +109,7 @@ export default function CTASection({ onGetStarted }: CTASectionProps) {
                   whileHover={{ scale: 1.04, boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)' }}
                   whileTap={{ scale: 0.95 }}
                   onClick={onGetStarted}
-                  className="px-8 sm:px-10 py-3 sm:py-4 bg-white text-[#0d5d3a] rounded-full font-medium flex items-center justify-center gap-2 shadow-lg text-base sm:text-lg"
+                  className="px-8 sm:px-10 py-3 sm:py-4 bg-white dark:bg-[#10b981] text-[#0d5d3a] dark:text-[#050505] rounded-full font-medium flex items-center justify-center gap-2 shadow-lg text-base sm:text-lg transition-colors"
                 >
                   <span>Get Started Free</span>
                   <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />

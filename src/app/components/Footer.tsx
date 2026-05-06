@@ -17,11 +17,11 @@ const socialLinks = [
   { icon: Mail, href: '#', label: 'Email' },
 ];
 
-export default function Footer() {
+export default function Footer({ onTherapistLoginTrigger }: { onTherapistLoginTrigger?: () => void }) {
   return (
-    <footer id="about" className="bg-gradient-to-br from-[#071d13] via-[#0a2617] to-[#0d5d3a] text-white relative overflow-hidden">
-      <div className="absolute -top-10 right-4 w-40 h-40 bg-[#27a86a]/20 blur-3xl rounded-full" />
-      <div className="absolute -bottom-8 left-4 w-40 h-40 bg-[#c8e6c9]/10 blur-3xl rounded-full" />
+    <footer id="about" className="bg-gradient-to-br from-[#071d13] via-[#0a2617] to-[#0d5d3a] dark:from-[#050505] dark:via-[#0a0a0a] dark:to-[#111111] transition-colors duration-300 text-white relative overflow-hidden">
+      <div className="absolute -top-10 right-4 w-40 h-40 bg-[#27a86a]/20 dark:bg-[#10b981]/10 blur-3xl rounded-full" />
+      <div className="absolute -bottom-8 left-4 w-40 h-40 bg-[#c8e6c9]/10 dark:bg-[#059669]/10 blur-3xl rounded-full" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-10">
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 mb-8 sm:mb-10">
@@ -77,7 +77,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="p-4 sm:p-5 bg-white/8 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/15 mb-6">
+        <div className="p-4 sm:p-5 bg-white/8 dark:bg-white/5 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/15 dark:border-white/10 mb-6">
           <p className="text-xs sm:text-sm text-white/85 text-center leading-relaxed">
             <strong className="text-white">India Crisis Support:</strong> Emergency <strong>112</strong> • Tele-MANAS <strong>14416</strong> or <strong>1-800-891-4416</strong> • AASRA <strong>+91 22 2754 6669</strong>
           </p>
@@ -85,9 +85,16 @@ export default function Footer() {
 
         <div className="border-t border-white/10 pt-5">
           <div className="flex flex-col md:flex-row justify-between items-center gap-3">
-            <p className="text-white/60 text-xs sm:text-sm">
-              © 2026 ZenMind. All rights reserved.
-            </p>
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <p className="text-white/60 text-xs sm:text-sm">
+                © 2026 ZenMind. All rights reserved.
+              </p>
+              {onTherapistLoginTrigger && (
+                <button onClick={onTherapistLoginTrigger} className="text-xs sm:text-sm text-white/50 hover:text-white transition">
+                  Therapist Portal
+                </button>
+              )}
+            </div>
             <div className="flex items-center gap-2 text-xs sm:text-sm text-white/60">
               Made with <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400 fill-red-400" /> for adolescent mental wellness
             </div>

@@ -58,9 +58,9 @@ export default function Features() {
   }, []);
 
   return (
-    <section id="features" ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-white relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#e8f5e9] rounded-full blur-3xl opacity-50" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#c8e6c9] rounded-full blur-3xl opacity-30" />
+    <section id="features" ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-white dark:bg-[#050505] transition-colors duration-300 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#e8f5e9] dark:bg-[#10b981] rounded-full blur-3xl opacity-50 dark:opacity-10" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#c8e6c9] dark:bg-[#059669] rounded-full blur-3xl opacity-30 dark:opacity-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         <motion.div
@@ -70,14 +70,14 @@ export default function Features() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-[#0d5d3a] uppercase tracking-wider text-xs sm:text-sm font-medium">Features</span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#0a2617] mt-4 mb-4 sm:mb-6" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
+          <span className="text-[#0d5d3a] dark:text-[#10b981] uppercase tracking-wider text-xs sm:text-sm font-medium">Features</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#0a2617] dark:text-white mt-4 mb-4 sm:mb-6" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
             Everything You Need to{' '}
-            <span className="bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] dark:from-[#10b981] dark:to-[#34d399] bg-clip-text text-transparent">
               Thrive
             </span>
           </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-[#4a7c5d] max-w-2xl mx-auto px-4">
+          <p className="text-base sm:text-lg lg:text-xl text-[#4a7c5d] dark:text-gray-400 max-w-2xl mx-auto px-4">
             Our comprehensive platform provides multiple pathways to support your mental wellness journey.
           </p>
         </motion.div>
@@ -135,7 +135,7 @@ export default function Features() {
           <button
             type="button"
             onClick={() => handleScrollCards('left')}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#0d5d3a]/25 bg-white text-[#0d5d3a] text-xl leading-none transition hover:border-[#0d5d3a] hover:bg-[#0d5d3a] hover:text-white"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#0d5d3a]/25 dark:border-white/10 bg-white dark:bg-[#111111] text-[#0d5d3a] dark:text-gray-300 text-xl leading-none transition hover:border-[#0d5d3a] dark:hover:border-white/20 hover:bg-[#0d5d3a] dark:hover:bg-[#222222] hover:text-white dark:hover:text-white"
             aria-label="Scroll features left"
           >
             &lt;
@@ -143,7 +143,7 @@ export default function Features() {
           <button
             type="button"
             onClick={() => handleScrollCards('right')}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#0d5d3a]/25 bg-white text-[#0d5d3a] text-xl leading-none transition hover:border-[#0d5d3a] hover:bg-[#0d5d3a] hover:text-white"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#0d5d3a]/25 dark:border-white/10 bg-white dark:bg-[#111111] text-[#0d5d3a] dark:text-gray-300 text-xl leading-none transition hover:border-[#0d5d3a] dark:hover:border-white/20 hover:bg-[#0d5d3a] dark:hover:bg-[#222222] hover:text-white dark:hover:text-white"
             aria-label="Scroll features right"
           >
             &gt;

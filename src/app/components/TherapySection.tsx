@@ -47,9 +47,9 @@ export default function TherapySection() {
   };
 
   return (
-    <section id="therapy" ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-white text-white relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#f2f8f3] rounded-full blur-3xl opacity-60" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#edf7ef] rounded-full blur-3xl opacity-70" />
+    <section id="therapy" ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-white dark:bg-[#050505] transition-colors duration-300 text-white relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#f2f8f3] dark:bg-[#10b981] rounded-full blur-3xl opacity-60 dark:opacity-10" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#edf7ef] dark:bg-[#059669] rounded-full blur-3xl opacity-70 dark:opacity-10" />
 
       <div className="relative z-10 flex justify-center px-4 sm:px-6">
         <motion.div
@@ -63,7 +63,7 @@ export default function TherapySection() {
           onMouseMove={handleCardMouseMove}
           onMouseEnter={() => setCursor((prev) => ({ ...prev, active: true }))}
           onMouseLeave={() => setCursor((prev) => ({ ...prev, active: false }))}
-          className="relative min-h-[90vh] sm:min-h-[98vh] lg:min-h-[108vh] overflow-hidden border border-white/20 shadow-2xl cursor-none"
+          className="relative min-h-[90vh] sm:min-h-[98vh] lg:min-h-[108vh] overflow-hidden border border-white/20 dark:border-white/10 shadow-2xl dark:shadow-[#10b981]/10 cursor-none"
         >
           <video
             className="absolute inset-0 h-full w-full object-cover"
@@ -108,7 +108,7 @@ export default function TherapySection() {
               </p>
               <button
                 type="button"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-medium text-[#0d5d3a] transition hover:bg-[#e8f5e9]"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-white dark:bg-[#10b981] px-6 py-3 font-medium text-[#0d5d3a] dark:text-[#050505] transition hover:bg-[#e8f5e9] dark:hover:bg-[#34d399]"
               >
                 Book a Session
                 <ArrowRight className="h-4 w-4" />

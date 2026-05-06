@@ -21,6 +21,10 @@
   }
 }
 
+:global(.dark) .logoloop, html.dark .logoloop {
+  --logoloop-fadeColorAuto: #050505;
+}
+
 .logoloop__track {
   display: flex;
   width: max-content;

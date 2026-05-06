@@ -1,0 +1,50 @@
+# Video Conferencing Implementation Plan (MERN Stack)
+
+Based on your feedback, here is the updated plan incorporating WebRTC + Socket.IO and the specific dashboard updates for both the patient and the therapist.
+
+## Why WebRTC + Socket.IO?
+1. **100% Free forever**: No APIs, no third-party services, no paid tiers.
+2. **Works Great on Render**: Render only handles the lightweight text signaling. The heavy video/audio data travels *directly* from the Patient to the Therapist (Peer-to-Peer), so Render won't crash or run out of memory.
+3. **MERN Native**: We can use your existing Node.js/Express backend as the "Signaling Server" by simply installing `socket.io`.
+4. **No TURN server needed for a project**: We will use Google's free public STUN servers, which is perfect for a project/demo.
+
+---
+
+## Proposed Changes
+
+### 1. Backend (Signaling & API)
+
+#### [MODIFY] `backend/src/index.js`
+- Integrate `socket.io` with the existing Express server to handle WebRTC signaling events:
+  - `join-room`: Users join a specific room (using the `Session ID`).
+  - `offer` & `answer`: Forward the WebRTC signals between peers.
+  - `ice-candidate`: Forward network routing information.
+
+#### [MODIFY] `backend/src/routes/session.js`
+- Add a new `GET /therapist` route.
+- This route will allow therapists to fetch all sessions booked with them. It will populate the `user` field to retrieve the patient's name, email, and phone number.
+
+### 2. Frontend (Video Call Interface)
+
+#### [NEW] `src/app/components/VideoRoom.tsx`
+A dedicated component for the video call.
+- **Features**: Main video view (the other person), Picture-in-Picture view (yourself), Mute/Unmute, Camera On/Off, and End Call.
+- **Logic**: Uses `navigator.mediaDevices.getUserMedia`, connects to the Socket.IO server, and establishes a direct `RTCPeerConnection`.
+
+### 3. Frontend (Dashboards)
+
+#### [MODIFY] `src/app/components/Dashboard.tsx` (Patient View)
+- Add a **"Join Call"** button to the Upcoming/Today sessions cards.
+- **Timing Logic**: The button will remain disabled until exactly **2 minutes before** the session is scheduled to start.
+
+#### [MODIFY] `src/app/components/TherapistDashboard.tsx` (Therapist View)
+- Create a new **"Booked Sessions"** section in the therapist dashboard.
+- This section will automatically populate when a user books a session.
+- **Sub-headers**: Split the view into **"Today's Sessions"** and **"Future Sessions"**.
+- **Patient Details**: Each session card will display the user's Name, Phone Number, and Email.
+- **Join Call**: Add the same **"Join Call"** button that activates **2 minutes before** the session starts, routing the therapist into the exact same `VideoRoom`.
+
+## Verification Plan
+1. **Therapist Dashboard**: Verify the therapist can see the patient's contact details and upcoming/today sessions correctly divided.
+2. **Button Timing**: Ensure the "Join Call" button unlocks strictly at the 2-minute mark for both users.
+3. **Video Room Connection**: Ensure that the Patient and Therapist can successfully join the room and see/hear each other seamlessly via WebRTC.

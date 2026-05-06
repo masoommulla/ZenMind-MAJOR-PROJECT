@@ -6,9 +6,10 @@ import logo from '../../../asset/logo.png';
 type NavigationProps = {
   onGetStarted: () => void;
   onAdminLoginTrigger?: () => void;
+  onTherapistLoginTrigger?: () => void;
 };
 
-export default function Navigation({ onGetStarted, onAdminLoginTrigger }: NavigationProps) {
+export default function Navigation({ onGetStarted, onAdminLoginTrigger, onTherapistLoginTrigger }: NavigationProps) {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export default function Navigation({ onGetStarted, onAdminLoginTrigger }: Naviga
         transition={{ duration: 0.35, ease: 'easeOut' }}
         className={`pointer-events-auto px-4 sm:px-6 py-3 sm:py-4 transition-all duration-300 ${
           isScrolled
-            ? 'bg-white/95 backdrop-blur-lg shadow-md border border-[#0d5d3a]/10 rounded-2xl sm:rounded-3xl'
+            ? 'bg-white/95 dark:bg-[#050505]/95 backdrop-blur-lg shadow-md border border-[#0d5d3a]/10 dark:border-white/10 rounded-2xl sm:rounded-3xl'
             : 'bg-transparent'
         }`}
       >
@@ -51,7 +52,7 @@ export default function Navigation({ onGetStarted, onAdminLoginTrigger }: Naviga
               e.preventDefault();
               onAdminLoginTrigger?.();
             }}
-            className="flex items-center gap-2 text-xl sm:text-2xl text-[#0a2617] whitespace-nowrap cursor-pointer select-none"
+            className="flex items-center gap-2 text-xl sm:text-2xl text-[#0a2617] dark:text-white whitespace-nowrap cursor-pointer select-none"
             style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700 }}
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.2 }}
@@ -77,22 +78,37 @@ export default function Navigation({ onGetStarted, onAdminLoginTrigger }: Naviga
             />
           </div>
 
-          {/* Get Started — far right, desktop only */}
-          <motion.button
-            whileHover={{ scale: 1.04, boxShadow: '0 8px 24px rgba(13,93,58,0.25)' }}
-            whileTap={{ scale: 0.96 }}
-            onClick={onGetStarted}
-            className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-[#0d5d3a] text-white rounded-full font-semibold text-sm shadow-md whitespace-nowrap"
-          >
-            Get Started
-          </motion.button>
+          {/* Get Started + Therapist Login — far right, desktop only */}
+          <div className="hidden sm:flex items-center gap-3">
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={onTherapistLoginTrigger}
+              className="flex items-center gap-2 px-4 py-2.5 border border-[#0d5d3a] dark:border-[#10b981] text-[#0d5d3a] dark:text-[#10b981] rounded-full font-semibold text-sm whitespace-nowrap hover:bg-[#0d5d3a]/5 transition-colors"
+            >
+              Therapist Login
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.04, boxShadow: '0 8px 24px rgba(13,93,58,0.25)' }}
+              whileTap={{ scale: 0.96 }}
+              onClick={onGetStarted}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#0d5d3a] dark:bg-[#10b981] text-white dark:text-[#050505] rounded-full font-semibold text-sm shadow-md whitespace-nowrap"
+            >
+              Get Started
+            </motion.button>
+          </div>
 
-          {/* Mobile: hamburger from PillNav (rendered inside PillNav itself) */}
-          <div className="sm:hidden">
-            <PillNav
+          {/* Mobile: hamburger from PillNav */}
+          <div className="sm:hidden flex items-center gap-3 w-full justify-end">
+            <div className="flex-1">
+              <PillNav
               logo={logo}
               logoAlt="ZenMind Logo"
-              items={[...navItems, { label: 'Get Started', href: '#cta', alwaysSolid: true }]}
+              items={[
+                ...navItems,
+                { label: 'Therapist Login', href: '#therapist', alwaysSolid: false },
+                { label: 'Get Started', href: '#cta', alwaysSolid: true },
+              ]}
               activeHref=""
               ease="power2.easeOut"
               baseColor="#0d5d3a"
@@ -104,9 +120,13 @@ export default function Navigation({ onGetStarted, onAdminLoginTrigger }: Naviga
                 if (item.href === '#cta') {
                   event.preventDefault();
                   onGetStarted();
+                } else if (item.href === '#therapist') {
+                  event.preventDefault();
+                  onTherapistLoginTrigger?.();
                 }
               }}
             />
+            </div>
           </div>
         </div>
       </motion.div>

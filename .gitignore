@@ -20,3 +20,4 @@ backend/.env.local
 patch_dashboard*.py
 patch_dashboard*.ps1
 find_comment.py
+patch_authpage.py

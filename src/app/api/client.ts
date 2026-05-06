@@ -8,31 +8,49 @@ export type ApiError = { error?: string };
 
 export async function apiFetch<T>(
   path: string,
-  options: RequestInit & { timeoutMs?: number } = {}
+  options: RequestInit & { timeoutMs?: number; noReloadOnSuspend?: boolean; isFormData?: boolean } = {}
 ): Promise<T> {
-  const { headers, timeoutMs = 8000, ...rest } = options;
+  const { headers, timeoutMs = 35000, noReloadOnSuspend = false, isFormData = false, ...rest } = options;
   const controller = new AbortController();
-  const t = window.setTimeout(() => controller.abort(), timeoutMs);
+  const t = window.setTimeout(() => controller.abort(new Error('Request timed out after ' + timeoutMs + 'ms')), timeoutMs);
+
+  const reqHeaders: HeadersInit = { ...headers };
+  if (!isFormData) {
+    (reqHeaders as any)['Content-Type'] = 'application/json';
+  }
+
   const res = await fetch(`${API_BASE}${path}`, {
     ...rest,
     credentials: 'include',
     signal: controller.signal,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(headers || {})
-    }
+    headers: reqHeaders
   });
 
   window.clearTimeout(t);
   const text = await res.text();
-  const json = text ? JSON.parse(text) : {};
+  let json: any = {};
+  try {
+    json = text ? JSON.parse(text) : {};
+  } catch {
+    // Server returned non-JSON (e.g. an HTML 404/500 page from Express)
+    if (!res.ok) {
+      throw new Error(`Server error (${res.status}) — unexpected non-JSON response`);
+    }
+  }
 
   if (!res.ok) {
-    if (res.status === 403 && (json?.error?.includes('suspended'))) {
+    // Only auto-reload on 403 "suspended" for already-authenticated routes,
+    // NOT on the login/register endpoints (noReloadOnSuspend = true there)
+    if (
+      res.status === 403 &&
+      json?.error?.includes('suspended') &&
+      !noReloadOnSuspend
+    ) {
+      // Clear localStorage so the user lands on the landing page after reload
+      try { localStorage.removeItem('zm_authed'); localStorage.removeItem('zm_admin'); } catch { }
       window.location.reload();
     }
     throw new Error((json && json.error) || `Request failed (${res.status})`);
   }
   return json as T;
 }
-
