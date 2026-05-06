@@ -10,14 +10,8 @@ const router = Router();
 const therapistCookieOpts = { ...cookieOpts };
 
 // Multer for profile picture uploads
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, 'uploads/'),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, 'therapist-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + ext);
-  },
-});
-const upload = multer({ storage });
+const storage = multer.memoryStorage();
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 /* ── Auth Middleware ── */
 export const requireTherapist = async (req, res, next) => {
@@ -97,10 +91,11 @@ router.put('/profile', requireTherapist, upload.fields([
 
     if (req.files) {
       if (req.files['profilePicture'] && req.files['profilePicture'][0]) {
-        therapist.profilePicture = `/uploads/${req.files['profilePicture'][0].filename}`;
+        const file = req.files['profilePicture'][0];
+        therapist.profilePicture = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
       }
       if (req.files['clinicImages'] && req.files['clinicImages'].length > 0) {
-        const newImages = req.files['clinicImages'].map(f => `/uploads/${f.filename}`);
+        const newImages = req.files['clinicImages'].map(f => `data:${f.mimetype};base64,${f.buffer.toString('base64')}`);
         therapist.clinicImages = [...therapist.clinicImages, ...newImages];
       }
     }

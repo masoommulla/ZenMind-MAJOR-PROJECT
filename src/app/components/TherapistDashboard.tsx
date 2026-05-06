@@ -11,6 +11,7 @@ import { apiFetch } from '../api/client';
 import logo from '../../../asset/logo.png';
 import ThemeToggle from './ThemeToggle';
 import VideoRoom from './VideoRoom';
+import { getImgSrc } from '../utils/image';
 
 type TabKey = 'profile' | 'schedule' | 'sessions';
 
@@ -60,7 +61,7 @@ export default function TherapistDashboard({ onLogout }: { onLogout: () => void 
       setSessionCost(t.sessionCost?.toString() || '500');
       setNotes(t.notes || '');
       setSlots(t.availableSlots || []);
-      if (t.profilePicture) setPicPreview(`${import.meta.env.VITE_API_URL || ''}${t.profilePicture}`);
+      if (t.profilePicture) setPicPreview(getImgSrc(t.profilePicture));
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
@@ -434,7 +435,7 @@ export default function TherapistDashboard({ onLogout }: { onLogout: () => void 
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                           {clinicImages.map(img => (
                             <div key={img} className="relative group rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 aspect-video">
-                              <img src={`${import.meta.env.VITE_API_URL || ''}${img}`} className="w-full h-full object-cover" alt="Clinic" />
+                              <img src={getImgSrc(img)} className="w-full h-full object-cover" alt="Clinic" />
                               <button onClick={() => removeExistingClinicImage(img)} className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-lg opacity-0 group-hover:opacity-100 transition hover:bg-red-500">
                                 <Trash2 size={14} />
                               </button>

@@ -183,16 +183,7 @@ import multer from 'multer';
 import path from 'path';
 
 // Multer storage config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-  }
-});
+const storage = multer.memoryStorage();
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
 
 router.get('/therapists', requireAdmin, async (req, res) => {
@@ -244,12 +235,18 @@ router.post('/therapists', requireAdmin,
         identityCardType: data.identityCardType || 'Aadhaar',
       });
 
-      if (req.files?.['profilePicture'])
-        therapist.profilePicture = `/uploads/${req.files['profilePicture'][0].filename}`;
-      if (req.files?.['licenseImage'])
-        therapist.licenseImage = `/uploads/${req.files['licenseImage'][0].filename}`;
-      if (req.files?.['identityCardImage'])
-        therapist.identityCardImage = `/uploads/${req.files['identityCardImage'][0].filename}`;
+      if (req.files?.['profilePicture']) {
+        const file = req.files['profilePicture'][0];
+        therapist.profilePicture = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+      }
+      if (req.files?.['licenseImage']) {
+        const file = req.files['licenseImage'][0];
+        therapist.licenseImage = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+      }
+      if (req.files?.['identityCardImage']) {
+        const file = req.files['identityCardImage'][0];
+        therapist.identityCardImage = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+      }
 
       await therapist.save();
       return res.json({ ok: true, therapist });
@@ -288,12 +285,18 @@ router.put('/therapists/:id', requireAdmin,
       if (data.aadharNumber !== undefined) therapist.aadharNumber = data.aadharNumber;
       if (data.identityCardType) therapist.identityCardType = data.identityCardType;
 
-      if (req.files?.['profilePicture'])
-        therapist.profilePicture = `/uploads/${req.files['profilePicture'][0].filename}`;
-      if (req.files?.['licenseImage'])
-        therapist.licenseImage = `/uploads/${req.files['licenseImage'][0].filename}`;
-      if (req.files?.['identityCardImage'])
-        therapist.identityCardImage = `/uploads/${req.files['identityCardImage'][0].filename}`;
+      if (req.files?.['profilePicture']) {
+        const file = req.files['profilePicture'][0];
+        therapist.profilePicture = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+      }
+      if (req.files?.['licenseImage']) {
+        const file = req.files['licenseImage'][0];
+        therapist.licenseImage = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+      }
+      if (req.files?.['identityCardImage']) {
+        const file = req.files['identityCardImage'][0];
+        therapist.identityCardImage = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+      }
 
       await therapist.save();
       return res.json({ ok: true, therapist });

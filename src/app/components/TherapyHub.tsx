@@ -4,6 +4,7 @@ import { Search, Star, Clock, MapPin, X, Calendar, GraduationCap, Filter, Chevro
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { apiFetch } from '../api/client';
+import { getImgSrc } from '../utils/image';
 
 const SPECIALIZATIONS = [
   'All Specializations',
@@ -224,7 +225,7 @@ export default function TherapyHub({ onSessionBooked }: { onSessionBooked?: () =
             <div className="w-full md:w-1/3 space-y-6 md:sticky md:top-6 self-start">
               <div className="bg-white dark:bg-[#111111] rounded-3xl p-6 sm:p-8 flex flex-col items-center border border-[#0d5d3a]/10 dark:border-white/5 shadow-sm">
                 {selectedTherapist.profilePicture
-                  ? <img src={`${import.meta.env.VITE_API_URL || ''}${selectedTherapist.profilePicture}`} alt={selectedTherapist.name}
+                  ? <img src={getImgSrc(selectedTherapist.profilePicture)} alt={selectedTherapist.name}
                       className="w-32 h-32 rounded-full object-cover border-4 border-[#e6f4ea] dark:border-[#0d5d3a]/30 shadow-md mb-4" />
                   : <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] flex items-center justify-center text-white text-4xl font-black mb-4 border-4 border-[#e6f4ea] dark:border-[#0d5d3a]/30 shadow-md">
                       {selectedTherapist.name.charAt(0)}
@@ -381,7 +382,7 @@ export default function TherapyHub({ onSessionBooked }: { onSessionBooked?: () =
                       <h5 className="text-xs text-gray-500 uppercase tracking-wide font-bold mb-3">Clinic Photos</h5>
                       <div className="flex gap-3 overflow-x-auto pb-2 snap-x">
                         {selectedTherapist.clinicImages.map((img: string, i: number) => (
-                          <img key={i} src={`${import.meta.env.VITE_API_URL || ''}${img}`} alt="Clinic" 
+                          <img key={i} src={getImgSrc(img)} alt="Clinic" 
                             className="w-40 h-28 object-cover rounded-xl border border-gray-200 dark:border-white/10 shrink-0 snap-start" />
                         ))}
                       </div>
@@ -392,7 +393,7 @@ export default function TherapyHub({ onSessionBooked }: { onSessionBooked?: () =
                   {selectedTherapist.licenseImage && (
                     <div>
                       <h5 className="text-xs text-gray-500 uppercase tracking-wide font-bold mb-3">Verified License</h5>
-                      <img src={`${import.meta.env.VITE_API_URL || ''}${selectedTherapist.licenseImage}`} alt="License" 
+                      <img src={getImgSrc(selectedTherapist.licenseImage)} alt="License" 
                           className="w-full sm:w-64 h-auto object-contain rounded-xl border border-gray-200 dark:border-white/10" />
                     </div>
                   )}
@@ -569,7 +570,7 @@ export default function TherapyHub({ onSessionBooked }: { onSessionBooked?: () =
                   {/* Profile Picture */}
                   <div className="relative mb-4 self-center">
                     {t.profilePicture
-                      ? <img src={`${import.meta.env.VITE_API_URL || ''}${t.profilePicture}`} alt={t.name}
+                      ? <img src={getImgSrc(t.profilePicture)} alt={t.name}
                           className="w-24 h-24 rounded-full object-cover border-4 border-[#e6f4ea] dark:border-[#0d5d3a]/30 shadow-sm shrink-0" />
                       : <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] flex items-center justify-center text-white text-3xl font-black shrink-0 border-4 border-[#e6f4ea] dark:border-[#0d5d3a]/30 shadow-sm">
                           {t.name.charAt(0)}

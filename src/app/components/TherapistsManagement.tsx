@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Search, Plus, Trash2, Edit2, ShieldAlert, UserCheck, UserX, AlertTriangle, X, Camera, Filter, ChevronDown } from 'lucide-react';
 import { apiFetch } from '../api/client';
+import { getImgSrc } from '../utils/image';
 
 export default function TherapistsManagement() {
   const [therapists, setTherapists] = useState<any[]>([]);
@@ -68,11 +69,11 @@ export default function TherapistsManagement() {
       aadharNumber: t.aadharNumber || '', identityCardType: t.identityCardType || 'Aadhaar'
     });
     setProfilePic(null);
-    setPreview(t.profilePicture ? `${import.meta.env.VITE_API_URL || ''}${t.profilePicture}` : '');
+    setPreview(t.profilePicture ? getImgSrc(t.profilePicture) : '');
     setLicenseFile(null);
-    setLicensePreview(t.licenseImage ? `${import.meta.env.VITE_API_URL || ''}${t.licenseImage}` : '');
+    setLicensePreview(t.licenseImage ? getImgSrc(t.licenseImage) : '');
     setIdFile(null);
-    setIdPreview(t.identityCardImage ? `${import.meta.env.VITE_API_URL || ''}${t.identityCardImage}` : '');
+    setIdPreview(t.identityCardImage ? getImgSrc(t.identityCardImage) : '');
     setShowAddModal(true);
   };
 
@@ -273,7 +274,7 @@ export default function TherapistsManagement() {
               <div key={t._id} className="grid grid-cols-12 gap-2 px-6 py-4 items-center hover:bg-[#fbfdfb] dark:hover:bg-[#1a1a1a] transition-colors">
                 <div className="col-span-4 flex items-center gap-3 overflow-hidden">
                   {t.profilePicture ? (
-                    <img src={`${import.meta.env.VITE_API_URL || ''}${t.profilePicture}`} alt={t.name} className="w-12 h-12 rounded-full object-cover shrink-0 border border-[#0d5d3a]/20" />
+                    <img src={getImgSrc(t.profilePicture)} alt={t.name} className="w-12 h-12 rounded-full object-cover shrink-0 border border-[#0d5d3a]/20" />
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-[#0d5d3a]/10 flex items-center justify-center text-[#0d5d3a] font-bold shrink-0">{t.name.charAt(0)}</div>
                   )}
@@ -507,8 +508,8 @@ export default function TherapistsManagement() {
                   {viewingTherapist.identityCardImage && (
                     <div className="mb-4">
                       <p className="text-xs font-bold text-gray-500 mb-1">ID Proof Image</p>
-                      <a href={`${import.meta.env.VITE_API_URL || ''}${viewingTherapist.identityCardImage}`} target="_blank" rel="noreferrer">
-                        <img src={`${import.meta.env.VITE_API_URL || ''}${viewingTherapist.identityCardImage}`} alt="ID Proof" className="w-full h-32 object-cover rounded-lg border" />
+                      <a href={getImgSrc(viewingTherapist.identityCardImage)} target="_blank" rel="noreferrer">
+                        <img src={getImgSrc(viewingTherapist.identityCardImage)} alt="ID Proof" className="w-full h-32 object-cover rounded-lg border" />
                       </a>
                     </div>
                   )}
@@ -516,8 +517,8 @@ export default function TherapistsManagement() {
                   {viewingTherapist.licenseImage && (
                     <div>
                       <p className="text-xs font-bold text-gray-500 mb-1">Medical License</p>
-                      <a href={`${import.meta.env.VITE_API_URL}${viewingTherapist.licenseImage}`} target="_blank" rel="noreferrer">
-                        <img src={`${import.meta.env.VITE_API_URL}${viewingTherapist.licenseImage}`} alt="License" className="w-full h-32 object-cover rounded-lg border" />
+                      <a href={getImgSrc(viewingTherapist.licenseImage)} target="_blank" rel="noreferrer">
+                        <img src={getImgSrc(viewingTherapist.licenseImage)} alt="License" className="w-full h-32 object-cover rounded-lg border" />
                       </a>
                     </div>
                   )}
