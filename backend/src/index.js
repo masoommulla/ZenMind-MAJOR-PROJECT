@@ -54,6 +54,8 @@ import therapistRoutes from './routes/therapist.js';
 app.use('/api/therapist', therapistRoutes);
 import sessionRoutes from './routes/session.js';
 app.use('/api/sessions', sessionRoutes);
+import supportRoutes from './routes/support.js';
+app.use('/api/support', supportRoutes);
 
 const port = process.env.PORT || 5000;
 const mongoUri = process.env.MONGODB_URI;

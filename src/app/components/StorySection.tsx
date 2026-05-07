@@ -155,7 +155,7 @@ export default function StorySection() {
   }));
 
   return (
-    <section className="py-16 sm:py-20 lg:py-28 bg-white dark:bg-[#050505] transition-colors duration-300 relative overflow-hidden">
+    <section id="stories" className="py-16 sm:py-20 lg:py-28 bg-white dark:bg-[#050505] transition-colors duration-300 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] dark:from-[#10b981] dark:to-[#059669] rounded-full blur-[120px] opacity-20 dark:opacity-10 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">

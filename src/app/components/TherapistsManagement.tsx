@@ -259,69 +259,73 @@ export default function TherapistsManagement() {
       </div>
 
       <div className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm overflow-hidden flex-1 flex flex-col">
-        <div className="grid grid-cols-12 gap-2 px-6 py-4 border-b border-[#0d5d3a]/10 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-xs font-bold text-[#4a7c5d] dark:text-gray-400 uppercase tracking-wider shrink-0">
-          <div className="col-span-4">Therapist Profile</div>
-          <div className="col-span-4">Medical Details</div>
-          <div className="col-span-2 text-center">Status</div>
-          <div className="col-span-2 text-right">Actions</div>
-        </div>
-        
-        {loading ? (
-          <div className="p-10 text-center font-bold text-[#4a7c5d]">Loading therapists...</div>
-        ) : (
-          <div className="overflow-y-auto flex-1 divide-y divide-[#0d5d3a]/5 dark:divide-white/5">
-            {filtered.map(t => (
-              <div key={t._id} className="grid grid-cols-12 gap-2 px-6 py-4 items-center hover:bg-[#fbfdfb] dark:hover:bg-[#1a1a1a] transition-colors">
-                <div className="col-span-4 flex items-center gap-3 overflow-hidden">
-                  {t.profilePicture ? (
-                    <img src={getImgSrc(t.profilePicture)} alt={t.name} className="w-12 h-12 rounded-full object-cover shrink-0 border border-[#0d5d3a]/20" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-[#0d5d3a]/10 flex items-center justify-center text-[#0d5d3a] font-bold shrink-0">{t.name.charAt(0)}</div>
-                  )}
-                  <div className="truncate">
-                    <div className="font-bold text-[#0a2617] dark:text-white text-sm truncate">{t.name}</div>
-                    <div className="text-xs text-[#4a7c5d] dark:text-gray-400 truncate">{t.email}</div>
-                    <div className="text-xs text-[#4a7c5d] dark:text-gray-400 truncate">{t.phone}</div>
+        <div className="overflow-x-auto flex-1 flex flex-col">
+          <div className="min-w-[900px] flex-1 flex flex-col">
+            <div className="grid grid-cols-12 gap-2 px-6 py-4 border-b border-[#0d5d3a]/10 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-xs font-bold text-[#4a7c5d] dark:text-gray-400 uppercase tracking-wider shrink-0">
+              <div className="col-span-4">Therapist Profile</div>
+              <div className="col-span-4">Medical Details</div>
+              <div className="col-span-2 text-center">Status</div>
+              <div className="col-span-2 text-right">Actions</div>
+            </div>
+            
+            {loading ? (
+              <div className="p-10 text-center font-bold text-[#4a7c5d]">Loading therapists...</div>
+            ) : (
+              <div className="overflow-y-auto flex-1 divide-y divide-[#0d5d3a]/5 dark:divide-white/5">
+                {filtered.map(t => (
+                  <div key={t._id} className="grid grid-cols-12 gap-2 px-6 py-4 items-center hover:bg-[#fbfdfb] dark:hover:bg-[#1a1a1a] transition-colors">
+                    <div className="col-span-4 flex items-center gap-3 overflow-hidden">
+                      {t.profilePicture ? (
+                        <img src={getImgSrc(t.profilePicture)} alt={t.name} className="w-12 h-12 rounded-full object-cover shrink-0 border border-[#0d5d3a]/20" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-[#0d5d3a]/10 flex items-center justify-center text-[#0d5d3a] font-bold shrink-0">{t.name.charAt(0)}</div>
+                      )}
+                      <div className="truncate">
+                        <div className="font-bold text-[#0a2617] dark:text-white text-sm truncate">{t.name}</div>
+                        <div className="text-xs text-[#4a7c5d] dark:text-gray-400 truncate">{t.email}</div>
+                        <div className="text-xs text-[#4a7c5d] dark:text-gray-400 truncate">{t.phone}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="col-span-4 flex flex-col justify-center overflow-hidden">
+                      <div className="font-bold text-[#0d5d3a] dark:text-[#10b981] text-sm truncate">{t.specialization}</div>
+                      <div className="text-xs text-[#4a7c5d] dark:text-gray-400 truncate">{t.education} • {t.experience} Yrs Exp</div>
+                      <div className="text-xs text-gray-500 truncate">₹{t.sessionCost} / {t.sessionTime} min</div>
+                    </div>
+
+                    <div className="col-span-2 flex justify-center items-center">
+                      {t.isSuspended ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-bold">
+                          <UserX size={12} /> Suspended
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200 text-xs font-bold">
+                          <UserCheck size={12} /> Active
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="col-span-2 flex items-center justify-end gap-2">
+                      <button onClick={() => toggleSuspend(t._id)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${t.isSuspended ? 'bg-[#0d5d3a]/10 text-[#0d5d3a]' : 'bg-orange-50 text-orange-600 hover:bg-orange-100'}`}>
+                        {t.isSuspended ? 'Activate' : 'Suspend'}
+                      </button>
+                      <button onClick={() => fetchAndOpenView(t._id)} className="p-1.5 text-[#0d5d3a] hover:bg-[#0d5d3a]/10 rounded-lg transition" title="View Full Profile">
+                        <Search size={16} />
+                      </button>
+                      <button onClick={() => openEdit(t)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition" title="Edit">
+                        <Edit2 size={16} />
+                      </button>
+                      <button onClick={() => deleteTherapist(t._id, t.name)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition" title="Delete">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="col-span-4 flex flex-col justify-center overflow-hidden">
-                  <div className="font-bold text-[#0d5d3a] dark:text-[#10b981] text-sm truncate">{t.specialization}</div>
-                  <div className="text-xs text-[#4a7c5d] dark:text-gray-400 truncate">{t.education} • {t.experience} Yrs Exp</div>
-                  <div className="text-xs text-gray-500 truncate">₹{t.sessionCost} / {t.sessionTime} min</div>
-                </div>
-
-                <div className="col-span-2 flex justify-center items-center">
-                  {t.isSuspended ? (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-bold">
-                      <UserX size={12} /> Suspended
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200 text-xs font-bold">
-                      <UserCheck size={12} /> Active
-                    </span>
-                  )}
-                </div>
-
-                <div className="col-span-2 flex items-center justify-end gap-2">
-                  <button onClick={() => toggleSuspend(t._id)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${t.isSuspended ? 'bg-[#0d5d3a]/10 text-[#0d5d3a]' : 'bg-orange-50 text-orange-600 hover:bg-orange-100'}`}>
-                    {t.isSuspended ? 'Activate' : 'Suspend'}
-                  </button>
-                  <button onClick={() => fetchAndOpenView(t._id)} className="p-1.5 text-[#0d5d3a] hover:bg-[#0d5d3a]/10 rounded-lg transition" title="View Full Profile">
-                    <Search size={16} />
-                  </button>
-                  <button onClick={() => openEdit(t)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition" title="Edit">
-                    <Edit2 size={16} />
-                  </button>
-                  <button onClick={() => deleteTherapist(t._id, t.name)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition" title="Delete">
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                ))}
+                {filtered.length === 0 && <div className="p-10 text-center font-bold text-[#4a7c5d]">No therapists found.</div>}
               </div>
-            ))}
-            {filtered.length === 0 && <div className="p-10 text-center font-bold text-[#4a7c5d]">No therapists found.</div>}
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Add / Edit Modal */}

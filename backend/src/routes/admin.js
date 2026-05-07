@@ -6,6 +6,7 @@ import Admin from '../models/Admin.js';
 import User from '../models/User.js';
 import Story from '../models/Story.js';
 import SiteSettings from '../models/SiteSettings.js';
+import SupportTicket from '../models/SupportTicket.js';
 import { cookieOpts } from '../utils/cookieOptions.js';
 
 const router = Router();
@@ -323,6 +324,41 @@ router.delete('/therapists/:id', requireAdmin, async (req, res) => {
   try {
     const therapist = await Therapist.findByIdAndDelete(req.params.id);
     if (!therapist) return res.status(404).json({ error: 'Therapist not found' });
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── SUPPORT MANAGEMENT ── */
+router.get('/support', requireAdmin, async (req, res) => {
+  try {
+    const tickets = await SupportTicket.find().sort({ createdAt: -1 }).lean();
+    return res.json({ ok: true, tickets });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/support/:id/resolve', requireAdmin, async (req, res) => {
+  try {
+    const ticket = await SupportTicket.findById(req.params.id);
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+    
+    ticket.status = ticket.status === 'pending' ? 'resolved' : 'pending';
+    await ticket.save();
+    return res.json({ ok: true, status: ticket.status });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/support/bulk-delete', requireAdmin, async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'Invalid ids array' });
+    
+    await SupportTicket.deleteMany({ _id: { $in: ids } });
     return res.json({ ok: true });
   } catch (err) {
     return res.status(500).json({ error: err.message });

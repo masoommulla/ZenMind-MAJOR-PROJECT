@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope } from 'lucide-react';
+import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import logo from '../../../asset/logo.png';
 import ThemeToggle from './ThemeToggle';
@@ -9,7 +9,7 @@ import TherapistsManagement from './TherapistsManagement';
 type AdminDashboardProps = { onLogout: () => void };
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'settings'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'settings'>('users');
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminUsername, setAdminUsername] = useState('Admin');
@@ -18,7 +18,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     apiFetch('/admin/me').then((res: any) => setAdminUsername(res.username)).catch(() => {});
   }, []);
 
-  const navTo = (tab: 'users' | 'therapists' | 'content' | 'settings') => {
+  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'settings') => {
     setActiveTab(tab);
     setMobileOpen(false);
   };
@@ -37,6 +37,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <NavItem icon={Users} label="Members Directory" active={activeTab === 'users'} onClick={() => navTo('users')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Stethoscope} label="Therapists Directory" active={activeTab === 'therapists'} onClick={() => navTo('therapists')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={FileText} label="Content Mgmt" active={activeTab === 'content'} onClick={() => navTo('content')} expanded={mobile || sidebarExpanded} />
+        <NavItem icon={LifeBuoy} label="Support Tickets" active={activeTab === 'support'} onClick={() => navTo('support')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => navTo('settings')} expanded={mobile || sidebarExpanded} />
       </nav>
       <div className="p-3 border-t border-[#0d5d3a]/10 dark:border-white/10">
@@ -89,7 +90,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <Menu size={20} />
             </button>
             <h1 className="text-lg sm:text-2xl font-bold text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>
-              {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : 'Admin Settings'}
+              {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'support' ? 'Support Tickets' : 'Admin Settings'}
             </h1>
           </div>
           <div className="flex items-center gap-4">
@@ -111,6 +112,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             {activeTab === 'users' && <UsersManagement />}
             {activeTab === 'therapists' && <TherapistsManagement />}
             {activeTab === 'content' && <ContentManagement />}
+            {activeTab === 'support' && <SupportManagement />}
             {activeTab === 'settings' && <AdminSettings onUpdateName={setAdminUsername} />}
           </div>
         </main>
@@ -539,6 +541,242 @@ function ContentManagement() {
             {stories.length === 0 && <p className="text-sm text-[#4a7c5d] dark:text-gray-400">No stories found.</p>}
           </div>
         </section>
+      )}
+    </div>
+  );
+}
+
+type SupportTicketData = {
+  _id: string;
+  type: 'contact' | 'report';
+  subject: string;
+  body: string;
+  name: string;
+  email: string;
+  phone: string;
+  status: 'pending' | 'resolved';
+  createdAt: string;
+};
+
+function SupportManagement() {
+  const [activeSubTab, setActiveSubTab] = useState<'contact' | 'report'>('contact');
+  const [tickets, setTickets] = useState<SupportTicketData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [viewingTicket, setViewingTicket] = useState<SupportTicketData | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const res = await apiFetch<any>('/admin/support');
+      setTickets(res.tickets || []);
+      setSelectedIds(new Set());
+    } catch (e: any) {
+      setMsg({ text: e.message || 'Failed to load tickets', ok: false });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadData(); }, []);
+
+  const toggleStatus = async (id: string) => {
+    try {
+      await apiFetch(`/admin/support/${id}/resolve`, { method: 'PUT' });
+      await loadData();
+    } catch (e: any) {
+      setMsg({ text: e.message || 'Failed to update ticket', ok: false });
+    }
+  };
+
+  const confirmBulkDelete = () => {
+    if (selectedIds.size === 0) return;
+    setDeleteConfirmOpen(true);
+  };
+
+  const executeBulkDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await apiFetch('/admin/support/bulk-delete', { 
+        method: 'POST', 
+        body: JSON.stringify({ ids: Array.from(selectedIds) }) 
+      });
+      setMsg({ text: 'Tickets deleted successfully.', ok: true });
+      await loadData();
+    } catch (e: any) {
+      setMsg({ text: e.message || 'Failed to delete tickets', ok: false });
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmOpen(false);
+    }
+  };
+
+  const filtered = tickets.filter(t => t.type === activeSubTab);
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map(t => t._id)));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setSelectedIds(newSet);
+  };
+
+  if (loading) return <div className="text-[#4a7c5d] font-bold">Loading support tickets...</div>;
+
+  return (
+    <div className="flex flex-col gap-6">
+      {msg && (
+        <div className={`p-4 rounded-xl font-semibold flex items-center gap-2 ${msg.ok ? 'bg-green-50 dark:bg-[#10b981]/10 text-green-700 dark:text-[#10b981]' : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'}`}>
+           {msg.text}
+        </div>
+      )}
+
+      <ConfirmModal
+        open={deleteConfirmOpen}
+        title="Delete Selected Tickets?"
+        message={`Are you sure you want to delete ${selectedIds.size} selected ticket(s)? This action cannot be undone.`}
+        confirmLabel="Yes, Delete"
+        danger={true}
+        onConfirm={executeBulkDelete}
+        onCancel={() => setDeleteConfirmOpen(false)}
+        busy={isDeleting}
+      />
+
+      {/* Sub-header Navigation */}
+      <div className="sticky top-0 z-20 flex flex-wrap gap-2 justify-between items-center bg-white/80 dark:bg-[#111111]/80 backdrop-blur-md border border-[#0d5d3a]/10 dark:border-white/10 rounded-2xl p-2 shadow-sm">
+        <div className="flex gap-2">
+          <button
+            onClick={() => { setActiveSubTab('contact'); setSelectedIds(new Set()); }}
+            className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeSubTab === 'contact' ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:bg-[#0d5d3a]/5 dark:hover:bg-white/5 hover:text-[#0d5d3a] dark:hover:text-gray-200'}`}
+          >
+            Contact Us Messages
+          </button>
+          <button
+            onClick={() => { setActiveSubTab('report'); setSelectedIds(new Set()); }}
+            className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeSubTab === 'report' ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:bg-[#0d5d3a]/5 dark:hover:bg-white/5 hover:text-[#0d5d3a] dark:hover:text-gray-200'}`}
+          >
+            Reported Issues
+          </button>
+        </div>
+        
+        {selectedIds.size > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-[#4a7c5d] dark:text-gray-400">{selectedIds.size} selected</span>
+            <button onClick={confirmBulkDelete} className="px-4 py-2 bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400 rounded-xl font-bold text-sm hover:bg-red-200 dark:hover:bg-red-500/30 transition">
+              Delete Selected
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-220px)]">
+        <div className="overflow-x-auto flex-1 flex flex-col">
+          <div className="min-w-[900px] flex-1 flex flex-col">
+            <div className="grid grid-cols-12 gap-2 px-4 sm:px-6 py-3 border-b border-[#0d5d3a]/10 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-xs font-bold text-[#4a7c5d] dark:text-gray-400 uppercase tracking-wider items-center shrink-0">
+              <div className="col-span-1 flex items-center">
+                <input type="checkbox" checked={filtered.length > 0 && selectedIds.size === filtered.length} onChange={toggleSelectAll} className="w-4 h-4 rounded border-gray-300 text-[#0d5d3a] focus:ring-[#0d5d3a]" />
+              </div>
+              <div className="col-span-3">User</div>
+              <div className="col-span-4">Subject & Message</div>
+              <div className="col-span-2 text-center">Status</div>
+              <div className="col-span-2 text-right">Actions</div>
+            </div>
+
+            <div className="overflow-y-auto flex-1 divide-y divide-[#0d5d3a]/5 dark:divide-white/5">
+              {filtered.length === 0 ? (
+                <div className="text-center py-16 text-[#4a7c5d] dark:text-gray-400 font-semibold">No tickets found.</div>
+              ) : filtered.map(t => (
+                <div key={t._id} className={`grid grid-cols-12 gap-2 px-4 sm:px-6 py-4 items-center hover:bg-[#fbfdfb] dark:hover:bg-[#1a1a1a] transition-colors ${selectedIds.has(t._id) ? 'bg-[#0d5d3a]/5 dark:bg-[#1a8a5a]/10' : ''}`}>
+                  <div className="col-span-1">
+                    <input type="checkbox" checked={selectedIds.has(t._id)} onChange={() => toggleSelect(t._id)} className="w-4 h-4 rounded border-gray-300 text-[#0d5d3a] focus:ring-[#0d5d3a]" />
+                  </div>
+                  <div className="col-span-3 overflow-hidden">
+                    <div className="font-bold text-[#0a2617] dark:text-gray-100 text-sm truncate">{t.name}</div>
+                    <div className="text-xs text-[#4a7c5d] dark:text-gray-400 truncate">{t.email}</div>
+                    <div className="text-xs text-[#4a7c5d] dark:text-gray-400 truncate">{t.phone}</div>
+                  </div>
+                  <div className="col-span-4 overflow-hidden pr-4">
+                    <div className="font-bold text-[#0a2617] dark:text-gray-100 text-sm truncate">{t.subject}</div>
+                    <div className="text-xs text-[#4a7c5d] dark:text-gray-400 line-clamp-2 mt-1">{t.body}</div>
+                    <div className="text-[10px] text-gray-400 mt-1">{new Date(t.createdAt).toLocaleString()}</div>
+                  </div>
+                  <div className="col-span-2 flex justify-center">
+                    {t.status === 'resolved' ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-50 text-green-700 border border-green-200 text-xs font-bold">
+                        <CheckCircle size={11} /> Resolved
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold">
+                        <Clock size={11} /> Pending
+                      </span>
+                    )}
+                  </div>
+                  <div className="col-span-2 flex justify-end gap-2 items-center">
+                    <button onClick={() => setViewingTicket(t)} className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition" title="View Details">
+                      <Eye size={16} />
+                    </button>
+                    <button onClick={() => toggleStatus(t._id)} className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-xs font-bold transition">
+                      {t.status === 'pending' ? 'Mark Resolved' : 'Mark Pending'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {viewingTicket && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-[#111111] rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+            <div className="flex justify-between items-center p-6 border-b border-[#0d5d3a]/10 dark:border-white/10 shrink-0">
+              <h3 className="text-xl font-bold text-[#0a2617] dark:text-white" style={{ fontFamily: 'Syne, sans-serif' }}>
+                Ticket Details
+              </h3>
+              <button onClick={() => setViewingTicket(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition"><X size={20} className="text-gray-500" /></button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-bold text-[#4a7c5d] uppercase tracking-wider">Name</p>
+                  <p className="text-[#0a2617] dark:text-white font-medium">{viewingTicket.name}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#4a7c5d] uppercase tracking-wider">Email</p>
+                  <p className="text-[#0a2617] dark:text-white font-medium">{viewingTicket.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#4a7c5d] uppercase tracking-wider">Phone</p>
+                  <p className="text-[#0a2617] dark:text-white font-medium">{viewingTicket.phone}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#4a7c5d] uppercase tracking-wider">Date Submitted</p>
+                  <p className="text-[#0a2617] dark:text-white font-medium">{new Date(viewingTicket.createdAt).toLocaleString()}</p>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+                <p className="text-sm font-bold text-[#4a7c5d] uppercase tracking-wider mb-1">Subject</p>
+                <p className="text-[#0a2617] dark:text-white font-bold">{viewingTicket.subject}</p>
+              </div>
+              <div className="mt-4">
+                <p className="text-sm font-bold text-[#4a7c5d] uppercase tracking-wider mb-1">Message</p>
+                <div className="bg-gray-50 dark:bg-[#1a1a1a] p-4 rounded-xl text-[#0a2617] dark:text-gray-300 whitespace-pre-wrap text-sm border border-gray-100 dark:border-white/5">
+                  {viewingTicket.body}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );

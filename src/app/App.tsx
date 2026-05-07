@@ -17,6 +17,7 @@ import AdminDashboard from './components/AdminDashboard';
 import TherapistLogin from './components/TherapistLogin';
 import TherapistDashboard from './components/TherapistDashboard';
 import LoadingScreen from './components/LoadingScreen';
+import ProductPage from './components/ProductPage';
 import { apiFetch } from './api/client';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -36,11 +37,13 @@ export default function App() {
   const [showAuth, setShowAuth]       = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showTherapistLogin, setShowTherapistLogin] = useState(false);
+  
+  const [activeFooterPage, setActiveFooterPage] = useState<string | null>(null);
 
   /* Loading screen state — only for very first render */
   const [checking, setChecking] = useState(true);   // show loader?
   const [apiReady, setApiReady] = useState(false);  // backend responded?
-  const isDashboard = adminAuthed || therapistAuthed || authed;
+  const isDashboard = adminAuthed || therapistAuthed || authed || activeFooterPage !== null;
 
   useEffect(() => {
     if (!isDashboard) {
@@ -155,7 +158,19 @@ export default function App() {
           <Statistics />
           <TherapySection />
           <CTASection onGetStarted={() => setShowAuth(true)} />
-          <Footer onTherapistLoginTrigger={() => setShowTherapistLogin(true)} />
+          <Footer 
+            onTherapistLoginTrigger={() => setShowTherapistLogin(true)} 
+            onProductLinkClick={setActiveFooterPage} 
+            onSupportLinkClick={(link) => {
+              if (link === 'Feedback') {
+                const el = document.getElementById('stories');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                setActiveFooterPage(link);
+              }
+            }}
+          />
+          {activeFooterPage && <ProductPage page={activeFooterPage} onClose={() => setActiveFooterPage(null)} />}
         </>
       )}
     </div>

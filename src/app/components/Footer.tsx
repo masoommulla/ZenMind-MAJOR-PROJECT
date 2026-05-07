@@ -17,7 +17,15 @@ const socialLinks = [
   { icon: Mail, href: '#', label: 'Email' },
 ];
 
-export default function Footer({ onTherapistLoginTrigger }: { onTherapistLoginTrigger?: () => void }) {
+export default function Footer({ 
+  onTherapistLoginTrigger, 
+  onProductLinkClick,
+  onSupportLinkClick
+}: { 
+  onTherapistLoginTrigger?: () => void;
+  onProductLinkClick?: (page: string) => void;
+  onSupportLinkClick?: (page: string) => void;
+}) {
   return (
     <footer id="about" className="bg-gradient-to-br from-[#071d13] via-[#0a2617] to-[#0d5d3a] dark:from-[#050505] dark:via-[#0a0a0a] dark:to-[#111111] transition-colors duration-300 text-white relative overflow-hidden">
       <div className="absolute -top-10 right-4 w-40 h-40 bg-[#27a86a]/20 dark:bg-[#10b981]/10 blur-3xl rounded-full" />
@@ -62,13 +70,29 @@ export default function Footer({ onTherapistLoginTrigger }: { onTherapistLoginTr
                 <ul className="space-y-1.5 sm:space-y-2.5">
                   {links.map((link) => (
                     <li key={link}>
-                      <motion.a
-                        href="#"
-                        whileHover={{ x: 4 }}
-                        className="text-white/70 hover:text-white transition-colors text-xs sm:text-sm block"
-                      >
-                        {link}
-                      </motion.a>
+                      {category === 'Product' && onProductLinkClick ? (
+                        <button
+                          onClick={() => onProductLinkClick(link)}
+                          className="text-white/70 hover:text-white transition-colors text-xs sm:text-sm block text-left"
+                        >
+                          {link}
+                        </button>
+                      ) : category === 'Support' && onSupportLinkClick ? (
+                        <button
+                          onClick={() => onSupportLinkClick(link)}
+                          className="text-white/70 hover:text-white transition-colors text-xs sm:text-sm block text-left"
+                        >
+                          {link}
+                        </button>
+                      ) : (
+                        <motion.a
+                          href="#"
+                          whileHover={{ x: 4 }}
+                          className="text-white/70 hover:text-white transition-colors text-xs sm:text-sm block"
+                        >
+                          {link}
+                        </motion.a>
+                      )}
                     </li>
                   ))}
                 </ul>
