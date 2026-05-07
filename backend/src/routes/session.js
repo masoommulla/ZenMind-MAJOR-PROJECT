@@ -43,8 +43,19 @@ router.post('/book', requireAuth, async (req, res) => {
 /* ── GET /api/sessions/me ── */
 router.get('/me', requireAuth, async (req, res) => {
   try {
-    const sessions = await Session.find({ user: req.user.id }).sort({ date: 1 }).lean();
-    return res.json({ ok: true, sessions });
+    let sessions = await Session.find({ user: req.user.id }).sort({ date: 1 }).lean();
+    
+    // Auto-cancellation check
+    const now = new Date();
+    const updatedSessions = await Promise.all(sessions.map(async (s) => {
+      if (s.status === 'booked' && now.getTime() > new Date(s.date).getTime() + 10 * 60 * 1000) {
+        const updated = await Session.findByIdAndUpdate(s._id, { status: 'cancelled' }, { new: true }).lean();
+        return updated;
+      }
+      return s;
+    }));
+
+    return res.json({ ok: true, sessions: updatedSessions });
   } catch (err) {
     return res.status(500).json({ error: 'Failed to fetch sessions' });
   }
@@ -53,11 +64,23 @@ router.get('/me', requireAuth, async (req, res) => {
 /* ── GET /api/sessions/therapist ── */
 router.get('/therapist', requireTherapist, async (req, res) => {
   try {
-    const sessions = await Session.find({ therapist: req.therapist._id })
+    let sessions = await Session.find({ therapist: req.therapist._id })
       .populate('user', 'name email phone')
       .sort({ date: 1 })
       .lean();
-    return res.json({ ok: true, sessions });
+      
+    // Auto-cancellation check
+    const now = new Date();
+    const updatedSessions = await Promise.all(sessions.map(async (s) => {
+      if (s.status === 'booked' && now.getTime() > new Date(s.date).getTime() + 10 * 60 * 1000) {
+        const updated = await Session.findByIdAndUpdate(s._id, { status: 'cancelled' }, { new: true })
+          .populate('user', 'name email phone').lean();
+        return updated;
+      }
+      return s;
+    }));
+
+    return res.json({ ok: true, sessions: updatedSessions });
   } catch (err) {
     return res.status(500).json({ error: 'Failed to fetch sessions' });
   }
@@ -117,6 +140,21 @@ router.post('/:id/complete', async (req, res) => {
     return res.json({ ok: true, session });
   } catch (err) {
     return res.status(500).json({ error: 'Failed to complete session' });
+  }
+});
+
+/* ── POST /api/sessions/:id/cancel ── */
+router.post('/:id/cancel', async (req, res) => {
+  try {
+    const session = await Session.findByIdAndUpdate(
+      req.params.id,
+      { status: 'cancelled' },
+      { new: true }
+    );
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+    return res.json({ ok: true, session });
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to cancel session' });
   }
 });
 

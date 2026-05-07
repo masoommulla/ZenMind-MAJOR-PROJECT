@@ -159,6 +159,7 @@ io.on('connection', (socket) => {
 
   socket.on('join-room', (roomId) => {
     socket.join(roomId);
+    socket.roomId = roomId;
     socket.to(roomId).emit('user-connected', socket.id);
   });
 
@@ -176,6 +177,9 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
+    if (socket.roomId) {
+      socket.to(socket.roomId).emit('user-disconnected', socket.id);
+    }
   });
 });
 

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   LogOut, Calendar, User, ChevronLeft, ChevronRight, PanelLeftOpen, PanelLeftClose, Menu, X,
   Camera, MapPin, Phone, Lock, Plus, Trash2, Clock, CheckCircle,
-  Shield, GraduationCap, Stethoscope, Edit3, Save
+  Shield, GraduationCap, Stethoscope, Edit3, Save, Info
 } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
@@ -12,6 +12,7 @@ import logo from '../../../asset/logo.png';
 import ThemeToggle from './ThemeToggle';
 import VideoRoom from './VideoRoom';
 import { getImgSrc } from '../utils/image';
+import CancellationPolicy from './CancellationPolicy';
 
 type TabKey = 'profile' | 'schedule' | 'sessions';
 
@@ -641,6 +642,26 @@ function TherapistSessionsPanel() {
   const [now, setNow] = useState(new Date());
   const [activeVideoSession, setActiveVideoSession] = useState<string | null>(null);
 
+  const [cancelSessionId, setCancelSessionId] = useState<string | null>(null);
+  const [showPolicy, setShowPolicy] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+
+  const handleCancelSession = async () => {
+    if (!cancelSessionId) return;
+    setCancelling(true);
+    try {
+      await apiFetch(`/sessions/${cancelSessionId}/cancel`, { method: 'POST' });
+      setCancelSessionId(null);
+      // reload sessions
+      const res = await apiFetch<any>('/sessions/therapist');
+      if (res.ok) setSessions(res.sessions || []);
+    } catch (e: any) {
+      alert(e.message || 'Failed to cancel session');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   useEffect(() => {
     let alive = true;
     apiFetch<any>('/sessions/therapist')
@@ -693,7 +714,7 @@ function TherapistSessionsPanel() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {today.map(s => (
-              <SessionCard key={s._id} s={s} formatCountdown={formatCountdown} isJoinable={isJoinable} onJoin={() => setActiveVideoSession(s._id)} />
+              <SessionCard key={s._id} s={s} formatCountdown={formatCountdown} isJoinable={isJoinable} onJoin={() => setActiveVideoSession(s._id)} onCancel={() => setCancelSessionId(s._id)} />
             ))}
           </div>
         </div>
@@ -706,35 +727,89 @@ function TherapistSessionsPanel() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {upcoming.map(s => (
-              <SessionCard key={s._id} s={s} formatCountdown={formatCountdown} isJoinable={isJoinable} onJoin={() => setActiveVideoSession(s._id)} />
+              <SessionCard key={s._id} s={s} formatCountdown={formatCountdown} isJoinable={isJoinable} onJoin={() => setActiveVideoSession(s._id)} onCancel={() => setCancelSessionId(s._id)} />
             ))}
           </div>
         )}
       </div>
+
+      {/* CANCEL MODAL */}
+      <AnimatePresence>
+        {cancelSessionId && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white dark:bg-[#111111] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative border border-[#0d5d3a]/10 dark:border-white/10">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Trash2 size={32} />
+                </div>
+                <h3 className="text-xl font-black text-[#0a2617] dark:text-white mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>Cancel Session?</h3>
+                <p className="text-[#4a7c5d] dark:text-gray-400 text-sm font-medium mb-4">Are you sure you want to cancel this session?</p>
+                
+                <button 
+                  onClick={() => setShowPolicy(true)}
+                  className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
+                >
+                  <Info size={14} /> Read cancellation policy before cancelling
+                </button>
+              </div>
+
+              <div className="flex gap-3">
+                <button 
+                  disabled={cancelling}
+                  onClick={() => setCancelSessionId(null)} 
+                  className="flex-1 py-3 bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 text-[#0a2617] dark:text-white rounded-xl font-bold hover:bg-gray-100 dark:hover:bg-white/5 transition disabled:opacity-50"
+                >
+                  No, Keep it
+                </button>
+                <button
+                  disabled={cancelling}
+                  onClick={handleCancelSession}
+                  className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition shadow-md disabled:opacity-50"
+                >
+                  {cancelling ? 'Cancelling...' : 'Yes, Cancel'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showPolicy && <CancellationPolicy onClose={() => setShowPolicy(false)} />}
+      </AnimatePresence>
+
     </div>
   );
 }
 
-function SessionCard({ s, formatCountdown, isJoinable, onJoin }: any) {
+function SessionCard({ s, formatCountdown, isJoinable, onJoin, onCancel }: any) {
   return (
-    <div className="bg-white dark:bg-[#111111] border border-[#0d5d3a]/20 dark:border-white/10 rounded-3xl p-6 shadow-sm">
-      <div className="mb-4 text-xs font-bold text-[#0d5d3a] dark:text-[#10b981] bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 px-3 py-1 rounded-full inline-block">
+    <div className="bg-white dark:bg-[#111111] border border-[#0d5d3a]/20 dark:border-white/10 rounded-3xl p-6 shadow-sm flex flex-col h-full">
+      <div className="mb-4 text-xs font-bold text-[#0d5d3a] dark:text-[#10b981] bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 px-3 py-1 rounded-full self-start">
         {formatCountdown(new Date(s.date))}
       </div>
       <h4 className="font-bold text-[#0a2617] dark:text-white text-lg mb-2">{s.user?.name || 'Unknown Patient'}</h4>
-      <div className="space-y-1 text-sm font-medium text-[#4a7c5d] dark:text-gray-400">
+      <div className="space-y-1 text-sm font-medium text-[#4a7c5d] dark:text-gray-400 flex-1">
         <div className="flex items-center gap-2"><Calendar size={14} className="text-[#0d5d3a] dark:text-[#10b981]" /> {new Date(s.date).toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
         <div className="flex items-center gap-2"><Clock size={14} className="text-[#0d5d3a] dark:text-[#10b981]" /> {new Date(s.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
         <div className="flex items-center gap-2"><Phone size={14} className="text-[#0d5d3a] dark:text-[#10b981]" /> {s.user?.phone || 'N/A'}</div>
         <div className="flex items-center gap-2 truncate text-xs">@ {s.user?.email || 'N/A'}</div>
       </div>
-      <button 
-        disabled={!isJoinable(new Date(s.date))}
-        onClick={onJoin}
-        className="w-full mt-4 py-2.5 rounded-xl font-bold bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md hover:bg-[#0a4a2e] disabled:opacity-50 disabled:cursor-not-allowed transition"
-      >
-        {isJoinable(new Date(s.date)) ? 'Join Call' : 'Join Call (opens 2 mins before)'}
-      </button>
+      <div className="flex flex-col sm:flex-row gap-3 mt-4 shrink-0">
+        <button 
+          disabled={!isJoinable(new Date(s.date))}
+          onClick={onJoin}
+          className="flex-1 py-2.5 rounded-xl font-bold bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md hover:bg-[#0a4a2e] disabled:opacity-50 disabled:cursor-not-allowed transition"
+        >
+          {isJoinable(new Date(s.date)) ? 'Join Call' : 'Wait...'}
+        </button>
+        <button 
+          onClick={onCancel}
+          className="px-4 py-2.5 rounded-xl font-bold bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20 transition"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   );
 }

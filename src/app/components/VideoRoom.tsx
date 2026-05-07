@@ -165,7 +165,11 @@ export default function VideoRoom({ roomId, onLeave }: VideoRoomProps) {
 
     peer.ontrack = (event) => {
       if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0];
+        if (!remoteVideoRef.current.srcObject) {
+          remoteVideoRef.current.srcObject = event.streams[0] || new MediaStream([event.track]);
+        } else if (!event.streams[0]) {
+          (remoteVideoRef.current.srcObject as MediaStream).addTrack(event.track);
+        }
         setIsConnected(true);
       }
     };

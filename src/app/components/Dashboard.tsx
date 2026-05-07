@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   MessageCircle, Settings, Upload, Save,
   ChevronLeft, ChevronRight, PanelLeftOpen, PanelLeftClose, Eye, EyeOff, LogOut, Menu, X, Stethoscope,
-  Calendar, Clock, Trash2, CheckSquare, IndianRupee, Star
+  Calendar, Clock, Trash2, CheckSquare, IndianRupee, Star, Info
 } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import ThemeToggle from './ThemeToggle';
 import TherapyHub from './TherapyHub';
 import VideoRoom from './VideoRoom';
+import CancellationPolicy from './CancellationPolicy';
 
 type DashboardProps = {
   onLogout: () => void;
@@ -672,6 +673,24 @@ function MySessionsPanel() {
   const [now, setNow] = useState(new Date());
   const [activeVideoSession, setActiveVideoSession] = useState<string | null>(null);
   
+  const [cancelSessionId, setCancelSessionId] = useState<string | null>(null);
+  const [showPolicy, setShowPolicy] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+
+  const handleCancelSession = async () => {
+    if (!cancelSessionId) return;
+    setCancelling(true);
+    try {
+      await apiFetch(`/sessions/${cancelSessionId}/cancel`, { method: 'POST' });
+      setCancelSessionId(null);
+      fetchSessions();
+    } catch (e: any) {
+      alert(e.message || 'Failed to cancel session');
+    } finally {
+      setCancelling(false);
+    }
+  };
+  
   const [ratingSessionId, setRatingSessionId] = useState<string | null>(null);
   const [ratingVal, setRatingVal] = useState<number>(0);
   const [reviewText, setReviewText] = useState('');
@@ -817,13 +836,21 @@ function MySessionsPanel() {
                   <div className="flex items-center gap-2 text-white/80 text-sm font-medium mb-4">
                     <IndianRupee size={14} /> {s.amountPaid} Paid
                   </div>
-                  <button 
-                    disabled={!isJoinable(new Date(s.date))}
-                    onClick={() => setActiveVideoSession(s._id)}
-                    className="w-full py-2.5 rounded-xl font-bold bg-white text-[#0d5d3a] shadow-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  >
-                    {isJoinable(new Date(s.date)) ? 'Join Call' : 'Join Call (opens 2 mins before)'}
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button 
+                      disabled={!isJoinable(new Date(s.date))}
+                      onClick={() => setActiveVideoSession(s._id)}
+                      className="flex-1 py-2.5 rounded-xl font-bold bg-white text-[#0d5d3a] shadow-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    >
+                      {isJoinable(new Date(s.date)) ? 'Join Call' : 'Wait...'}
+                    </button>
+                    <button 
+                      onClick={() => setCancelSessionId(s._id)}
+                      className="px-4 py-2.5 rounded-xl font-bold bg-red-500 text-white shadow-md hover:bg-red-600 transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -862,13 +889,21 @@ function MySessionsPanel() {
                     <IndianRupee size={14} className="text-[#0d5d3a] dark:text-[#10b981]" /> {s.amountPaid} Paid
                   </div>
                 </div>
-                <button 
-                  disabled={!isJoinable(new Date(s.date))}
-                  onClick={() => setActiveVideoSession(s._id)}
-                  className="w-full mt-4 py-2.5 rounded-xl font-bold bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md hover:bg-[#0a4a2e] disabled:opacity-50 disabled:cursor-not-allowed transition"
-                >
-                  {isJoinable(new Date(s.date)) ? 'Join Call' : 'Join Call (opens 2 mins before)'}
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                  <button 
+                    disabled={!isJoinable(new Date(s.date))}
+                    onClick={() => setActiveVideoSession(s._id)}
+                    className="flex-1 py-2.5 rounded-xl font-bold bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md hover:bg-[#0a4a2e] disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  >
+                    {isJoinable(new Date(s.date)) ? 'Join Call' : 'Wait...'}
+                  </button>
+                  <button 
+                    onClick={() => setCancelSessionId(s._id)}
+                    className="px-4 py-2.5 rounded-xl font-bold bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -911,7 +946,14 @@ function MySessionsPanel() {
                   className={`border rounded-3xl p-5 cursor-pointer transition-all ${selected ? 'bg-[#e6f4ea]/50 dark:bg-[#0d5d3a]/10 border-[#0d5d3a] dark:border-[#10b981]' : 'bg-white dark:bg-[#111111] border-gray-100 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/20'}`}>
                   
                   <div className="flex justify-between items-start mb-3">
-                    <h4 className="font-bold text-[#0a2617] dark:text-white">{s.therapistName}</h4>
+                    <h4 className="font-bold text-[#0a2617] dark:text-white flex items-center gap-2">
+                      {s.therapistName}
+                      {s.status === 'cancelled' && (
+                        <span className="text-[10px] font-black uppercase tracking-wider bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400 px-2 py-0.5 rounded-md">
+                          Cancelled
+                        </span>
+                      )}
+                    </h4>
                     <div className={`w-5 h-5 rounded border flex items-center justify-center ${selected ? 'bg-[#0d5d3a] border-[#0d5d3a] text-white' : 'border-gray-300 dark:border-gray-600'}`}>
                       {selected && <CheckSquare size={12} />}
                     </div>
@@ -985,6 +1027,51 @@ function MySessionsPanel() {
             </motion.div>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* CANCEL MODAL */}
+      <AnimatePresence>
+        {cancelSessionId && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white dark:bg-[#111111] rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative border border-[#0d5d3a]/10 dark:border-white/10">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Trash2 size={32} />
+                </div>
+                <h3 className="text-xl font-black text-[#0a2617] dark:text-white mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>Cancel Session?</h3>
+                <p className="text-[#4a7c5d] dark:text-gray-400 text-sm font-medium mb-4">Are you sure you want to cancel this session?</p>
+                
+                <button 
+                  onClick={() => setShowPolicy(true)}
+                  className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
+                >
+                  <Info size={14} /> Read cancellation policy before cancelling
+                </button>
+              </div>
+
+              <div className="flex gap-3">
+                <button 
+                  disabled={cancelling}
+                  onClick={() => setCancelSessionId(null)} 
+                  className="flex-1 py-3 bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 text-[#0a2617] dark:text-white rounded-xl font-bold hover:bg-gray-100 dark:hover:bg-white/5 transition disabled:opacity-50"
+                >
+                  No, Keep it
+                </button>
+                <button
+                  disabled={cancelling}
+                  onClick={handleCancelSession}
+                  className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition shadow-md disabled:opacity-50"
+                >
+                  {cancelling ? 'Cancelling...' : 'Yes, Cancel'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showPolicy && <CancellationPolicy onClose={() => setShowPolicy(false)} />}
       </AnimatePresence>
 
     </motion.div>
