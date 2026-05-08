@@ -19,8 +19,6 @@ export default function TherapistChatView({ therapist }: { therapist: any }) {
   const [selectedMsg, setSelectedMsg] = useState<any | null>(null);
   const [showClearChatModal, setShowClearChatModal] = useState(false);
   const [toastError, setToastError] = useState('');
-  
-  const [onlineUsersMap, setOnlineUsersMap] = useState<Record<string, { isOnline: boolean, lastSeen?: string }>>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isMobile = window.innerWidth < 768;
@@ -45,21 +43,11 @@ export default function TherapistChatView({ therapist }: { therapist: any }) {
         setChats(res.chats || []);
         setLoading(false);
 
-        // Map initial online status from DB
-        const statusMap: any = {};
-        (res.chats || []).forEach((c: any) => {
-          if (c.user) {
-            statusMap[c.user._id] = { isOnline: c.user.isOnline, lastSeen: c.user.lastSeen };
-          }
-        });
-        setOnlineUsersMap(statusMap);
-
         const socketUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '/';
         s = io(socketUrl, { withCredentials: true });
         setSocket(s);
 
         s.on('connect', () => {
-          s.emit('user-status', { userId: therapist._id, model: 'Therapist', status: 'online' });
           // Join all active chat rooms to receive messages
           (res.chats || []).forEach((c: any) => {
             s.emit('join-chat', c._id);
@@ -77,13 +65,6 @@ export default function TherapistChatView({ therapist }: { therapist: any }) {
             }
             return prev;
           });
-        });
-
-        s.on('status-changed', (data) => {
-          setOnlineUsersMap(prev => ({
-            ...prev,
-            [data.userId]: { isOnline: data.isOnline, lastSeen: data.lastSeen }
-          }));
         });
 
       } catch (err: any) {
@@ -206,7 +187,6 @@ export default function TherapistChatView({ therapist }: { therapist: any }) {
             chats.map(chat => {
               const u = chat.user;
               if (!u) return null;
-              const isOnline = onlineUsersMap[u._id]?.isOnline;
               const isSelected = selectedChat?._id === chat._id;
               
               return (
@@ -223,15 +203,10 @@ export default function TherapistChatView({ therapist }: { therapist: any }) {
                         {u.name.charAt(0)}
                       </div>
                     )}
-                    <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-[#111111] ${isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-baseline mb-0.5">
-                      <h4 className="font-bold text-sm text-[#0a2617] dark:text-white truncate">{u.name}</h4>
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {isOnline ? 'Online' : 'Offline'}
-                    </p>
+                    <h4 className="font-bold text-sm text-[#0a2617] dark:text-white truncate">{u.name}</h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Tap to open conversation</p>
                   </div>
                 </div>
               );
@@ -262,13 +237,7 @@ export default function TherapistChatView({ therapist }: { therapist: any }) {
                 </div>
                 <div>
                   <h3 className="font-bold text-[#0a2617] dark:text-white text-base">{selectedChat.user.name}</h3>
-                  <div className="text-xs text-gray-500">
-                    {onlineUsersMap[selectedChat.user._id]?.isOnline ? (
-                      <span className="text-green-500 font-medium">Online</span>
-                    ) : (
-                      <span>Last seen {onlineUsersMap[selectedChat.user._id]?.lastSeen ? new Date(onlineUsersMap[selectedChat.user._id].lastSeen!).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : 'recently'}</span>
-                    )}
-                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Tap to view details</div>
                 </div>
               </div>
             </div>
@@ -404,9 +373,6 @@ export default function TherapistChatView({ therapist }: { therapist: any }) {
                   </div>
                 )}
                 <h3 className="text-xl font-black text-[#0a2617] dark:text-white">{selectedChat.user.name}</h3>
-                <span className={`text-xs mt-1 font-bold ${onlineUsersMap[selectedChat.user._id]?.isOnline ? 'text-green-500' : 'text-gray-500'}`}>
-                  {onlineUsersMap[selectedChat.user._id]?.isOnline ? 'Online' : 'Offline'}
-                </span>
               </div>
 
               <div className="space-y-3 border-t border-gray-100 dark:border-white/5 pt-4">

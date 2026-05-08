@@ -12,9 +12,7 @@ export default function UserChat({ therapist, onBack, me }: { therapist: any; on
   const [inputText, setInputText] = useState('');
   const [chatId, setChatId] = useState<string | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
-  
-  const [isTherapistOnline, setIsTherapistOnline] = useState(therapist.isOnline);
-  const [lastSeen, setLastSeen] = useState(therapist.lastSeen);
+
   const [showOptions, setShowOptions] = useState(false);
   const [selectedMsg, setSelectedMsg] = useState<any | null>(null);
   const [showClearChatModal, setShowClearChatModal] = useState(false);
@@ -47,13 +45,12 @@ export default function UserChat({ therapist, onBack, me }: { therapist: any; on
         setMessages(msgRes.messages || []);
         setLoading(false);
 
-        // Init socket
+        // Init socket for real-time messaging only (no status tracking)
         const socketUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '/';
         s = io(socketUrl, { withCredentials: true });
         setSocket(s);
 
         s.on('connect', () => {
-          s.emit('user-status', { userId: me.id, model: 'User', status: 'online' });
           s.emit('join-chat', currentChatId);
         });
 
@@ -68,13 +65,6 @@ export default function UserChat({ therapist, onBack, me }: { therapist: any; on
             }
             return prev;
           });
-        });
-
-        s.on('status-changed', (data) => {
-          if (data.userId === therapist._id) {
-            setIsTherapistOnline(data.isOnline);
-            if (data.lastSeen) setLastSeen(data.lastSeen);
-          }
         });
 
       } catch (err: any) {
@@ -98,7 +88,6 @@ export default function UserChat({ therapist, onBack, me }: { therapist: any; on
     const text = inputText;
     setInputText('');
 
-    // Optimistic UI update could be added here, but API is fast enough
     try {
       const res = await apiFetch<any>(`/chat/${chatId}/messages`, {
         method: 'POST',
@@ -123,7 +112,6 @@ export default function UserChat({ therapist, onBack, me }: { therapist: any; on
         if (type === 'everyone') {
           return prev.map(m => m._id === msgId ? { ...m, deletedForEveryone: true } : m);
         } else {
-          // me
           return prev.filter(m => m._id !== msgId);
         }
       });
@@ -169,7 +157,7 @@ export default function UserChat({ therapist, onBack, me }: { therapist: any; on
             <ArrowLeft size={20} />
           </button>
           
-          <div className="relative cursor-pointer" onClick={() => {/* Future: show modal */}}>
+          <div className="relative">
             {therapist.profilePicture ? (
               <img src={getImgSrc(therapist.profilePicture)} alt={therapist.name} className="w-10 h-10 rounded-full object-cover border-2 border-[#e6f4ea] dark:border-[#0d5d3a]/30" />
             ) : (
@@ -177,18 +165,11 @@ export default function UserChat({ therapist, onBack, me }: { therapist: any; on
                 {therapist.name.charAt(0)}
               </div>
             )}
-            <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-[#111111] ${isTherapistOnline ? 'bg-green-500' : 'bg-gray-400'}`}></div>
           </div>
           
           <div>
             <h2 className="font-bold text-[#0a2617] dark:text-white text-base leading-tight">{therapist.name}</h2>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              {isTherapistOnline ? (
-                <span className="text-green-500 font-medium">Online</span>
-              ) : (
-                <span>Last seen {lastSeen ? new Date(lastSeen).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : 'recently'}</span>
-              )}
-            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">{therapist.specialization}</div>
           </div>
         </div>
         
@@ -216,7 +197,7 @@ export default function UserChat({ therapist, onBack, me }: { therapist: any; on
         
         {messages.length === 0 && (
           <div className="text-center text-gray-500 text-sm mt-10">
-            Start a conversation with {therapist.name}. Messages are securely encrypted.
+            Start a conversation with {therapist.name}. Your messages are private and secure.
           </div>
         )}
         

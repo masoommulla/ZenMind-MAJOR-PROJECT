@@ -4,7 +4,6 @@ import Chat from '../models/Chat.js';
 import Message from '../models/Message.js';
 import User from '../models/User.js';
 import { Therapist } from '../models/Therapist.js';
-import { encryptMessage, decryptMessage } from '../utils/encryption.js';
 
 const router = express.Router();
 
@@ -97,16 +96,19 @@ router.get('/:chatId/messages', authenticateAny, async (req, res) => {
 
     const currentUserId = isUser ? req.user.id : String(req.therapist._id);
 
-    const decryptedMessages = messages.filter(m => {
+    const processedMessages = messages.filter(m => {
+      // Skip messages deleted for/by the current user
       if (m.deletedBy && m.deletedBy.map(id => String(id)).includes(currentUserId)) return false;
+      // Auto-hide legacy AES-encrypted blobs (iv:ciphertext hex pattern) — they can't be read
+      if (m.encryptedContent && /^[0-9a-f]{32}:[0-9a-f]+$/i.test(m.encryptedContent)) return false;
       return true;
     }).map(m => {
-      m.content = decryptMessage(m.encryptedContent);
+      m.content = m.encryptedContent || '';
       delete m.encryptedContent;
       return m;
     });
 
-    res.json({ ok: true, messages: decryptedMessages });
+    res.json({ ok: true, messages: processedMessages });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -126,13 +128,11 @@ router.post('/:chatId/messages', authenticateAny, async (req, res) => {
     const { content } = req.body;
     if (!content) return res.status(400).json({ error: 'Message content is required' });
 
-    const encryptedContent = encryptMessage(content);
-
     const message = new Message({
       chatId: chat._id,
       senderId: isUser ? req.user.id : req.therapist._id,
       senderModel: isUser ? 'User' : 'Therapist',
-      encryptedContent
+      encryptedContent: content  // field name kept for DB compatibility; stores plain text
     });
 
     await message.save();

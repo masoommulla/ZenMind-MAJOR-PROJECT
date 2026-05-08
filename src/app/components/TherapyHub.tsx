@@ -267,8 +267,8 @@ export default function TherapyHub({ onSessionBooked, onStartChat }: { onSession
                     <Calendar size={16} /> Book Session
                   </button>
                   <button onClick={() => onStartChat && onStartChat(selectedTherapist)}
-                    className="w-full py-3.5 rounded-xl bg-white dark:bg-[#222222] border border-[#0d5d3a] dark:border-[#10b981] hover:bg-[#e6f4ea] dark:hover:bg-[#333] text-[#0d5d3a] dark:text-[#10b981] font-bold text-sm transition-all shadow-sm flex justify-center items-center gap-2">
-                    <MessageCircle size={16} /> Chat with Therapist
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm transition-all shadow-lg flex justify-center items-center gap-1.5 ring-2 ring-emerald-400/30 whitespace-nowrap">
+                    <MessageCircle size={15} className="shrink-0" /> Chat with Therapist
                   </button>
                 </div>
               </div>
