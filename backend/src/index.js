@@ -212,3 +212,11 @@ server.listen(port, () => {
   console.log(`API and Socket.IO listening on port ${port}`);
 });
 
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n❌ Port ${port} is already in use. Kill the process using that port and restart.\n`);
+    process.exit(1);
+  } else {
+    throw err;
+  }
+});
