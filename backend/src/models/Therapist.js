@@ -36,6 +36,10 @@ const therapistSchema = new mongoose.Schema({
   sessionCost: { type: Number, default: 500 },
   availableSlots: [{ type: String }],
   notes: { type: String, default: '' },
+  
+  // Status tracking
+  isOnline: { type: Boolean, default: false },
+  lastSeen: { type: Date, default: Date.now }
 }, { timestamps: true });
 
 therapistSchema.pre('save', async function (next) {

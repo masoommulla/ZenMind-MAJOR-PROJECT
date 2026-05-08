@@ -56,6 +56,8 @@ import sessionRoutes from './routes/session.js';
 app.use('/api/sessions', sessionRoutes);
 import supportRoutes from './routes/support.js';
 app.use('/api/support', supportRoutes);
+import chatRoutes from './routes/chat.js';
+app.use('/api/chat', chatRoutes);
 
 const port = process.env.PORT || 5000;
 const mongoUri = process.env.MONGODB_URI;
@@ -156,9 +158,41 @@ const io = new Server(server, {
   }
 });
 
+const onlineUsers = new Map(); // userId -> socketId
+
 io.on('connection', (socket) => {
   console.log('User connected to socket:', socket.id);
 
+  // --- Chat Logic ---
+  socket.on('user-status', async (data) => {
+    // data = { userId: string, model: 'User' | 'Therapist', status: 'online' | 'offline' }
+    if (!data.userId) return;
+    socket.userId = data.userId;
+    socket.userModel = data.model;
+
+    if (data.status === 'online') {
+      onlineUsers.set(data.userId, socket.id);
+      // Broadcast status
+      io.emit('status-changed', { userId: data.userId, isOnline: true });
+    }
+  });
+
+  socket.on('join-chat', (chatId) => {
+    socket.join(`chat_${chatId}`);
+  });
+
+  socket.on('send-chat-message', (data) => {
+    // data: { chatId, message }
+    socket.to(`chat_${data.chatId}`).emit('receive-chat-message', data.message);
+  });
+
+  socket.on('delete-chat-message', (data) => {
+    // data: { chatId, messageId, deletedForEveryone, deletedBy }
+    socket.to(`chat_${data.chatId}`).emit('chat-message-deleted', data);
+  });
+  // ------------------
+
+  // --- Video Conference Logic ---
   socket.on('join-room', (roomId) => {
     socket.join(roomId);
     socket.roomId = roomId;
@@ -177,8 +211,17 @@ io.on('connection', (socket) => {
     socket.to(roomId).emit('ice-candidate', data);
   });
 
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
     console.log('User disconnected:', socket.id);
+    
+    // Chat disconnect logic
+    if (socket.userId) {
+      onlineUsers.delete(socket.userId);
+      const lastSeen = new Date();
+      io.emit('status-changed', { userId: socket.userId, isOnline: false, lastSeen });
+    }
+
+    // Video disconnect logic
     if (socket.roomId) {
       socket.to(socket.roomId).emit('user-disconnected', socket.id);
     }

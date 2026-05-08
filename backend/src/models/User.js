@@ -12,7 +12,9 @@ const userSchema = new mongoose.Schema(
     avatar: {
       mime: { type: String },
       data: { type: String } // base64 (no local storage)
-    }
+    },
+    isOnline: { type: Boolean, default: false },
+    lastSeen: { type: Date, default: Date.now }
   },
   { timestamps: true }
 );

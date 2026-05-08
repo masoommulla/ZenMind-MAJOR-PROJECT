@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Star, Clock, MapPin, X, Calendar, GraduationCap, Filter, ChevronDown, IndianRupee, BookOpen, Award } from 'lucide-react';
+import { Search, Star, Clock, MapPin, X, Calendar, GraduationCap, Filter, ChevronDown, IndianRupee, BookOpen, Award, MessageCircle } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { apiFetch } from '../api/client';
@@ -17,7 +17,7 @@ const SPECIALIZATIONS = [
   'Child Psychologist',
 ];
 
-export default function TherapyHub({ onSessionBooked }: { onSessionBooked?: () => void }) {
+export default function TherapyHub({ onSessionBooked, onStartChat }: { onSessionBooked?: () => void, onStartChat?: (therapist: any) => void }) {
   const [therapists, setTherapists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -261,10 +261,16 @@ export default function TherapyHub({ onSessionBooked }: { onSessionBooked?: () =
                   </div>
                 </div>
 
-                <button onClick={() => setIsBookingMode(true)}
-                  className="w-full mt-6 py-3.5 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] hover:bg-[#0a4a2e] text-white font-bold text-sm transition-all shadow-md flex justify-center items-center gap-2">
-                  <Calendar size={16} /> Book Session
-                </button>
+                <div className="flex flex-col gap-2 mt-6">
+                  <button onClick={() => setIsBookingMode(true)}
+                    className="w-full py-3.5 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] hover:bg-[#0a4a2e] text-white font-bold text-sm transition-all shadow-md flex justify-center items-center gap-2">
+                    <Calendar size={16} /> Book Session
+                  </button>
+                  <button onClick={() => onStartChat && onStartChat(selectedTherapist)}
+                    className="w-full py-3.5 rounded-xl bg-white dark:bg-[#222222] border border-[#0d5d3a] dark:border-[#10b981] hover:bg-[#e6f4ea] dark:hover:bg-[#333] text-[#0d5d3a] dark:text-[#10b981] font-bold text-sm transition-all shadow-sm flex justify-center items-center gap-2">
+                    <MessageCircle size={16} /> Chat with Therapist
+                  </button>
+                </div>
               </div>
             </div>
 

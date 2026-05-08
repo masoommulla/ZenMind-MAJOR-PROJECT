@@ -10,6 +10,7 @@ import ThemeToggle from './ThemeToggle';
 import TherapyHub from './TherapyHub';
 import VideoRoom from './VideoRoom';
 import CancellationPolicy from './CancellationPolicy';
+import UserChat from './UserChat';
 
 type DashboardProps = {
   onLogout: () => void;
@@ -25,7 +26,7 @@ type Me = {
   avatar: { mime: string; data: string } | null;
 };
 
-type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions';
+type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat';
 
 const NAV_ITEMS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'aichat',   label: 'AI Chat',  icon: <MessageCircle className="w-5 h-5 flex-shrink-0" /> },
@@ -41,6 +42,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
   const [error, setError]     = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [chatTherapist, setChatTherapist] = useState<any | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -197,6 +199,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                 <div className="text-[#0a2617] dark:text-gray-100 text-lg sm:text-xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
                   {tab === 'sessions' ? 'My Sessions' : 
                    tab === 'therapy' ? 'Therapy Hub' : 
+                   tab === 'chat' ? 'Chat' :
                    tab === 'aichat' ? 'AI Chat' : 
                    tab === 'settings' ? 'Settings' :
                    loading ? 'Loading...' : `Welcome, ${me?.name?.split(' ')[0] || 'there'}!`}
@@ -204,6 +207,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                 <div className="text-sm text-[#4a7c5d] dark:text-gray-400">
                   {tab === 'sessions' ? 'Manage your upcoming therapy appointments and view history.' : 
                    tab === 'therapy' ? 'Connect with verified professionals for your mental wellness journey.' : 
+                   tab === 'chat' ? 'Secure, real-time messaging with your therapist.' :
                    tab === 'aichat' ? 'Your intelligent companion for mental wellness.' : 
                    tab === 'settings' ? 'Manage your account settings and preferences.' :
                    'Your personal wellness dashboard'}
@@ -222,10 +226,17 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 
         <main className="flex-1 overflow-hidden flex flex-col min-h-0">
           {tab === 'therapy' ? (
-            <TherapyHub onSessionBooked={() => setTab('sessions')} />
+            <TherapyHub 
+              onSessionBooked={() => setTab('sessions')} 
+              onStartChat={(t) => { setChatTherapist(t); setTab('chat'); }} 
+            />
           ) : tab === 'sessions' ? (
             <div className="flex-1 overflow-y-auto">
               <MySessionsPanel />
+            </div>
+          ) : tab === 'chat' && chatTherapist && me ? (
+            <div className="flex-1 overflow-hidden">
+              <UserChat therapist={chatTherapist} me={me} onBack={() => setTab('therapy')} />
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto">

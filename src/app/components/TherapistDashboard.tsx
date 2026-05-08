@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   LogOut, Calendar, User, ChevronLeft, ChevronRight, PanelLeftOpen, PanelLeftClose, Menu, X,
   Camera, MapPin, Phone, Lock, Plus, Trash2, Clock, CheckCircle,
-  Shield, GraduationCap, Stethoscope, Edit3, Save, Info
+  Shield, GraduationCap, Stethoscope, Edit3, Save, Info, MessageCircle
 } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
@@ -13,8 +13,9 @@ import ThemeToggle from './ThemeToggle';
 import VideoRoom from './VideoRoom';
 import { getImgSrc } from '../utils/image';
 import CancellationPolicy from './CancellationPolicy';
+import TherapistChatView from './TherapistChatView';
 
-type TabKey = 'profile' | 'schedule' | 'sessions';
+type TabKey = 'profile' | 'schedule' | 'sessions' | 'chats';
 
 export default function TherapistDashboard({ onLogout }: { onLogout: () => void }) {
   const [tab, setTab] = useState<TabKey>('profile');
@@ -203,6 +204,7 @@ export default function TherapistDashboard({ onLogout }: { onLogout: () => void 
     { key: 'profile', label: 'My Profile', icon: <User size={20} /> },
     { key: 'schedule', label: 'Schedule', icon: <Calendar size={20} /> },
     { key: 'sessions', label: 'Booked Sessions', icon: <CheckCircle size={20} /> },
+    { key: 'chats', label: 'Chats', icon: <MessageCircle size={20} /> },
   ];
 
   const SidebarContent = ({ mobile }: { mobile?: boolean }) => {
@@ -292,7 +294,7 @@ export default function TherapistDashboard({ onLogout }: { onLogout: () => void 
               <Menu size={20} />
             </button>
             <h1 className="text-lg sm:text-2xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
-              {tab === 'profile' ? 'My Profile' : tab === 'schedule' ? 'Schedule & Availability' : 'Booked Sessions'}
+              {tab === 'profile' ? 'My Profile' : tab === 'schedule' ? 'Schedule & Availability' : tab === 'chats' ? 'Chats' : 'Booked Sessions'}
             </h1>
           </div>
           <ThemeToggle />
@@ -602,6 +604,13 @@ export default function TherapistDashboard({ onLogout }: { onLogout: () => void 
           {tab === 'sessions' && (
             <div className="p-4 sm:p-8">
               <TherapistSessionsPanel />
+            </div>
+          )}
+
+          {/* CHATS TAB */}
+          {tab === 'chats' && (
+            <div className="p-4 sm:p-8 h-full">
+              <TherapistChatView therapist={therapist} />
             </div>
           )}
 
