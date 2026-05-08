@@ -1,43 +1,40 @@
 /**
- * Brevo SMTP Relay mailer (nodemailer → smtp-relay.brevo.com)
+ * Nodemailer email utility — Gmail SMTP
  *
- * This uses Brevo's SMTP server, NOT the REST API.
- * The SMTP key (xsmtpsib-...) is the password for the SMTP server.
- *
- * .env variables:
- *   BREVO_SMTP_USER    = the email you use to LOGIN to brevo.com
- *   BREVO_SMTP_KEY     = xsmtpsib-... key (from Brevo → SMTP & API → SMTP)
- *   BREVO_SENDER_EMAIL = verified sender email in Brevo
- *   BREVO_SENDER_NAME  = display name
+ * .env variables required:
+ *   EMAIL_USER  = your Gmail address (e.g. yourname@gmail.com)
+ *   EMAIL_PASS  = Gmail App Password (16-char, generated in Google Account → Security → App Passwords)
+ *   EMAIL_FROM_NAME = Display name (default: ZenMind)
  */
 
 import nodemailer from 'nodemailer';
 
 function createTransport() {
-  const user = process.env.BREVO_SMTP_USER;
-  const pass = process.env.BREVO_SMTP_KEY;
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASS;
 
   if (!user || !pass) {
-    throw new Error('[Mailer] BREVO_SMTP_USER or BREVO_SMTP_KEY is missing from .env');
+    throw new Error('[Mailer] EMAIL_USER or EMAIL_PASS is missing from .env');
   }
 
   return nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false,   // STARTTLS
+    service: 'gmail',
     auth: { user, pass },
   });
 }
 
+const fromName = () => process.env.EMAIL_FROM_NAME || 'ZenMind';
+const fromAddr = () => process.env.EMAIL_USER;
+const from     = () => `"${fromName()}" <${fromAddr()}>`;
+
 /* ─── OTP EMAIL ─── */
 export async function sendOtpEmail({ toEmail, toName, code }) {
   const transporter = createTransport();
-  const from = `"${process.env.BREVO_SENDER_NAME || 'ZenMind'}" <${process.env.BREVO_SENDER_EMAIL}>`;
 
   console.log(`[Mailer] Sending OTP to: ${toEmail}`);
 
   await transporter.sendMail({
-    from,
+    from: from(),
     to: toEmail,
     subject: 'Your ZenMind Verification Code',
     html: `
@@ -76,12 +73,11 @@ export async function sendOtpEmail({ toEmail, toName, code }) {
 /* ─── WELCOME EMAIL ─── */
 export async function sendWelcomeEmail({ toEmail, toName }) {
   const transporter = createTransport();
-  const from = `"${process.env.BREVO_SENDER_NAME || 'ZenMind'}" <${process.env.BREVO_SENDER_EMAIL}>`;
 
   await transporter.sendMail({
-    from,
+    from: from(),
     to: toEmail,
-    subject: "Welcome to ZenMind &#127807; You're not alone",
+    subject: "Welcome to ZenMind 🌿 You're not alone",
     html: `
 <div style="font-family:'Segoe UI',Arial,sans-serif;background:#eef6f1;padding:32px 16px;">
   <div style="max-width:580px;margin:auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(13,93,58,0.10);">

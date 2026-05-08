@@ -5,7 +5,7 @@ import { z } from 'zod';
 import User from '../models/User.js';
 import PasswordReset from '../models/PasswordReset.js';
 import { signJwt } from '../utils/jwt.js';
-import { sendOtpEmail, sendWelcomeEmail } from '../utils/brevo.js';
+import { sendOtpEmail, sendWelcomeEmail } from '../utils/mailer.js';
 import { requireAuth } from '../middleware/auth.js';
 import { cookieOpts } from '../utils/cookieOptions.js';
 
@@ -40,7 +40,7 @@ router.post('/register', async (req, res) => {
   const token = signJwt({ sub: String(user._id) });
 
   sendWelcomeEmail({ toEmail: user.email, toName: user.name }).catch((err) =>
-    console.error('[Brevo] ❌ Welcome email failed for', user.email, ':', err.message)
+    console.error('[Mailer] ❌ Welcome email failed for', user.email, ':', err.message)
   );
 
   res.cookie('auth_token', token, cookieOpts);
@@ -103,7 +103,7 @@ router.post('/send-otp', requireAuth, async (req, res) => {
   try {
     await sendOtpEmail({ toEmail: user.email, toName: user.name, code });
   } catch (err) {
-    console.error('[Brevo] ❌ OTP email failed:', err.message);
+    console.error('[Mailer] ❌ OTP email failed:', err.message);
     return res.status(500).json({ error: 'Failed to send OTP email. Please try again.' });
   }
 
@@ -140,7 +140,7 @@ router.post('/forgot-password', async (req, res) => {
   try {
     await sendOtpEmail({ toEmail: user.email, toName: user.name, code });
   } catch (err) {
-    console.error('[Brevo] ❌ OTP email failed for', user.email, ':', err.message);
+    console.error('[Mailer] ❌ OTP email failed for', user.email, ':', err.message);
     return res.status(500).json({ error: 'Failed to send OTP email. Please try again.' });
   }
 

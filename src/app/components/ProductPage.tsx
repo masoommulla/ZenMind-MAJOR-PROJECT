@@ -362,20 +362,21 @@ export default function ProductPage({ page, onClose }: { page: string; onClose: 
 
       case 'Documentation':
         return (
-          <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
-            <div className="relative">
+          <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4 py-10">
+            <div className="relative w-full max-w-xl">
               <div className="absolute inset-0 bg-[#0d5d3a]/20 dark:bg-[#10b981]/20 blur-3xl rounded-full" />
-              <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 p-12 rounded-[3rem] shadow-2xl relative z-10 max-w-xl w-full">
-                <div className="w-20 h-20 bg-[#e6f4ea] dark:bg-[#0d5d3a]/30 text-[#0d5d3a] dark:text-[#10b981] rounded-full flex items-center justify-center mx-auto mb-8">
-                  <FileCode size={36} />
+              <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 p-6 sm:p-10 md:p-12 rounded-2xl sm:rounded-[3rem] shadow-2xl relative z-10 w-full">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#e6f4ea] dark:bg-[#0d5d3a]/30 text-[#0d5d3a] dark:text-[#10b981] rounded-full flex items-center justify-center mx-auto mb-6 sm:mb-8">
+                  <FileCode size={30} className="sm:hidden" />
+                  <FileCode size={36} className="hidden sm:block" />
                 </div>
-                <h2 className="text-4xl sm:text-5xl font-black text-[#0a2617] dark:text-white mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#0a2617] dark:text-white mb-4 sm:mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
                   Documentation
                 </h2>
-                <div className="inline-block px-4 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 font-bold text-sm mb-6 uppercase tracking-widest">
+                <div className="inline-block px-4 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 font-bold text-sm mb-4 sm:mb-6 uppercase tracking-widest">
                   Coming Soon
                 </div>
-                <p className="text-[#4a7c5d] dark:text-gray-400 text-lg leading-relaxed">
+                <p className="text-[#4a7c5d] dark:text-gray-400 text-base sm:text-lg leading-relaxed">
                   We are building comprehensive developer and user documentation to help you get the most out of the ZenMind platform.
                 </p>
               </div>
@@ -385,20 +386,21 @@ export default function ProductPage({ page, onClose }: { page: string; onClose: 
 
       case 'Safety Guidelines':
         return (
-          <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
-            <div className="relative">
+          <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4 py-10">
+            <div className="relative w-full max-w-xl">
               <div className="absolute inset-0 bg-blue-500/10 dark:bg-blue-500/20 blur-3xl rounded-full" />
-              <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 p-12 rounded-[3rem] shadow-2xl relative z-10 max-w-xl w-full">
-                <div className="w-20 h-20 bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-8">
-                  <ShieldCheck size={36} />
+              <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 p-6 sm:p-10 md:p-12 rounded-2xl sm:rounded-[3rem] shadow-2xl relative z-10 w-full">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-6 sm:mb-8">
+                  <ShieldCheck size={30} className="sm:hidden" />
+                  <ShieldCheck size={36} className="hidden sm:block" />
                 </div>
-                <h2 className="text-4xl sm:text-5xl font-black text-[#0a2617] dark:text-white mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#0a2617] dark:text-white mb-4 sm:mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
                   Safety Guidelines
                 </h2>
-                <div className="inline-block px-4 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 font-bold text-sm mb-6 uppercase tracking-widest">
+                <div className="inline-block px-4 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 font-bold text-sm mb-4 sm:mb-6 uppercase tracking-widest">
                   Coming Soon
                 </div>
-                <p className="text-[#4a7c5d] dark:text-gray-400 text-lg leading-relaxed">
+                <p className="text-[#4a7c5d] dark:text-gray-400 text-base sm:text-lg leading-relaxed">
                   Community safety is our priority. Our comprehensive safety guidelines and crisis resources page is currently being finalized.
                 </p>
               </div>
