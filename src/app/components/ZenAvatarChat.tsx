@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Mic, MicOff, Send, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 import { apiFetch } from '../api/client';
 
-type Message = { role: 'user' | 'assistant'; content: string; id: string; revealedCount?: number };
+type Message = { role: 'user' | 'assistant'; content: string; id: string };
 let _id = 0;
 const uid = () => `m_${Date.now()}_${_id++}`;
 const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -87,12 +87,9 @@ function WaveVisualizer({ active }: { active: boolean }) {
   );
 }
 
-/* ── Word-by-word message bubble ────────────────────────────────────────── */
-function MessageBubble({ msg, isSpeaking }: { msg: Message; isSpeaking: boolean }) {
+/* ── Message bubble ──────────────────────────────────────────────────────── */
+function MessageBubble({ msg }: { msg: Message }) {
   const isBot = msg.role === 'assistant';
-  const words = msg.content.split(' ');
-  // Only animate words if this message is actively being spoken right now
-  const revealed = isSpeaking && msg.revealedCount !== undefined ? msg.revealedCount : words.length;
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={`flex gap-2.5 ${isBot ? 'flex-row' : 'flex-row-reverse'}`}>
       <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 ${isBot ? 'bg-gradient-to-br from-[#0d5d3a] to-[#10b981] text-white' : 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white'}`}>
@@ -101,9 +98,7 @@ function MessageBubble({ msg, isSpeaking }: { msg: Message; isSpeaking: boolean 
       <div className={`max-w-[72%] flex flex-col gap-1 ${isBot ? 'items-start' : 'items-end'}`}>
         <div className={`text-[11px] font-semibold ${isBot ? 'text-[#0d5d3a] dark:text-[#10b981]' : 'text-[#4a7c5d] dark:text-gray-400'}`}>{isBot ? 'Zen' : 'You'}</div>
         <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${isBot ? 'bg-[#f7fbf8] dark:bg-[#1a1a1a] text-[#0a2617] dark:text-gray-100 border border-[#0d5d3a]/08 dark:border-white/08 rounded-tl-sm' : 'bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] text-white rounded-tr-sm shadow-lg shadow-[#0d5d3a]/15'}`}>
-          {words.map((w, i) => (
-            <motion.span key={i} initial={false} animate={{ opacity: i < revealed ? 1 : 0 }} transition={{ duration: 0.1 }} className="inline-block mr-1">{w}</motion.span>
-          ))}
+          {msg.content}
         </div>
       </div>
     </motion.div>
@@ -120,8 +115,6 @@ export default function ZenAvatarChat() {
   const [voiceOn, setVoiceOn]       = useState(true);
   const [avatarState, setAvatarState] = useState<'idle'|'listening'|'thinking'|'speaking'>('idle');
   const [error, setError]           = useState<string | null>(null);
-  const [latestBotId, setLatestBotId] = useState<string | null>(null);
-  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
 
   const recognitionRef = useRef<any>(null);
   const transcriptRef  = useRef('');
@@ -143,19 +136,9 @@ export default function ZenAvatarChat() {
     const voices = SS.getVoices();
     const v = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Samantha') || v.name.includes('Karen'));
     if (v) utt.voice = v;
-    utt.onstart  = () => { setSpeaking(true); setAvatarState('speaking'); setSpeakingMsgId(msg.id); };
-    utt.onend    = () => {
-      setSpeaking(false); setAvatarState('idle'); setSpeakingMsgId(null);
-      // Reveal all words when done
-      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, revealedCount: msg.content.split(' ').length } : m));
-    };
-    utt.onerror  = () => { setSpeaking(false); setAvatarState('idle'); setSpeakingMsgId(null); };
-    utt.onboundary = (e: SpeechSynthesisEvent) => {
-      if (e.name === 'word') {
-        setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, revealedCount: (m.revealedCount ?? 0) + 1 } : m));
-      }
-    };
-    setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, revealedCount: 0 } : m));
+    utt.onstart  = () => { setSpeaking(true); setAvatarState('speaking'); };
+    utt.onend    = () => { setSpeaking(false); setAvatarState('idle'); };
+    utt.onerror  = () => { setSpeaking(false); setAvatarState('idle'); };
     SS.speak(utt);
   }, [voiceOn]);
 
@@ -184,8 +167,7 @@ export default function ZenAvatarChat() {
     try {
       const history = [...messages, userMsg].slice(-12).map(({ role, content }) => ({ role, content }));
       const { reply } = await apiFetch<{ reply: string }>('/zen-chat', { method: 'POST', body: JSON.stringify({ messages: history }) });
-      const botMsg: Message = { role: 'assistant', content: reply, id: uid(), revealedCount: 0 };
-      setLatestBotId(botMsg.id);
+      const botMsg: Message = { role: 'assistant', content: reply, id: uid() };
       setMessages(prev => [...prev, botMsg]);
       setAvatarState('idle');
       if (voiceOn) speakText(botMsg);
@@ -194,8 +176,8 @@ export default function ZenAvatarChat() {
   }, [messages, loading, voiceOn, speakText]);
 
   const clearChat = () => {
-    SS?.cancel(); setSpeaking(false); setAvatarState('idle'); setSpeakingMsgId(null); setInput(''); setError(null); setLatestBotId(null);
-    const g: Message = { role: 'assistant', id: uid(), content: "Hello! I'm Zen, your mental wellness companion. How are you feeling today?", revealedCount: 100 };
+    SS?.cancel(); setSpeaking(false); setAvatarState('idle'); setInput(''); setError(null);
+    const g: Message = { role: 'assistant', id: uid(), content: "Hello! I'm Zen, your mental wellness companion. How are you feeling today?" };
     setMessages([g]); if (voiceOn) speakText(g);
   };
 
@@ -290,7 +272,7 @@ export default function ZenAvatarChat() {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4">
           {messages.map(msg => (
-            <MessageBubble key={msg.id} msg={msg} isSpeaking={msg.id === speakingMsgId} />
+            <MessageBubble key={msg.id} msg={msg} />
           ))}
           <AnimatePresence>
             {loading && (
