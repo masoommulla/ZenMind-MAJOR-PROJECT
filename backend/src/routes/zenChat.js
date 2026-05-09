@@ -62,6 +62,9 @@ Remember: You are Zen, not an AI assistant. You are a caring companion.`
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
+        // OpenRouter-specific headers (ignored by other providers)
+        'HTTP-Referer': process.env.FRONTEND_URL || 'https://zenmind.onrender.com',
+        'X-Title': 'ZenMind',
       },
       body: JSON.stringify({
         model,
