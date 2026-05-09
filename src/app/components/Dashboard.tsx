@@ -11,6 +11,7 @@ import TherapyHub from './TherapyHub';
 import VideoRoom from './VideoRoom';
 import CancellationPolicy from './CancellationPolicy';
 import UserChat from './UserChat';
+import ZenAvatarChat from './ZenAvatarChat';
 
 type DashboardProps = {
   onLogout: () => void;
@@ -238,13 +239,19 @@ export default function Dashboard({ onLogout }: DashboardProps) {
             <div className="flex-1 overflow-hidden">
               <UserChat therapist={chatTherapist} me={me} onBack={() => setTab('therapy')} />
             </div>
+          ) : tab === 'aichat' ? (
+            <div className="flex-1 overflow-hidden flex flex-col min-h-0 px-4 sm:px-6 py-4">
+              {error && (
+                <div className="mb-3 rounded-2xl border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">{error}</div>
+              )}
+              <AiChatPanel />
+            </div>
           ) : (
             <div className="flex-1 overflow-y-auto">
               <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
                 {error && (
                   <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">{error}</div>
                 )}
-                {tab === 'aichat'   && <AiChatPanel />}
                 {tab === 'settings' && <SettingsPanel me={me} setMe={setMe} onLogout={onLogout} />}
               </div>
             </div>
@@ -258,15 +265,8 @@ export default function Dashboard({ onLogout }: DashboardProps) {
 /* AI CHAT */
 function AiChatPanel() {
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="rounded-3xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm p-6 min-h-[500px]">
-        <div className="rounded-2xl border border-[#0d5d3a]/10 dark:border-white/5 bg-[#f7fbf8] dark:bg-[#1a1a1a] h-[380px] flex items-center justify-center">
-          <div className="text-center text-[#4a7c5d] dark:text-gray-500">
-            <MessageCircle className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm opacity-60">AI Chat coming soon</p>
-          </div>
-        </div>
-      </div>
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="h-full">
+      <ZenAvatarChat />
     </motion.div>
   );
 }

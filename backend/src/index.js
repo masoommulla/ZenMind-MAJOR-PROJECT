@@ -58,6 +58,8 @@ import supportRoutes from './routes/support.js';
 app.use('/api/support', supportRoutes);
 import chatRoutes from './routes/chat.js';
 app.use('/api/chat', chatRoutes);
+import zenChatRoute from './routes/zenChat.js';
+app.use('/api/zen-chat', zenChatRoute);
 
 const port = process.env.PORT || 5000;
 const mongoUri = process.env.MONGODB_URI;
