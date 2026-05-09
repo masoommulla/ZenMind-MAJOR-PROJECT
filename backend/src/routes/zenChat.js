@@ -22,7 +22,7 @@ router.post('/', requireAuth, async (req, res) => {
 
   const apiKey = process.env.AI_API_KEY;
   const apiUrl = process.env.AI_API_URL || 'https://api.openai.com/v1';
-  const model  = process.env.AI_MODEL  || 'gpt-3.5-turbo';
+  const model  = process.env.AI_MODEL  || 'llama-3.1-8b-instant';
 
   if (!apiKey) {
     return res.status(503).json({ error: 'AI service not configured. Please set AI_API_KEY.' });
@@ -75,9 +75,11 @@ Remember: You are Zen, not an AI assistant. You are a caring companion.`
     });
 
     if (!response.ok) {
-      const err = await response.text();
-      console.error('[ZenChat] AI API error:', response.status, err);
-      return res.status(502).json({ error: 'AI service error. Please try again.' });
+      const errText = await response.text();
+      console.error('[ZenChat] AI API error:', response.status, errText);
+      let errMsg = 'AI service error. Please try again.';
+      try { errMsg = JSON.parse(errText)?.error?.message || errMsg; } catch {}
+      return res.status(502).json({ error: errMsg });
     }
 
     const data = await response.json();
