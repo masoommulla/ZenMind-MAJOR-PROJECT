@@ -17,6 +17,12 @@ services:
         sync: false
       - key: FRONTEND_URL
         sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: EMAIL_FROM_NAME
+        sync: false
 
   # ─── Frontend: Web Service (serves built Vite app) ───────────────────────────
   - type: web
