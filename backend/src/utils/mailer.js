@@ -1,16 +1,39 @@
 /**
- * Nodemailer — Gmail SMTP
- * .env: EMAIL_USER, EMAIL_PASS, EMAIL_FROM_NAME
+ * Nodemailer — Gmail SMTP (smtp.gmail.com:587 STARTTLS)
+ * .env: EMAIL_USER, EMAIL_PASS (Gmail App Password), EMAIL_FROM_NAME
  */
 import nodemailer from 'nodemailer';
 
 function createTransport() {
   const user = process.env.EMAIL_USER;
-  const pass = process.env.EMAIL_PASS;
-  if (!user || !pass) throw new Error('[Mailer] EMAIL_USER or EMAIL_PASS missing from .env');
-  return nodemailer.createTransport({ service: 'gmail', auth: { user, pass } });
+  // Strip spaces from App Password in case they were pasted with spaces
+  const pass = (process.env.EMAIL_PASS || '').replace(/\s/g, '');
+  if (!user || !pass) throw new Error('[Mailer] EMAIL_USER or EMAIL_PASS missing from env');
+  return nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,       // STARTTLS
+    auth: { user, pass },
+    tls: { rejectUnauthorized: false }
+  });
 }
 const from = () => `"${process.env.EMAIL_FROM_NAME || 'ZenMind'}" <${process.env.EMAIL_USER}>`;
+
+// Verify SMTP connection at startup — logs exact error to Render logs
+(async () => {
+  const user = process.env.EMAIL_USER;
+  const pass = (process.env.EMAIL_PASS || '').replace(/\s/g, '');
+  if (!user || !pass) {
+    console.warn('[Mailer] ⚠️  EMAIL_USER or EMAIL_PASS not set — emails will fail');
+    return;
+  }
+  try {
+    await createTransport().verify();
+    console.log(`[Mailer] ✅ SMTP ready — sending as ${user}`);
+  } catch (err) {
+    console.error('[Mailer] ❌ SMTP verify failed:', err.message);
+  }
+})();
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function fmtDate(d) {
