@@ -24,14 +24,15 @@ services:
       - key: EMAIL_FROM_NAME
         sync: false
 
-  # ─── Frontend: Web Service (serves built Vite app) ───────────────────────────
-  - type: web
+  # ─── Frontend: Static Site ───────────────────────────────────────────────────
+  - type: static
     name: zenmind-frontend
-    runtime: node
     buildCommand: npm install && npm run build
-    startCommand: npx serve -s dist -l $PORT
+    staticPublishPath: ./dist
     envVars:
-      - key: PORT
-        value: 10000
       - key: VITE_API_URL
         sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
