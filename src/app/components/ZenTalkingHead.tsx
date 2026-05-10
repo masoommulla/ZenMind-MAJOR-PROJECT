@@ -160,10 +160,11 @@ export default function ZenTalkingHead({ speaking, text, onReady }: ZenTalkingHe
         }}
       >
         <svg
-          viewBox="0 0 220 320"
+          viewBox="20 55 180 200"
           xmlns="http://www.w3.org/2000/svg"
           width="100%"
           height="100%"
+          preserveAspectRatio="xMidYMid meet"
         >
           <defs>
             {/* Skin gradient */}

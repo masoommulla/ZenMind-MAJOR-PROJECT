@@ -33,6 +33,7 @@ export default function App() {
   const [authed, setAuthed]           = useState(() => ls.get('zm_authed'));
   const [adminAuthed, setAdminAuthed] = useState(() => ls.get('zm_admin'));
   const [therapistAuthed, setTherapistAuthed] = useState(() => ls.get('zm_therapist'));
+  const [meData, setMeData] = useState<any>(null); // prefetched /me data passed to Dashboard
 
   const [showAuth, setShowAuth]       = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -70,25 +71,38 @@ export default function App() {
   useEffect(() => {
     let alive = true;
 
-    const verify = async (path: string): Promise<boolean | null> => {
+    // Fetch /me and return the data (not just a boolean) so Dashboard can use it directly
+    const verifyMe = async (): Promise<{ ok: boolean; data: any }> => {
       try {
-        await apiFetch(path, { timeoutMs: 55_000 }); // 55s — plenty for Render cold start
-        return true;
+        const data = await apiFetch<any>('/me', { timeoutMs: 15_000 });
+        return { ok: true, data };
       } catch (e: any) {
         const msg = String(e?.message ?? '').toLowerCase();
-        if (msg.includes('unauthori') || msg.includes('forbidden') || msg.includes('401') || msg.includes('403')) {
-          return false;
+        if (msg.includes('unauthori') || msg.includes('forbidden')) {
+          return { ok: false, data: null };
         }
-        return null; // network / timeout — keep cached state
+        return { ok: ls.get('zm_authed'), data: null }; // network error — keep cached state
       }
     };
 
-    Promise.all([verify('/me'), verify('/admin/me'), verify('/therapist/me')]).then(([u, a, t]) => {
+    const verifyOther = async (path: string): Promise<boolean | null> => {
+      try {
+        await apiFetch(path, { timeoutMs: 15_000 });
+        return true;
+      } catch (e: any) {
+        const msg = String(e?.message ?? '').toLowerCase();
+        if (msg.includes('unauthori') || msg.includes('forbidden')) return false;
+        return null;
+      }
+    };
+
+    Promise.all([verifyMe(), verifyOther('/admin/me'), verifyOther('/therapist/me')]).then(([u, a, t]) => {
       if (!alive) return;
-      if (u !== null) { setAuthed(!!u);      ls.set('zm_authed', !!u); }
+      setAuthed(u.ok); ls.set('zm_authed', u.ok);
+      if (u.data) setMeData(u.data); // store prefetched profile
       if (a !== null) { setAdminAuthed(!!a); ls.set('zm_admin', !!a); }
       if (t !== null) { setTherapistAuthed(!!t); ls.set('zm_therapist', !!t); }
-      setApiReady(true); // signal LoadingScreen to race to 100
+      setApiReady(true);
     });
 
     return () => { alive = false; };
@@ -142,7 +156,7 @@ export default function App() {
           }}
         />
       ) : authed ? (
-        <Dashboard onLogout={logoutUser} />
+        <Dashboard onLogout={logoutUser} prefetchedMe={meData} />
       ) : showAuth ? (
         <AuthPage
           onBackHome={() => setShowAuth(false)}

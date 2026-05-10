@@ -15,6 +15,7 @@ import ZenAvatarChat from './ZenAvatarChat';
 
 type DashboardProps = {
   onLogout: () => void;
+  prefetchedMe?: any; // already fetched by App.tsx during startup verification
 };
 
 type Me = {
@@ -36,32 +37,33 @@ const NAV_ITEMS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'settings', label: 'Settings', icon: <Settings      className="w-5 h-5 flex-shrink-0" /> },
 ];
 
-export default function Dashboard({ onLogout }: DashboardProps) {
+export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
   const [tab, setTab]         = useState<TabKey>('aichat');
-  const [me, setMe]           = useState<Me | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [me, setMe]           = useState<Me | null>(prefetchedMe ?? null);
+  const [loading, setLoading] = useState(!prefetchedMe); // no loading if we have data
   const [error, setError]     = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [chatTherapist, setChatTherapist] = useState<any | null>(null);
 
   useEffect(() => {
+    // If prefetchedMe was already provided, skip the fetch
+    if (prefetchedMe) { setMe(prefetchedMe); setLoading(false); return; }
+
+    // Fallback: fetch /me (happens after AuthPage login without full page reload)
     let alive = true;
     setLoading(true);
-
-    // Fetch with 8s timeout + one auto-retry (MongoDB Atlas can be slow on first hit)
     const fetchMe = (attempt = 0): Promise<Me> =>
       apiFetch<Me>('/me', { timeoutMs: 8000 }).catch((e) => {
-        if (attempt === 0) return fetchMe(1); // retry once
+        if (attempt === 0) return fetchMe(1);
         throw e;
       });
-
     fetchMe()
       .then((data) => { if (alive) { setMe(data); setError(null); } })
       .catch((e)  => { if (alive) setError(e.message || 'Failed to load profile'); })
       .finally(()  => { if (alive) setLoading(false); });
     return () => { alive = false; };
-  }, []);
+  }, [prefetchedMe]); // re-run if App passes fresh data
 
   const avatarUrl = useMemo(() => {
     if (!me?.avatar?.data) return null;

@@ -171,37 +171,40 @@ export default function ZenAvatarChat() {
       {/* ── DESKTOP: left panel ────────────────────────────────────────── */}
       <div className="hidden lg:flex flex-col flex-shrink-0 w-72 xl:w-80 gap-3">
 
-        {/* 3D Avatar — fills the top card fully (passport view) */}
-        <div className="relative flex-[3] rounded-3xl overflow-hidden shadow-2xl min-h-[280px]">
-          <ZenTalkingHead speaking={speaking} text={lastBotText} />
+        {/* Avatar card — fixed proportions matching mobile (w-48 h-56 = same ratio as w-36 h-44) */}
+        <div className="rounded-3xl bg-[#071a0f] shadow-2xl overflow-hidden flex flex-col items-center py-5 gap-3 flex-shrink-0">
+          {/* Fixed-size avatar container — same proportions as mobile */}
+          <div className="relative w-48 h-56 rounded-2xl overflow-hidden shadow-xl flex-shrink-0">
+            <ZenTalkingHead speaking={speaking} text={lastBotText} />
 
-          {/* Subtle pulse rings on top of canvas when active */}
-          <AnimatePresence>
-            {(avatarState === 'speaking' || avatarState === 'listening') && [1, 2].map(i => (
-              <motion.div key={i}
-                className="absolute rounded-full border border-[#10b981]/20 pointer-events-none"
-                style={{ inset: `${25 - i * 10}%` }}
-                animate={{ scale: [1, 1.12, 1], opacity: [0.3, 0, 0.3] }}
-                transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.5 }}
-              />
-            ))}
-          </AnimatePresence>
+            {/* Pulse rings when active */}
+            <AnimatePresence>
+              {(avatarState === 'speaking' || avatarState === 'listening') && [1, 2].map(i => (
+                <motion.div key={i}
+                  className="absolute rounded-full border border-[#10b981]/20 pointer-events-none"
+                  style={{ inset: `${25 - i * 10}%` }}
+                  animate={{ scale: [1, 1.12, 1], opacity: [0.3, 0, 0.3] }}
+                  transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.5 }}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
 
-          {/* Name + status badge at bottom */}
-          <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
+          {/* Name + status */}
+          <div className="text-center">
             <div className="text-white text-base font-bold tracking-wide" style={{ fontFamily: 'Syne,sans-serif' }}>Zen</div>
-            <div className="flex items-center gap-1.5 mt-0.5">
+            <div className="flex items-center justify-center gap-1.5 mt-0.5">
               <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
                 avatarState === 'speaking' ? 'bg-[#10b981] animate-pulse' :
                 avatarState === 'listening' ? 'bg-yellow-400 animate-pulse' :
                 avatarState === 'thinking' ? 'bg-blue-400 animate-pulse' : 'bg-[#10b981]/40'
               }`} />
-              <span className="text-white/70 text-xs capitalize">{avatarState === 'idle' ? 'Ready' : avatarState + '...'}</span>
+              <span className="text-white/60 text-xs capitalize">{avatarState === 'idle' ? 'Ready' : avatarState + '...'}</span>
             </div>
           </div>
         </div>
 
-        {/* Waveform bottom section */}
+        {/* Waveform section */}
         <div className="flex-[1] rounded-3xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm overflow-hidden flex flex-col min-h-[100px]">
           <div className="px-4 pt-3 pb-1 text-[11px] font-semibold text-[#4a7c5d] dark:text-gray-400 uppercase tracking-wider">Voice Activity</div>
           <div className="flex-1 pb-2"><WaveVisualizer active={speaking || listening} /></div>
