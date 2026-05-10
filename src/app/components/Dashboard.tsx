@@ -19,6 +19,7 @@ import MoodJournal from './MoodJournal';
 import PeerCircles from './PeerCircles';
 import WellnessGoalTracker from './WellnessGoalTracker';
 import ReadingListsUser from './ReadingListsUser';
+import WellnessProgramsUser from './WellnessProgramsUser';
 
 type DashboardProps = {
   onLogout: () => void;
@@ -35,13 +36,14 @@ type Me = {
   avatar: { mime: string; data: string } | null;
 };
 
-type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources' | 'journal' | 'circles' | 'goals' | 'reading';
+type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources' | 'journal' | 'circles' | 'goals' | 'reading' | 'programs';
 
 const NAV_ITEMS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'aichat',     label: 'AI Chat',      icon: <MessageCircle className="w-5 h-5 flex-shrink-0" /> },
   { key: 'therapy',    label: 'Therapy Hub',  icon: <Stethoscope   className="w-5 h-5 flex-shrink-0" /> },
   { key: 'resources',  label: 'Resources',    icon: <Info          className="w-5 h-5 flex-shrink-0" /> },
   { key: 'reading',    label: 'Reading Lists', icon: <Info          className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'programs',   label: 'Wellness Programs', icon: <Star       className="w-5 h-5 flex-shrink-0" /> },
   { key: 'journal',    label: 'Mood Journal', icon: <Star          className="w-5 h-5 flex-shrink-0" /> },
   { key: 'circles',    label: 'Peer Circles', icon: <Upload        className="w-5 h-5 flex-shrink-0" /> },
   { key: 'goals',      label: 'My Goals',     icon: <Star          className="w-5 h-5 flex-shrink-0" /> },
@@ -233,6 +235,7 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
                    tab === 'journal' ? 'Mood Journal' :
                    tab === 'circles' ? 'Peer Support Circles' :
                    tab === 'goals' ? 'Wellness Goals' :
+                   tab === 'programs' ? 'Guided Wellness Programs' :
                    tab === 'settings' ? 'Settings' :
                    loading ? 'Loading...' : `Welcome, ${me?.name?.split(' ')[0] || 'there'}!`}
                 </div>
@@ -248,6 +251,7 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
                    tab === 'journal' ? 'Your private wellness diary with AI-powered weekly insights.' :
                    tab === 'circles' ? 'Real-time group spaces where you can share, support and feel less alone.' :
                    tab === 'goals' ? 'Build daily habits, track streaks and get nudged to never miss a day.' :
+                   tab === 'programs' ? 'Structured day-by-day programs designed by mental health experts — free and science-backed.' :
                    tab === 'settings' ? 'Manage your account settings and preferences.' :
                    'Your personal wellness dashboard'}
                 </div>
@@ -309,6 +313,12 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
             <div className="flex-1 overflow-y-auto">
               <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
                 <ReadingListsUser />
+              </div>
+            </div>
+          ) : tab === 'programs' ? (
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+                <WellnessProgramsUser />
               </div>
             </div>
           ) : (

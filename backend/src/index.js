@@ -83,6 +83,8 @@ import pushRoute from './routes/push.js';
 app.use('/api/push', pushRoute);
 import readingListsRoute from './routes/readingLists.js';
 app.use('/api/reading-lists', readingListsRoute);
+import wellnessProgramsRoute from './routes/wellnessPrograms.js';
+app.use('/api/wellness-programs', wellnessProgramsRoute);
 
 const port = process.env.PORT || 5000;
 const mongoUri = process.env.MONGODB_URI;
@@ -275,6 +277,127 @@ if (therapistCount !== 12) {
     await t.save();
   }
   console.log('Generated exactly 12 therapists (7 Online, 5 Offline).');
+}
+
+// Seed Wellness Programs
+import { WellnessProgram } from './models/WellnessProgram.js';
+const wpCount = await WellnessProgram.countDocuments();
+if (wpCount === 0) {
+  await WellnessProgram.insertMany([
+    {
+      title: '7-Day Anxiety Relief',
+      description: 'A gentle daily program combining breathing exercises, journaling, and mindfulness to quieten anxious thoughts and build calm confidence.',
+      category: 'anxiety', difficulty: 'beginner', durationDays: 7,
+      coverGradientFrom: '#7c3aed', coverGradientTo: '#a78bfa',
+      steps: [
+        { dayNumber: 1, title: 'Welcome & Box Breathing', content: 'Today we start with the 4-4-4-4 box breathing technique. Inhale for 4 counts, hold for 4, exhale for 4, hold for 4. Repeat 5 times. This activates your parasympathetic nervous system instantly.', exerciseType: 'breathing', durationMinutes: 10 },
+        { dayNumber: 2, title: 'Body Scan Awareness', content: 'Lie down comfortably. Close your eyes and slowly scan your body from head to toe. Notice tension without judgement. Breathe into each area of tightness and release on the exhale.', exerciseType: 'meditation', durationMinutes: 15 },
+        { dayNumber: 3, title: 'Worry Journal', content: 'Write down every worry currently on your mind. Then next to each one write: "Is this in my control?" If yes, write one small action step. If no, write "I release this."', exerciseType: 'journaling', durationMinutes: 20 },
+        { dayNumber: 4, title: '5-4-3-2-1 Grounding', content: 'Name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste. Practice this technique 3 times today even when calm — your brain learns best in calm states.', exerciseType: 'reflection', durationMinutes: 10 },
+        { dayNumber: 5, title: 'Progressive Muscle Relaxation', content: 'Tense each muscle group for 5 seconds, then release for 10 seconds. Start with your feet, move up to calves, thighs, abdomen, hands, arms, shoulders, and face.', exerciseType: 'movement', durationMinutes: 20 },
+        { dayNumber: 6, title: 'Compassionate Letter', content: 'Write a letter to yourself as if you were your own best friend. Acknowledge your anxiety with kindness, not criticism. Remind yourself of past challenges you overcame.', exerciseType: 'journaling', durationMinutes: 25 },
+        { dayNumber: 7, title: 'Reflection & Toolkit', content: 'Look back at your week. Which tool helped most? Write your personalised anxiety toolkit — your top 3 go-to techniques. Celebrate completing 7 days!', exerciseType: 'reflection', durationMinutes: 15 },
+      ],
+    },
+    {
+      title: '10-Day Deep Sleep Reset',
+      description: 'Science-backed sleep hygiene habits, relaxation rituals, and mindset shifts to help you fall asleep faster and wake up restored.',
+      category: 'sleep', difficulty: 'beginner', durationDays: 10,
+      coverGradientFrom: '#1e40af', coverGradientTo: '#6366f1',
+      steps: [
+        { dayNumber: 1, title: 'Sleep Audit', content: 'Track your sleep for the past week mentally. What time did you sleep and wake? How many hours? Write a brief audit — awareness is the first step to change.', exerciseType: 'journaling', durationMinutes: 10 },
+        { dayNumber: 2, title: 'Screen-Free Hour', content: 'Starting tonight, put all screens away 1 hour before bed. The blue light suppresses melatonin. Replace it with reading, light stretching, or soft music.', exerciseType: 'other', durationMinutes: 60 },
+        { dayNumber: 3, title: '4-7-8 Sleep Breath', content: 'Breathe in for 4 counts, hold for 7 counts, exhale slowly for 8 counts. This technique was designed specifically to induce sleepiness. Practice 4 cycles before bed.', exerciseType: 'breathing', durationMinutes: 10 },
+        { dayNumber: 4, title: 'Evening Body Scan', content: 'Perform a slow body scan from your toes to your head while in bed. Visualise each body part becoming heavy and sinking into the mattress.', exerciseType: 'meditation', durationMinutes: 15 },
+        { dayNumber: 5, title: 'Gratitude Wind-Down', content: 'Write 3 specific things that went well today and why. Research shows gratitude journaling reduces pre-sleep cognitive arousal — the racing thoughts that keep you awake.', exerciseType: 'journaling', durationMinutes: 10 },
+        { dayNumber: 6, title: 'Temperature Hack', content: 'Take a warm shower 1-2 hours before bed. As your body cools down afterward, core temperature drops, triggering sleepiness. Keep your bedroom cool (18-20 degrees is optimal).', exerciseType: 'other', durationMinutes: 20 },
+        { dayNumber: 7, title: 'Sleep Worry Dump', content: 'Keep a notepad by your bed. Write tomorrow\'s to-do list before sleep to offload it from your brain. Your mind can rest when it trusts things are recorded.', exerciseType: 'journaling', durationMinutes: 10 },
+        { dayNumber: 8, title: 'Yoga Nidra Introduction', content: 'Yoga Nidra (yogic sleep) is a guided meditation that puts your body to sleep while keeping awareness. Listen to a 20-minute Yoga Nidra recording tonight as you lie in bed.', exerciseType: 'meditation', durationMinutes: 20 },
+        { dayNumber: 9, title: 'Consistent Wake Time', content: 'Set one consistent wake time for the next 7 days — even on weekends. Your circadian rhythm needs regularity. A fixed wake time is more powerful than a fixed bedtime.', exerciseType: 'other', durationMinutes: 5 },
+        { dayNumber: 10, title: 'Your Sleep Ritual', content: 'Design your personalised 30-minute pre-sleep ritual using what worked this week. Write it down and commit to it for 21 days to cement it as a habit. Congratulations!', exerciseType: 'reflection', durationMinutes: 15 },
+      ],
+    },
+    {
+      title: '14-Day Mindfulness Journey',
+      description: 'Build a sustainable daily meditation and mindfulness practice from scratch — no experience needed. Cultivate presence, reduce reactivity, and find stillness within.',
+      category: 'mindfulness', difficulty: 'beginner', durationDays: 14,
+      coverGradientFrom: '#0d5d3a', coverGradientTo: '#10b981',
+      steps: [
+        { dayNumber: 1, title: 'What Is Mindfulness?', content: 'Mindfulness is simply paying attention to the present moment without judgement. Today, spend 5 minutes observing your breath — just notice it, do not try to change it.', exerciseType: 'meditation', durationMinutes: 5 },
+        { dayNumber: 2, title: 'Mindful Morning', content: 'Before checking your phone, take 3 deep breaths and set an intention for the day. Eat breakfast in silence, noticing every taste and texture.', exerciseType: 'reflection', durationMinutes: 10 },
+        { dayNumber: 3, title: 'Breath as Anchor', content: 'Practice 10 minutes of breath-focused meditation. Count each exhale from 1 to 10, then start again. Notice when you lose count — that is awareness!', exerciseType: 'breathing', durationMinutes: 10 },
+        { dayNumber: 4, title: 'Mindful Walking', content: 'Take a 10-minute walk with no phone, no music. Feel each footstep, notice the air, sounds, colours around you. Walking meditation trains mindfulness in movement.', exerciseType: 'movement', durationMinutes: 10 },
+        { dayNumber: 5, title: 'RAIN Technique', content: 'Recognise what you feel, Allow it to be present, Investigate with curiosity, Nurture with self-compassion. Apply RAIN to one emotion you notice today.', exerciseType: 'reflection', durationMinutes: 15 },
+        { dayNumber: 6, title: 'Loving Kindness', content: 'Sit quietly and silently repeat: "May I be happy. May I be healthy. May I be safe." Then extend these wishes to someone you love, a neutral person, and someone difficult.', exerciseType: 'meditation', durationMinutes: 15 },
+        { dayNumber: 7, title: 'Week 1 Reflection', content: 'Journal: What did you notice this week? Were there moments of genuine presence? What pulled you out of the present? Recognising patterns is the foundation of mindfulness progress.', exerciseType: 'journaling', durationMinutes: 15 },
+        { dayNumber: 8, title: 'Expanding Awareness', content: 'Extend your meditation to 15 minutes. After 5 minutes of breath focus, expand awareness to sounds, then body sensations, then thoughts — watching each arise and pass like clouds.', exerciseType: 'meditation', durationMinutes: 15 },
+        { dayNumber: 9, title: 'The STOP Practice', content: 'Stop, Take a breath, Observe (thoughts, feelings, sensations), Proceed with awareness. Set 3 alarms today and practice STOP for 2 minutes each time.', exerciseType: 'reflection', durationMinutes: 6 },
+        { dayNumber: 10, title: 'Mindful Listening', content: 'In your next conversation, practice truly listening — no planning your response, no phone. Just full presence. Notice how this changes the quality of connection.', exerciseType: 'other', durationMinutes: 20 },
+        { dayNumber: 11, title: 'Observing Thoughts', content: 'Thoughts are not facts. Today, practice observing thoughts as mental events rather than truths. Label them: "planning thought," "worry thought," "judgement thought."', exerciseType: 'meditation', durationMinutes: 15 },
+        { dayNumber: 12, title: 'Compassion for Difficulty', content: 'Bring to mind something challenging in your life. Instead of problem-solving, sit with it in meditation — breathing into the discomfort, meeting it with compassion.', exerciseType: 'meditation', durationMinutes: 20 },
+        { dayNumber: 13, title: 'Gratitude Meditation', content: 'Sit quietly and recall 5 things you are genuinely grateful for. Stay with each one for 30 seconds, letting warmth arise naturally. Gratitude and mindfulness reinforce each other powerfully.', exerciseType: 'meditation', durationMinutes: 15 },
+        { dayNumber: 14, title: 'Your Mindfulness Commitment', content: 'You have built a 14-day foundation! Journal your experience and write a realistic commitment for daily mindfulness going forward — even 5 minutes daily is transformative over months.', exerciseType: 'journaling', durationMinutes: 20 },
+      ],
+    },
+    {
+      title: '5-Day Stress Detox',
+      description: 'A rapid 5-day intensive to release built-up stress, regulate your nervous system, and create immediate relief strategies you can use for life.',
+      category: 'stress', difficulty: 'beginner', durationDays: 5,
+      coverGradientFrom: '#b45309', coverGradientTo: '#f59e0b',
+      steps: [
+        { dayNumber: 1, title: 'Stress Inventory', content: 'List every current stressor in your life. Rate each from 1-10. Then circle only the ones you have some control over. Focus goes only there.', exerciseType: 'journaling', durationMinutes: 20 },
+        { dayNumber: 2, title: 'Movement Medicine', content: 'Stress hormones need to be physically discharged. Today: 20 minutes of any movement — walk, dance, yoga, anything. Movement is the most direct biological stress relief.', exerciseType: 'movement', durationMinutes: 20 },
+        { dayNumber: 3, title: 'Digital Detox Half-Day', content: 'From noon to 6pm, no social media, no news, no unnecessary apps. Notice the relief — and the discomfort. Constant information consumption is a primary stress amplifier.', exerciseType: 'other', durationMinutes: 360 },
+        { dayNumber: 4, title: 'Say No Practice', content: 'Overwhelm comes from over-commitment. Identify one thing on your plate this week you can decline, delegate, or defer. Write the message you will send. Boundaries are stress prevention.', exerciseType: 'reflection', durationMinutes: 15 },
+        { dayNumber: 5, title: 'Your Stress Response Plan', content: 'Create your personalised Stress SOS — a 3-step response for when stress spikes: immediate (2 min), short-term (20 min), longer reset. You now have a stress management system.', exerciseType: 'journaling', durationMinutes: 20 },
+      ],
+    },
+    {
+      title: '21-Day Self-Esteem Builder',
+      description: 'Rebuild your relationship with yourself through self-compassion practices, cognitive reframing, values work, and identity-level shifts over 3 transformative weeks.',
+      category: 'self_esteem', difficulty: 'intermediate', durationDays: 21,
+      coverGradientFrom: '#be123c', coverGradientTo: '#fb7185',
+      steps: [
+        { dayNumber: 1, title: 'Your Inner Critic', content: 'Tune into your self-talk today. Write down the 3 most common critical thoughts you have about yourself. Awareness precedes change.', exerciseType: 'journaling', durationMinutes: 15 },
+        { dayNumber: 2, title: 'Self-Compassion Break', content: 'When you notice self-criticism, pause and ask: "What would I say to a dear friend in this situation?" Then say exactly that to yourself. Practise 3 times today.', exerciseType: 'reflection', durationMinutes: 10 },
+        { dayNumber: 3, title: 'Strength Inventory', content: 'List 10 genuine strengths — skills, character traits, things you do well. We systematically undercount our strengths and overcount our flaws.', exerciseType: 'journaling', durationMinutes: 20 },
+        { dayNumber: 4, title: 'Values Clarification', content: 'List your top 5 core values. Reflect: are your current daily actions aligned with these values? Low self-esteem often comes from living against our values.', exerciseType: 'reflection', durationMinutes: 20 },
+        { dayNumber: 5, title: 'Mirror Practice', content: 'Look at yourself in the mirror for 2 minutes. Notice judgements arising. Then say aloud three times: "I am enough exactly as I am." Uncomfortable means effective.', exerciseType: 'other', durationMinutes: 5 },
+        { dayNumber: 6, title: 'Accomplishment Timeline', content: 'Create a timeline of your life achievements. Include learning to ride a bike, a kind thing you did, a hard time you survived. Your evidence of capability is far greater than you realise.', exerciseType: 'journaling', durationMinutes: 25 },
+        { dayNumber: 7, title: 'Week 1 Check-In', content: 'Journal: How has your self-talk shifted this week? Rate your self-esteem from 1-10 honestly. Celebrate any movement upward — small shifts compound powerfully.', exerciseType: 'journaling', durationMinutes: 15 },
+        { dayNumber: 8, title: 'Cognitive Reframing', content: 'Take your 3 critical thoughts from Day 1. For each, write a realistic, compassionate reframe. Not toxic positivity — just fair, evidence-based perspective.', exerciseType: 'journaling', durationMinutes: 20 },
+        { dayNumber: 9, title: 'Say Yes to Something Scary', content: 'Low self-esteem is maintained by avoidance. Today, do one small thing outside your comfort zone. Self-esteem is built through action, not affirmations alone.', exerciseType: 'other', durationMinutes: 30 },
+        { dayNumber: 10, title: 'Body Appreciation', content: 'Write 10 things your body does for you that have nothing to do with appearance — breathing, healing, sensing, moving. Shift from criticising to appreciating.', exerciseType: 'journaling', durationMinutes: 15 },
+        { dayNumber: 11, title: 'Social Comparison Audit', content: 'Who do you compare yourself to most, and where? Identify 2 practical ways to reduce your comparison triggers this week. Comparison is self-esteem\'s biggest enemy.', exerciseType: 'reflection', durationMinutes: 15 },
+        { dayNumber: 12, title: 'The Best Friend Letter', content: 'Write a full letter from your best friend to you — one who loves you completely. What would they say about your worth and your journey? Read it aloud.', exerciseType: 'journaling', durationMinutes: 25 },
+        { dayNumber: 13, title: 'Forgiveness Practice', content: 'Choose one thing you have been punishing yourself for. Write: what you learned, what you would do differently, and that you forgive yourself. Forgiveness is power.', exerciseType: 'journaling', durationMinutes: 20 },
+        { dayNumber: 14, title: 'Week 2 Review', content: 'Journal: What has shifted? What is still hard? Rate self-esteem 1-10 again. Celebrate any upward movement. Change this deep takes time and consistency.', exerciseType: 'journaling', durationMinutes: 15 },
+        { dayNumber: 15, title: 'Role Model Meditation', content: 'Think of someone who embodies the confidence you want. Meditate on that person — how they carry themselves, speak, respond to criticism. You are activating those qualities in yourself.', exerciseType: 'meditation', durationMinutes: 15 },
+        { dayNumber: 16, title: 'Contribution Focus', content: 'Self-esteem rises when we feel useful. Today, do one thing to contribute to another person\'s wellbeing — listen fully, help with a task, send encouragement. Notice how it feels.', exerciseType: 'other', durationMinutes: 20 },
+        { dayNumber: 17, title: 'Identity Statement', content: 'Write 5 "I am" statements that reflect who you are choosing to become — not who you have been told you are. Read them every morning for the remaining days.', exerciseType: 'journaling', durationMinutes: 15 },
+        { dayNumber: 18, title: 'Boundaries as Self-Respect', content: 'Every boundary you set is a statement that your needs matter. Identify one relationship or situation where you need a boundary. Write clearly what it is and how you will communicate it.', exerciseType: 'reflection', durationMinutes: 20 },
+        { dayNumber: 19, title: 'Celebrating Imperfection', content: 'Perfectionism and low self-esteem are deeply linked. Today, intentionally do something imperfectly — and let it be enough. Done is better than perfect.', exerciseType: 'other', durationMinutes: 15 },
+        { dayNumber: 20, title: 'Integration Meditation', content: 'Sit in meditation for 20 minutes. Let images from the past 20 days arise — your strengths, values, forgiveness, identity. Let them weave together into a felt sense of wholeness.', exerciseType: 'meditation', durationMinutes: 20 },
+        { dayNumber: 21, title: 'Letter to Future You', content: 'Write a letter to yourself 1 year from now — describing the self-esteem you have built, how you treat yourself, how you show up. Seal it. You have completed 21 Days. This is extraordinary.', exerciseType: 'journaling', durationMinutes: 25 },
+      ],
+    },
+    {
+      title: '7-Day Motivation Reboot',
+      description: 'When motivation is low, willpower alone will not save you. This 7-day program rebuilds drive from the inside — through purpose, habit design, environment, and energy management.',
+      category: 'motivation', difficulty: 'beginner', durationDays: 7,
+      coverGradientFrom: '#065f46', coverGradientTo: '#34d399',
+      steps: [
+        { dayNumber: 1, title: 'Why Motivation Disappears', content: 'Motivation is not a character trait — it is a biological state influenced by sleep, dopamine, meaning, and environment. Journal: When do you feel most energised? What is present in those moments?', exerciseType: 'journaling', durationMinutes: 15 },
+        { dayNumber: 2, title: 'Your North Star', content: 'Write your North Star — your deepest why for this period of your life. Not what you should want — what you actually care about. Return to this when momentum dips.', exerciseType: 'reflection', durationMinutes: 20 },
+        { dayNumber: 3, title: 'The 2-Minute Rule', content: 'The hardest part of any task is starting. Commit to just 2 minutes on your most avoided task. Usually you will continue beyond 2 minutes. Implement this today on one thing you have been procrastinating.', exerciseType: 'other', durationMinutes: 20 },
+        { dayNumber: 4, title: 'Energy Audit', content: 'Track your energy levels every 2 hours today — rate from 1-10. Identify your peak energy windows. Schedule important work during peak windows. Audit what drains you.', exerciseType: 'journaling', durationMinutes: 20 },
+        { dayNumber: 5, title: 'Environment Design', content: 'Your environment shapes your behaviour more than your willpower. Redesign one space for motivation: clear your workspace, put your goals visible, remove one distraction.', exerciseType: 'other', durationMinutes: 30 },
+        { dayNumber: 6, title: 'Wins Compilation', content: 'List every meaningful accomplishment from the past 12 months — no matter how small. Low motivation often comes from not recognising what we have already done.', exerciseType: 'journaling', durationMinutes: 20 },
+        { dayNumber: 7, title: 'Your Motivation System', content: 'Design your personalised motivation system: your morning activation ritual, clear goals for the next 30 days, one accountability mechanism, and your recovery plan for low days.', exerciseType: 'reflection', durationMinutes: 25 },
+      ],
+    },
+  ]);
+  console.log('Default Wellness Programs seeded (6 programs)');
 }
 
 const server = http.createServer(app);
