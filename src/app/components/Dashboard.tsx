@@ -48,7 +48,15 @@ export default function Dashboard({ onLogout }: DashboardProps) {
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    apiFetch<Me>('/me')
+
+    // Fetch with 8s timeout + one auto-retry (MongoDB Atlas can be slow on first hit)
+    const fetchMe = (attempt = 0): Promise<Me> =>
+      apiFetch<Me>('/me', { timeoutMs: 8000 }).catch((e) => {
+        if (attempt === 0) return fetchMe(1); // retry once
+        throw e;
+      });
+
+    fetchMe()
       .then((data) => { if (alive) { setMe(data); setError(null); } })
       .catch((e)  => { if (alive) setError(e.message || 'Failed to load profile'); })
       .finally(()  => { if (alive) setLoading(false); });
@@ -241,9 +249,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
             </div>
           ) : tab === 'aichat' ? (
             <div className="flex-1 overflow-hidden flex flex-col min-h-0 px-4 sm:px-6 py-4">
-              {error && (
-                <div className="mb-3 rounded-2xl border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">{error}</div>
-              )}
+              {/* No profile-error shown here — irrelevant to AI chat */}
               <AiChatPanel />
             </div>
           ) : (
