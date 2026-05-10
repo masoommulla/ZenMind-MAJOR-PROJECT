@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Hero from './components/Hero';
@@ -19,6 +19,9 @@ import TherapistDashboard from './components/TherapistDashboard';
 import LoadingScreen from './components/LoadingScreen';
 import ProductPage from './components/ProductPage';
 import { apiFetch } from './api/client';
+
+// Code-split Spline so it never blocks initial page render
+const Spline = lazy(() => import('@splinetool/react-spline'));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -195,62 +198,78 @@ export default function App() {
 }
 
 /* ─────────────────────────────────────────────────────────
-   RobotWidget — lazy loads Spline 3s after mount so it
-   never blocks the landing page from rendering smoothly.
+   RobotWidget
+   - Uses @splinetool/react-spline (no iframe, cursor-aware)
+   - Injected only after requestIdleCallback → zero render lag
+   - Watermark overlay covers "Built with Spline" badge
 ───────────────────────────────────────────────────────── */
 function RobotWidget({ onOpen }: { onOpen: () => void }) {
-  const [ready, setReady] = useState(false);
+  const [ready, setReady]     = useState(false);
   const [hovered, setHovered] = useState(false);
 
-  // Defer iframe injection until after the page is fully idle
   useEffect(() => {
-    const id = window.setTimeout(() => setReady(true), 3000);
-    return () => window.clearTimeout(id);
+    // Wait until browser is fully idle, then mount the heavy 3D scene
+    const cb = () => setReady(true);
+    if ('requestIdleCallback' in window) {
+      const id = (window as any).requestIdleCallback(cb, { timeout: 4000 });
+      return () => (window as any).cancelIdleCallback(id);
+    } else {
+      const id = window.setTimeout(cb, 3500);
+      return () => window.clearTimeout(id);
+    }
   }, []);
 
   return (
     <div
-      onClick={onOpen}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      title="Get started with ZenMind"
       style={{
         position: 'fixed',
-        bottom: '10px',
-        right: '10px',
-        width: '90px',
-        height: '110px',
+        bottom: '0px',
+        right: '0px',
+        width: '120px',
+        height: '140px',
         zIndex: 9999,
         cursor: 'pointer',
         background: 'transparent',
-        border: 'none',
-        overflow: 'visible',
-        transform: hovered ? 'scale(1.08) translateY(-4px)' : 'scale(1)',
-        transition: 'transform 0.3s ease',
+        overflow: 'hidden',
       }}
     >
-      {/* Tooltip — only on hover */}
+      {/* Clickable invisible overlay on top so cursor interaction still works below */}
+      <div
+        onClick={onOpen}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 2,
+          cursor: 'pointer',
+          // Let mouse events pass through to Spline canvas for cursor tracking
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Tooltip on hover */}
       {hovered && (
         <div style={{
           position: 'absolute',
-          bottom: '108%',
-          right: 0,
+          bottom: '105%',
+          right: '4px',
           background: 'linear-gradient(135deg,#0d5d3a,#1a8a5a)',
           color: '#fff',
           fontSize: '11px',
           fontWeight: 700,
-          padding: '6px 12px',
+          padding: '6px 11px',
           borderRadius: '10px',
           whiteSpace: 'nowrap',
           pointerEvents: 'none',
           boxShadow: '0 4px 14px rgba(13,93,58,0.4)',
           fontFamily: 'Inter,sans-serif',
-          letterSpacing: '0.2px',
-          animation: 'fadeInUp 0.2s ease',
+          zIndex: 10,
+          animation: 'fadeInUp 0.18s ease',
         }}>
           👋 Let&apos;s get started!
           <span style={{
-            position: 'absolute', bottom: '-6px', right: '14px',
+            position: 'absolute', bottom: '-6px', right: '12px',
             width: 0, height: 0,
             borderLeft: '6px solid transparent',
             borderRight: '6px solid transparent',
@@ -259,45 +278,56 @@ function RobotWidget({ onOpen }: { onOpen: () => void }) {
         </div>
       )}
 
-      {/* Spline iframe — only mounted after 3s delay */}
       {ready ? (
-        <iframe
-          src="https://my.spline.design/genkubgreetingrobot-CyA4TkBNYMI56xiY5EZhAr2D/"
-          frameBorder="0"
-          style={{
-            width: '200px',
-            height: '200px',
-            marginLeft: '-55px',
-            marginTop: '-45px',
-            pointerEvents: 'none',
-            border: 'none',
+        /* Spline scene — cursor tracking works natively on the canvas */
+        <div
+          onClick={onOpen}
+          style={{ width: '240px', height: '260px', marginLeft: '-60px', marginTop: '-60px', position: 'relative' }}
+        >
+          <Suspense fallback={null}>
+            <Spline
+              scene="https://prod.spline.design/genkubgreetingrobot-CyA4TkBNYMI56xiY5EZhAr2D/scene.splinecode"
+              style={{ width: '100%', height: '100%' }}
+            />
+          </Suspense>
+
+          {/* ── Hide "Built with Spline" watermark (bottom-left of canvas) ── */}
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            width: '120px',
+            height: '28px',
             background: 'transparent',
-          }}
-          title="ZenMind Robot"
-        />
+            zIndex: 5,
+            pointerEvents: 'none',
+          }} />
+        </div>
       ) : (
-        /* Placeholder while loading — a subtle pulsing dot */
-        <div style={{
-          width: '56px',
-          height: '56px',
-          margin: '27px auto 0',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle,rgba(26,138,90,0.5),rgba(13,93,58,0.1))',
-          animation: 'robotDotPulse 1.4s ease-in-out infinite',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '22px',
-        }}>🤖</div>
+        /* Placeholder — pulsing robot emoji while idle callback fires */
+        <div
+          onClick={onOpen}
+          style={{
+            width: '64px',
+            height: '64px',
+            margin: '38px auto 0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '28px',
+            animation: 'robotDotPulse 1.5s ease-in-out infinite',
+            cursor: 'pointer',
+          }}
+        >🤖</div>
       )}
 
       <style>{`
         @keyframes robotDotPulse {
-          0%,100% { transform: scale(1); opacity: 0.7; }
-          50%      { transform: scale(1.15); opacity: 1; }
+          0%,100% { transform: scale(1); opacity: 0.8; }
+          50%      { transform: scale(1.12); opacity: 1; }
         }
         @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(4px); }
+          from { opacity: 0; transform: translateY(5px); }
           to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
