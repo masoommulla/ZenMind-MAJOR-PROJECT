@@ -1668,17 +1668,96 @@ function QuizManagement() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   FLAGGED CONTENT — AI bad-word detection + moderation
-════════════════════════════════════════════════════════════ */
-const BAD_WORDS = ['fuck','fuk','f*ck','f**k','shit','sh!t','s**t','bitch','b*tch','bastard','asshole','ass',
-  'dick','cock','pussy','cunt','whore','slut','nigger','nigga','faggot','retard','rape','kill yourself',
-  'kys','suicide','idiot','stupid','moron','loser','hate you','ugly','worthless','die','chutiya','madarchod',
-  'bhenchod','lund','gaand','sala','saala','randi','haramzada','bakwas','harami','kamina','gandu','behen ke',
-  'maa ki','teri maa','teri behen','sexy','porn','sex','nude','naked','abuse','violent','threat'];
+/* ─── Profanity detection engine ───────────────────────────────
+   Strategy:
+   1. Normalize text: collapse spaces, strip punctuation between letters,
+      map common leetspeak substitutions (@ → a, 3 → e, 0 → o, $ → s, etc.)
+   2. Match against a flat pattern list (plain words) — checked via indexOf
+      on the normalized string for broad coverage.
+   3. Also run regex patterns for abbreviations and spaced-out variants.
+──────────────────────────────────────────────────────────────── */
+
+// Plain word patterns (matched on normalized text)
+const BAD_WORDS: string[] = [
+  // ── English — sexual ──
+  'fuck','fucker','fucking','fucked','fck','fuk','fvck','phuck','f u c k',
+  'shit','sht','sh1t','shyt','shitting','bullshit',
+  'bitch','b1tch','biatch','bytch','btch',
+  'ass','arse','asshole','arsehole','asswipe','jackass','dumbass','smartass',
+  'dick','d1ck','dik','cock','c0ck','cuck','cocks',
+  'pussy','p*ssy','puss','vagina','penis','cunt','c*nt',
+  'whore','slut','hoe','ho','skank','tramp',
+  'porn','porno','xxx','nude','naked','nsfw','sex','sexting','boobs','tits','boob',
+  'masturbat','orgasm','ejacul','erection','horny','pervert',
+  // ── English — violence / threats ──
+  'kill','murder','stab','shoot','bomb','terrorist','attack','harm','hurt',
+  'rape','rapist','molest','abuse','beat you','beat him','beat her',
+  'die','drop dead','go die','kys','kill yourself','end your life',
+  'suicide','suicidal','self harm','cut yourself','overdose','hang yourself',
+  // ── English — slurs ──
+  'nigger','nigga','nig','negro','spic','chink','gook','wetback','kike',
+  'faggot','fag','dyke','tranny','retard','retarded','spastic','cripple',
+  // ── English — hate / toxic ──
+  'hate you','i hate','loser','moron','idiot','stupid','dumb','fool','ugly',
+  'worthless','useless','pathetic','disgusting','trash','garbage','scum',
+  'bastard','son of a bitch','sob','prick','wanker','twat','bellend',
+  // ── Abbreviations / shortcuts ──
+  'mf','mfr','stfu','gtfo','wtf','omfg','lmfao','af','ffs','pos',
+  'foff','f off','fu','foh','fhritp',
+  // ── Hindi / Urdu profanity ──
+  'chutiya','chutiye','chu','bc','bkl','bsdk','bhenchod','bhainchod',
+  'madarchod','mc','maderchod','gaand','gand','lund','lauda','lavda',
+  'randi','rand','harami','haramzada','haramkhor','kamina','kameena',
+  'gandu','saala','sala','ullu','kutte','kutta','suar','chinal',
+  'behenchod','behenchodi','maa ki','teri maa','teri behen','behen ke',
+  'teri gand','tere baap','aukaat','jhaat','jhatu','lawde','chod',
+  'chodna','chodega','chudai','chudwa','randa','randwa',
+  // ── Urdu / Punjabi ──
+  'choot','chooti','madar','madarjat','harami','haram',
+  // ── Drug references ──
+  'cocaine','heroin','weed','marijuana','meth','crack','drug','drugs',
+];
+
+// Regex patterns for spaced/symbolic variants
+const BAD_PATTERNS: RegExp[] = [
+  /f[\W_]*u[\W_]*c[\W_]*k/i,
+  /s[\W_]*h[\W_]*i[\W_]*t/i,
+  /b[\W_]*i[\W_]*t[\W_]*c[\W_]*h/i,
+  /a[\W_]*s[\W_]*s[\W_]*h[\W_]*o[\W_]*l[\W_]*e/i,
+  /c[\W_]*u[\W_]*n[\W_]*t/i,
+  /n[\W_]*i[\W_]*g[\W_]*g[\W_]*[ae]/i,
+  /k[\W_]*y[\W_]*s/i,           // kys
+  /m[\W_]*f[\W_]*r?/i,          // mf / mfr
+  /s[\W_]*t[\W_]*f[\W_]*u/i,    // stfu
+  /g[\W_]*t[\W_]*f[\W_]*o/i,    // gtfo
+  /b[\W_]*h[\W_]*e[\W_]*n[\W_]*c[\W_]*h[\W_]*o[\W_]*d/i,
+  /m[\W_]*a[\W_]*d[\W_]*a[\W_]*r[\W_]*c[\W_]*h[\W_]*o[\W_]*d/i,
+  /c[\W_]*h[\W_]*u[\W_]*t[\W_]*i[\W_]*y[\W_]*a/i,
+];
+
+// Normalize leetspeak/symbol substitutions
+function normalizeLeet(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/@/g, 'a').replace(/3/g, 'e').replace(/1/g, 'i')
+    .replace(/0/g, 'o').replace(/5/g, 's').replace(/\$/g, 's')
+    .replace(/7/g, 't').replace(/8/g, 'b').replace(/4/g, 'a')
+    .replace(/\+/g, 't').replace(/!/g, 'i').replace(/\|/g, 'i');
+}
 
 function containsBadWord(text: string): string[] {
-  const lower = text.toLowerCase();
-  return BAD_WORDS.filter(w => lower.includes(w));
+  const normalized = normalizeLeet(text);
+  const found: string[] = [];
+  // Plain word check on normalized text
+  for (const word of BAD_WORDS) {
+    if (normalized.includes(word)) found.push(word);
+  }
+  // Regex pattern check on original (catches spaced-out variants)
+  for (const pattern of BAD_PATTERNS) {
+    const m = text.match(pattern);
+    if (m && !found.includes(m[0])) found.push(m[0]);
+  }
+  return [...new Set(found)];
 }
 
 function SuspendCountdown({ until }: { until: string }) {

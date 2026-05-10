@@ -125,11 +125,13 @@ function CircleCard({
    Chat Room View
 ──────────────────────────────────────────────────────────────── */
 function CircleChatRoom({
-  circle, currentUserId, onBack,
+  circle, currentUserId, onBack, onJoin, joining,
 }: {
   circle: Circle;
   currentUserId: string;
   onBack: () => void;
+  onJoin: (id: string) => void;
+  joining: string | null;
 }) {
   const [messages, setMessages]     = useState<CircleMsg[]>([]);
   const [loading, setLoading]       = useState(true);
@@ -280,50 +282,70 @@ function CircleChatRoom({
         <div ref={bottomRef} />
       </div>
 
-      {/* Input bar */}
-      <div className="flex-shrink-0 border-t border-[#0d5d3a]/10 dark:border-white/10 bg-white/90 dark:bg-[#111111]/90 backdrop-blur px-4 py-3">
-        {/* Anon toggle */}
-        <div className="flex items-center gap-2 mb-2">
-          <button
-            onClick={() => setIsAnon(v => !v)}
-            className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full transition-all ${
-              isAnon
-                ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white'
-                : 'bg-[#f0fbf4] dark:bg-[#0d5d3a]/10 text-[#0d5d3a] dark:text-[#10b981]'
-            }`}
-          >
-            {isAnon ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-            {isAnon ? 'Anonymous' : 'Visible name'}
-          </button>
-          <span className="text-[10px] text-[#4a7c5d] dark:text-gray-500">
-            {isAnon ? 'Your name is hidden' : 'Others can see your name'}
-          </span>
-        </div>
+      {/* Input bar — only if joined */}
+      {circle.isJoined ? (
+        <div className="flex-shrink-0 border-t border-[#0d5d3a]/10 dark:border-white/10 bg-white/90 dark:bg-[#111111]/90 backdrop-blur px-4 py-3">
+          {/* Anon toggle */}
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={() => setIsAnon(v => !v)}
+              className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full transition-all ${
+                isAnon
+                  ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white'
+                  : 'bg-[#f0fbf4] dark:bg-[#0d5d3a]/10 text-[#0d5d3a] dark:text-[#10b981]'
+              }`}
+            >
+              {isAnon ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+              {isAnon ? 'Anonymous' : 'Visible name'}
+            </button>
+            <span className="text-[10px] text-[#4a7c5d] dark:text-gray-500">
+              {isAnon ? 'Your name is hidden' : 'Others can see your name'}
+            </span>
+          </div>
 
-        <div className="flex items-end gap-2">
-          <textarea
-            value={text}
-            onChange={e => setText(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder="Share how you feel… (Enter to send)"
-            rows={1}
-            className="flex-1 px-4 py-2.5 rounded-2xl border border-[#0d5d3a]/12 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 dark:focus:ring-[#1a8a5a]/50 resize-none leading-relaxed placeholder-[#4a7c5d]/50 max-h-28 overflow-y-auto"
-            style={{ height: 'auto' }}
-            onInput={e => {
-              const t = e.currentTarget;
-              t.style.height = 'auto';
-              t.style.height = Math.min(t.scrollHeight, 112) + 'px';
-            }}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!text.trim() || sending}
-            className="flex-shrink-0 w-10 h-10 rounded-2xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white flex items-center justify-center hover:bg-[#0a4a2e] dark:hover:bg-[#10b981] disabled:opacity-40 transition shadow-md shadow-[#0d5d3a]/20"
-          >
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          </button>
+          <div className="flex items-end gap-2">
+            <textarea
+              value={text}
+              onChange={e => setText(e.target.value)}
+              onKeyDown={handleKey}
+              placeholder="Share how you feel… (Enter to send)"
+              rows={1}
+              className="flex-1 px-4 py-2.5 rounded-2xl border border-[#0d5d3a]/12 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 dark:focus:ring-[#1a8a5a]/50 resize-none leading-relaxed placeholder-[#4a7c5d]/50 max-h-28 overflow-y-auto"
+              style={{ height: 'auto' }}
+              onInput={e => {
+                const t = e.currentTarget;
+                t.style.height = 'auto';
+                t.style.height = Math.min(t.scrollHeight, 112) + 'px';
+              }}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!text.trim() || sending}
+              className="flex-shrink-0 w-10 h-10 rounded-2xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white flex items-center justify-center hover:bg-[#0a4a2e] dark:hover:bg-[#10b981] disabled:opacity-40 transition shadow-md shadow-[#0d5d3a]/20"
+            >
+              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
-      </div>
+      ) : (
+        /* NOT JOINED — read-only banner */
+        <div className="flex-shrink-0 border-t border-[#0d5d3a]/10 dark:border-white/10 bg-white/90 dark:bg-[#111111]/90 backdrop-blur px-4 py-4">
+          <div className="flex items-center justify-between gap-3 bg-[#f0fbf4] dark:bg-[#0d5d3a]/10 rounded-2xl px-4 py-3 border border-[#0d5d3a]/15 dark:border-[#10b981]/20">
+            <div>
+              <p className="text-sm font-bold text-[#0a2617] dark:text-white">👀 You're viewing as a guest</p>
+              <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-0.5">Join this circle to send messages and participate.</p>
+            </div>
+            <button
+              onClick={() => onJoin(circle._id)}
+              disabled={joining === circle._id}
+              className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white text-xs font-bold hover:bg-[#0a4a2e] transition shadow-md disabled:opacity-50"
+            >
+              {joining === circle._id ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserPlus className="w-3 h-3" />}
+              Join Circle
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -369,6 +391,21 @@ export default function PeerCircles({ userId }: { userId?: string }) {
           circle={activeCircle}
           currentUserId={userId || ''}
           onBack={() => setActiveCircle(null)}
+          onJoin={async (id) => {
+            setJoining(id);
+            try {
+              const res = await apiFetch<any>(`/circles/${id}/join`, { method: 'POST' });
+              // Update active circle isJoined state
+              setActiveCircle(prev => prev ? { ...prev, isJoined: res.joined } : prev);
+              setCircles(prev => prev.map(c =>
+                c._id === id
+                  ? { ...c, isJoined: res.joined, memberCount: c.memberCount + (res.joined ? 1 : -1) }
+                  : c
+              ));
+            } catch { /* silent */ }
+            finally { setJoining(null); }
+          }}
+          joining={joining}
         />
       </div>
     );
