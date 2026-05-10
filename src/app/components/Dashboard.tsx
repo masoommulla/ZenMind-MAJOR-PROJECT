@@ -15,6 +15,7 @@ import ZenAvatarChat from './ZenAvatarChat';
 import ZenProgressDashboard from './ZenProgressDashboard';
 import CommunityWall from './CommunityWall';
 import ResourceHub from './ResourceHub';
+import MoodJournal from './MoodJournal';
 
 type DashboardProps = {
   onLogout: () => void;
@@ -31,12 +32,13 @@ type Me = {
   avatar: { mime: string; data: string } | null;
 };
 
-type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources';
+type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources' | 'journal';
 
 const NAV_ITEMS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'aichat',     label: 'AI Chat',      icon: <MessageCircle className="w-5 h-5 flex-shrink-0" /> },
   { key: 'therapy',    label: 'Therapy Hub',  icon: <Stethoscope   className="w-5 h-5 flex-shrink-0" /> },
   { key: 'resources',  label: 'Resources',    icon: <Info          className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'journal',    label: 'Mood Journal', icon: <Star          className="w-5 h-5 flex-shrink-0" /> },
   { key: 'progress',   label: 'My Progress',  icon: <Save          className="w-5 h-5 flex-shrink-0" /> },
   { key: 'community',  label: 'Community',    icon: <Upload        className="w-5 h-5 flex-shrink-0" /> },
   { key: 'sessions',   label: 'My Sessions',  icon: <Calendar      className="w-5 h-5 flex-shrink-0" /> },
@@ -221,6 +223,7 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
                    tab === 'progress' ? 'My Progress' :
                    tab === 'community' ? 'Community Stories' :
                    tab === 'resources' ? 'Wellness Resources' :
+                   tab === 'journal' ? 'Mood Journal' :
                    tab === 'settings' ? 'Settings' :
                    loading ? 'Loading...' : `Welcome, ${me?.name?.split(' ')[0] || 'there'}!`}
                 </div>
@@ -232,6 +235,7 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
                    tab === 'progress' ? 'Track your mood, sessions and mental wellness journey over time.' :
                    tab === 'community' ? 'Read and share stories — you are never alone. 💚' :
                    tab === 'resources' ? 'Curated videos, audio, articles & more for your wellness journey. 📚' :
+                   tab === 'journal' ? 'Your private wellness diary with AI-powered weekly insights.' :
                    tab === 'settings' ? 'Manage your account settings and preferences.' :
                    'Your personal wellness dashboard'}
                 </div>
@@ -276,6 +280,10 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
           ) : tab === 'resources' ? (
             <div className="flex-1 overflow-hidden flex flex-col min-h-0">
               <ResourceHub />
+            </div>
+          ) : tab === 'journal' ? (
+            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+              <MoodJournal />
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto">

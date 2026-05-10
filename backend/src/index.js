@@ -72,6 +72,8 @@ import zenProgressRoute from './routes/zenProgress.js';
 app.use('/api/zen-progress', zenProgressRoute);
 import resourcesRoute from './routes/resources.js';
 app.use('/api/resources', resourcesRoute);
+import journalRoute from './routes/journal.js';
+app.use('/api/journal', journalRoute);
 
 const port = process.env.PORT || 5000;
 const mongoUri = process.env.MONGODB_URI;
