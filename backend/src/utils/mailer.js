@@ -11,9 +11,13 @@ function createTransport() {
   if (!user || !pass) throw new Error('[Mailer] EMAIL_USER or EMAIL_PASS missing from env');
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,       // STARTTLS
+    port: 465,           // SSL — Render blocks 587 (STARTTLS)
+    secure: true,        // true = SSL/TLS on connect
+    family: 4,           // Force IPv4 — avoids ENETUNREACH on Render
     auth: { user, pass },
+    connectionTimeout: 10000,  // 10s
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
     tls: { rejectUnauthorized: false }
   });
 }
