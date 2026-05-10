@@ -5,11 +5,12 @@ import { apiFetch } from '../api/client';
 import logo from '../../../asset/logo.png';
 import ThemeToggle from './ThemeToggle';
 import TherapistsManagement from './TherapistsManagement';
+import ReadingListsAdmin from './ReadingListsAdmin';
 
 type AdminDashboardProps = { onLogout: () => void };
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'settings'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'settings'>('users');
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminUsername, setAdminUsername] = useState('Admin');
@@ -18,7 +19,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     apiFetch('/admin/me').then((res: any) => setAdminUsername(res.username)).catch(() => {});
   }, []);
 
-  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'settings') => {
+  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'settings') => {
     setActiveTab(tab);
     setMobileOpen(false);
   };
@@ -39,6 +40,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <NavItem icon={FileText} label="Content Mgmt" active={activeTab === 'content'} onClick={() => navTo('content')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={MessageSquare} label="Peer Circles" active={activeTab === 'circles'} onClick={() => navTo('circles')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Shield} label="Flagged Content" active={activeTab === 'flagged'} onClick={() => navTo('flagged')} expanded={mobile || sidebarExpanded} />
+        <NavItem icon={BookOpen} label="Reading Lists" active={activeTab === 'reading'} onClick={() => navTo('reading')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Brain} label="Quiz Questions" active={activeTab === 'quiz'} onClick={() => navTo('quiz')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={LifeBuoy} label="Support Tickets" active={activeTab === 'support'} onClick={() => navTo('support')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => navTo('settings')} expanded={mobile || sidebarExpanded} />
@@ -93,7 +95,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <Menu size={20} />
             </button>
             <h1 className="text-lg sm:text-2xl font-bold text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>
-            {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? '🚨 Flagged Content' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : 'Admin Settings'}
+            {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? '🚨 Flagged Content' : activeTab === 'reading' ? '📚 Reading Lists' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : 'Admin Settings'}
             </h1>
           </div>
           <div className="flex items-center gap-4">
@@ -117,6 +119,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             {activeTab === 'content' && <ContentManagement />}
             {activeTab === 'circles' && <PeerCirclesManagement />}
             {activeTab === 'flagged' && <FlaggedContent />}
+            {activeTab === 'reading' && <ReadingListsAdmin />}
             {activeTab === 'quiz' && <QuizManagement />}
             {activeTab === 'support' && <SupportManagement />}
             {activeTab === 'settings' && <AdminSettings onUpdateName={setAdminUsername} />}

@@ -81,6 +81,8 @@ import goalsRoute from './routes/goals.js';
 app.use('/api/goals', goalsRoute);
 import pushRoute from './routes/push.js';
 app.use('/api/push', pushRoute);
+import readingListsRoute from './routes/readingLists.js';
+app.use('/api/reading-lists', readingListsRoute);
 
 const port = process.env.PORT || 5000;
 const mongoUri = process.env.MONGODB_URI;

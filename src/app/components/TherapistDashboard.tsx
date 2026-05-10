@@ -14,8 +14,9 @@ import VideoRoom from './VideoRoom';
 import { getImgSrc } from '../utils/image';
 import CancellationPolicy from './CancellationPolicy';
 import TherapistChatView from './TherapistChatView';
+import ReadingListsTherapist from './ReadingListsTherapist';
 
-type TabKey = 'profile' | 'schedule' | 'sessions' | 'chats';
+type TabKey = 'profile' | 'schedule' | 'sessions' | 'chats' | 'reading';
 
 export default function TherapistDashboard({ onLogout }: { onLogout: () => void }) {
   const [tab, setTab] = useState<TabKey>('profile');
@@ -205,6 +206,7 @@ export default function TherapistDashboard({ onLogout }: { onLogout: () => void 
     { key: 'schedule', label: 'Schedule', icon: <Calendar size={20} /> },
     { key: 'sessions', label: 'Booked Sessions', icon: <CheckCircle size={20} /> },
     { key: 'chats', label: 'Chats', icon: <MessageCircle size={20} /> },
+    { key: 'reading', label: 'Reading Lists', icon: <Info size={20} /> },
   ];
 
   const SidebarContent = ({ mobile }: { mobile?: boolean }) => {
@@ -294,7 +296,7 @@ export default function TherapistDashboard({ onLogout }: { onLogout: () => void 
               <Menu size={20} />
             </button>
             <h1 className="text-lg sm:text-2xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
-              {tab === 'profile' ? 'My Profile' : tab === 'schedule' ? 'Schedule & Availability' : tab === 'chats' ? 'Chats' : 'Booked Sessions'}
+              {tab === 'profile' ? 'My Profile' : tab === 'schedule' ? 'Schedule & Availability' : tab === 'chats' ? 'Chats' : tab === 'reading' ? '📚 Reading Lists' : 'Booked Sessions'}
             </h1>
           </div>
           <ThemeToggle />
@@ -611,6 +613,13 @@ export default function TherapistDashboard({ onLogout }: { onLogout: () => void 
           {tab === 'chats' && (
             <div className="p-4 sm:p-8 h-full">
               <TherapistChatView therapist={therapist} />
+            </div>
+          )}
+
+          {/* READING LISTS TAB */}
+          {tab === 'reading' && (
+            <div className="p-4 sm:p-8">
+              <ReadingListsTherapist />
             </div>
           )}
 

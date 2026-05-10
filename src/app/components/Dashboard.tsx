@@ -18,6 +18,7 @@ import ResourceHub from './ResourceHub';
 import MoodJournal from './MoodJournal';
 import PeerCircles from './PeerCircles';
 import WellnessGoalTracker from './WellnessGoalTracker';
+import ReadingListsUser from './ReadingListsUser';
 
 type DashboardProps = {
   onLogout: () => void;
@@ -34,12 +35,13 @@ type Me = {
   avatar: { mime: string; data: string } | null;
 };
 
-type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources' | 'journal' | 'circles' | 'goals';
+type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources' | 'journal' | 'circles' | 'goals' | 'reading';
 
 const NAV_ITEMS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'aichat',     label: 'AI Chat',      icon: <MessageCircle className="w-5 h-5 flex-shrink-0" /> },
   { key: 'therapy',    label: 'Therapy Hub',  icon: <Stethoscope   className="w-5 h-5 flex-shrink-0" /> },
   { key: 'resources',  label: 'Resources',    icon: <Info          className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'reading',    label: 'Reading Lists', icon: <Info          className="w-5 h-5 flex-shrink-0" /> },
   { key: 'journal',    label: 'Mood Journal', icon: <Star          className="w-5 h-5 flex-shrink-0" /> },
   { key: 'circles',    label: 'Peer Circles', icon: <Upload        className="w-5 h-5 flex-shrink-0" /> },
   { key: 'goals',      label: 'My Goals',     icon: <Star          className="w-5 h-5 flex-shrink-0" /> },
@@ -227,6 +229,7 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
                    tab === 'progress' ? 'My Progress' :
                    tab === 'community' ? 'Community Stories' :
                    tab === 'resources' ? 'Wellness Resources' :
+                   tab === 'reading' ? 'Therapist Reading Lists' :
                    tab === 'journal' ? 'Mood Journal' :
                    tab === 'circles' ? 'Peer Support Circles' :
                    tab === 'goals' ? 'Wellness Goals' :
@@ -241,6 +244,7 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
                    tab === 'progress' ? 'Track your mood, sessions and mental wellness journey over time.' :
                    tab === 'community' ? 'Read and share stories — you are never alone. 💚' :
                    tab === 'resources' ? 'Curated videos, audio, articles & more for your wellness journey. 📚' :
+                   tab === 'reading' ? 'Books, articles & resources hand-picked by our therapists.' :
                    tab === 'journal' ? 'Your private wellness diary with AI-powered weekly insights.' :
                    tab === 'circles' ? 'Real-time group spaces where you can share, support and feel less alone.' :
                    tab === 'goals' ? 'Build daily habits, track streaks and get nudged to never miss a day.' :
@@ -300,6 +304,12 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
           ) : tab === 'goals' ? (
             <div className="flex-1 overflow-hidden flex flex-col min-h-0">
               <WellnessGoalTracker />
+            </div>
+          ) : tab === 'reading' ? (
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+                <ReadingListsUser />
+              </div>
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto">
