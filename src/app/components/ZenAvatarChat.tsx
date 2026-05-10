@@ -4,7 +4,7 @@ import { Mic, MicOff, Send, Volume2, VolumeX, RotateCcw, ExternalLink } from 'lu
 import { apiFetch } from '../api/client';
 import ZenTalkingHead from './ZenTalkingHead';
 
-type MessageAction = 'STORY_BUTTONS' | 'THERAPY_BUTTON' | 'CRISIS' | null;
+type MessageAction = 'STORY_BUTTONS' | 'POST_STORY' | 'THERAPY_BUTTON' | 'CRISIS' | null;
 type Message = { role: 'user' | 'assistant'; content: string; id: string; action?: MessageAction };
 
 let _id = 0;
@@ -12,7 +12,7 @@ const uid = () => `m_${Date.now()}_${_id++}`;
 const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 const SS = window.speechSynthesis;
 
-const ACTION_RE = /\[ACTION:(STORY_BUTTONS|THERAPY_BUTTON|CRISIS)\]/;
+const ACTION_RE = /\[ACTION:(STORY_BUTTONS|POST_STORY|THERAPY_BUTTON|CRISIS)\]/;
 
 function parseReply(raw: string): { text: string; action: MessageAction } {
   const m = raw.match(ACTION_RE);
@@ -67,10 +67,12 @@ function CrisisCard() {
 }
 
 /* ── Message bubble ────────────────────────────────────────── */
-function MessageBubble({ msg, onStoryYes, onStoryNo, onGoToTherapy }: {
+function MessageBubble({ msg, onStoryYes, onStoryNo, onFeelingGood, onConnectReal, onGoToTherapy }: {
   msg: Message;
   onStoryYes: () => void;
   onStoryNo: () => void;
+  onFeelingGood: () => void;
+  onConnectReal: () => void;
   onGoToTherapy: () => void;
 }) {
   const isBot = msg.role === 'assistant';
@@ -90,7 +92,7 @@ function MessageBubble({ msg, onStoryYes, onStoryNo, onGoToTherapy }: {
           {msg.content}
         </div>
 
-        {/* Story Yes/No buttons */}
+        {/* Story Yes/No buttons — offer phase only */}
         {isBot && msg.action === 'STORY_BUTTONS' && (
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2 mt-1">
             <button onClick={onStoryYes}
@@ -100,6 +102,20 @@ function MessageBubble({ msg, onStoryYes, onStoryNo, onGoToTherapy }: {
             <button onClick={onStoryNo}
               className="px-5 py-2 bg-white dark:bg-[#1a1a1a] text-[#0d5d3a] dark:text-[#10b981] text-sm font-bold rounded-xl border border-[#0d5d3a]/20 dark:border-white/10 hover:bg-[#f0fbf4] dark:hover:bg-white/5 transition">
               Not right now
+            </button>
+          </motion.div>
+        )}
+
+        {/* Post-story check-in buttons */}
+        {isBot && msg.action === 'POST_STORY' && (
+          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2 mt-1 flex-wrap">
+            <button onClick={onFeelingGood}
+              className="px-5 py-2 bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white text-sm font-bold rounded-xl hover:bg-[#0a4a2e] transition shadow-md">
+              Feeling good 😊
+            </button>
+            <button onClick={onConnectReal}
+              className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition shadow-md">
+              Connect to a real person
             </button>
           </motion.div>
         )}
@@ -204,8 +220,10 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
     } finally { setLoading(false); }
   }, [messages, loading, voiceOn, speakText]);
 
-  const handleStoryYes = useCallback(() => handleSend("Yes, please tell me the story"), [handleSend]);
-  const handleStoryNo  = useCallback(() => handleSend("Not right now, thanks"), [handleSend]);
+  const handleStoryYes    = useCallback(() => handleSend("Yes, please tell me the story"), [handleSend]);
+  const handleStoryNo     = useCallback(() => handleSend("Not right now, thanks"), [handleSend]);
+  const handleFeelingGood = useCallback(() => handleSend("Feeling good now, thank you 😊"), [handleSend]);
+  const handleConnectReal = useCallback(() => handleSend("I'd like to connect to a real person"), [handleSend]);
   const handleGoToTherapy = useCallback(() => { if (onNavigateToTherapy) onNavigateToTherapy(); }, [onNavigateToTherapy]);
 
   const clearChat = () => {
@@ -288,6 +306,8 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
             <MessageBubble key={msg.id} msg={msg}
               onStoryYes={handleStoryYes}
               onStoryNo={handleStoryNo}
+              onFeelingGood={handleFeelingGood}
+              onConnectReal={handleConnectReal}
               onGoToTherapy={handleGoToTherapy}
             />
           ))}
