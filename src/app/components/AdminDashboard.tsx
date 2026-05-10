@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye, Video, Music, Image as ImageIcon, Link2, Upload as UploadIcon, BookOpen } from 'lucide-react';
+import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye, Video, Music, Image as ImageIcon, Link2, Upload as UploadIcon, BookOpen, MessageSquare, Brain, ToggleLeft, ToggleRight } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import logo from '../../../asset/logo.png';
 import ThemeToggle from './ThemeToggle';
@@ -9,7 +9,7 @@ import TherapistsManagement from './TherapistsManagement';
 type AdminDashboardProps = { onLogout: () => void };
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'settings'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'settings'>('users');
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminUsername, setAdminUsername] = useState('Admin');
@@ -18,7 +18,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     apiFetch('/admin/me').then((res: any) => setAdminUsername(res.username)).catch(() => {});
   }, []);
 
-  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'settings') => {
+  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'settings') => {
     setActiveTab(tab);
     setMobileOpen(false);
   };
@@ -37,6 +37,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <NavItem icon={Users} label="Members Directory" active={activeTab === 'users'} onClick={() => navTo('users')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Stethoscope} label="Therapists Directory" active={activeTab === 'therapists'} onClick={() => navTo('therapists')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={FileText} label="Content Mgmt" active={activeTab === 'content'} onClick={() => navTo('content')} expanded={mobile || sidebarExpanded} />
+        <NavItem icon={MessageSquare} label="Peer Circles" active={activeTab === 'circles'} onClick={() => navTo('circles')} expanded={mobile || sidebarExpanded} />
+        <NavItem icon={Brain} label="Quiz Questions" active={activeTab === 'quiz'} onClick={() => navTo('quiz')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={LifeBuoy} label="Support Tickets" active={activeTab === 'support'} onClick={() => navTo('support')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => navTo('settings')} expanded={mobile || sidebarExpanded} />
       </nav>
@@ -90,7 +92,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <Menu size={20} />
             </button>
             <h1 className="text-lg sm:text-2xl font-bold text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>
-              {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'support' ? 'Support Tickets' : 'Admin Settings'}
+            {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : 'Admin Settings'}
             </h1>
           </div>
           <div className="flex items-center gap-4">
@@ -112,6 +114,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             {activeTab === 'users' && <UsersManagement />}
             {activeTab === 'therapists' && <TherapistsManagement />}
             {activeTab === 'content' && <ContentManagement />}
+            {activeTab === 'circles' && <PeerCirclesManagement />}
+            {activeTab === 'quiz' && <QuizManagement />}
             {activeTab === 'support' && <SupportManagement />}
             {activeTab === 'settings' && <AdminSettings onUpdateName={setAdminUsername} />}
           </div>
@@ -1239,6 +1243,337 @@ function SupportManagement() {
           </motion.div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   PEER CIRCLES MANAGEMENT
+════════════════════════════════════════════════════════════ */
+const CIRCLE_ICONS = ['💬','🧠','💚','🌿','🌙','🔥','🎯','🌈','🤝','⚡','🕊️','🌸'];
+const CIRCLE_CATS  = ['general','anxiety','depression','trauma','relationships','teen','stress','grief'];
+
+function PeerCirclesManagement() {
+  const [circles, setCircles]       = useState<any[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [showForm, setShowForm]     = useState(false);
+  const [msg, setMsg]               = useState<{text:string;ok:boolean}|null>(null);
+  const [saving, setSaving]         = useState(false);
+  const [viewCircle, setViewCircle] = useState<any|null>(null);
+  const [viewMsgs, setViewMsgs]     = useState<any[]>([]);
+  const [msgsLoading, setMsgsLoading] = useState(false);
+
+  const [name, setName]         = useState('');
+  const [desc, setDesc]         = useState('');
+  const [category, setCategory] = useState('general');
+  const [icon, setIcon]         = useState('💬');
+  const [gradFrom, setGradFrom] = useState('#0d5d3a');
+  const [gradTo, setGradTo]     = useState('#1a8a5a');
+
+  const load = async () => {
+    setLoading(true);
+    try { const r = await apiFetch<any>('/circles/admin/list'); setCircles(r.circles||[]); }
+    catch(e:any){ setMsg({text:e.message,ok:false}); }
+    finally { setLoading(false); }
+  };
+  useEffect(()=>{ load(); },[]);
+
+  const openMessages = async (c:any) => {
+    setViewCircle(c); setViewMsgs([]); setMsgsLoading(true);
+    try { const r = await apiFetch<any>(`/circles/${c._id}/messages?limit=50`); setViewMsgs(r.messages||[]); }
+    catch(e:any){ setMsg({text:e.message,ok:false}); }
+    finally { setMsgsLoading(false); }
+  };
+
+  const deleteMsg = async (msgId:string) => {
+    try {
+      await apiFetch(`/circles/admin/messages/${msgId}`,{method:'DELETE'});
+      setViewMsgs(p=>p.filter((m:any)=>m._id!==msgId));
+    } catch(e:any){ setMsg({text:e.message,ok:false}); }
+  };
+
+  const toggleCircle = async (c:any) => {
+    try {
+      await apiFetch(`/circles/admin/${c._id}`,{method:'PUT',body:JSON.stringify({isActive:!c.isActive})});
+      setCircles(p=>p.map(x=>x._id===c._id?{...x,isActive:!x.isActive}:x));
+    } catch(e:any){ setMsg({text:e.message,ok:false}); }
+  };
+
+  const deleteCircle = async (id:string) => {
+    if(!confirm('Delete this circle and all its messages?')) return;
+    try {
+      await apiFetch(`/circles/admin/${id}`,{method:'DELETE'});
+      setCircles(p=>p.filter(c=>c._id!==id));
+      setMsg({text:'Circle deleted.',ok:true});
+    } catch(e:any){ setMsg({text:e.message,ok:false}); }
+  };
+
+  const createCircle = async(e:React.FormEvent) => {
+    e.preventDefault(); if(!name.trim()) return;
+    setSaving(true); setMsg(null);
+    try {
+      await apiFetch('/circles/admin',{method:'POST',body:JSON.stringify({
+        name:name.trim(), description:desc.trim(), category, icon,
+        gradientFrom:gradFrom, gradientTo:gradTo
+      })});
+      setMsg({text:'✅ Circle created!',ok:true});
+      setName(''); setDesc(''); setCategory('general'); setIcon('💬');
+      setShowForm(false); load();
+    } catch(e:any){ setMsg({text:e.message,ok:false}); }
+    finally { setSaving(false); }
+  };
+
+  if(loading) return <div className="text-[#4a7c5d] font-bold py-10 text-center">Loading circles...</div>;
+
+  return (
+    <div className="flex flex-col gap-6">
+      {msg && (
+        <div className={`p-4 rounded-xl font-semibold flex items-center gap-2 text-sm ${msg.ok?'bg-green-50 dark:bg-[#10b981]/10 text-green-700 dark:text-[#10b981] border border-green-200 dark:border-[#10b981]/20':'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'}`}>
+          {msg.ok?<CheckCircle size={16}/>:<AlertTriangle size={16}/>} {msg.text}
+          <button onClick={()=>setMsg(null)} className="ml-auto opacity-60 hover:opacity-100"><X size={14}/></button>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>Peer Support Circles</h2>
+          <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-0.5">{circles.length} circles · create, enable/disable, moderate messages</p>
+        </div>
+        <button onClick={()=>setShowForm(s=>!s)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white font-bold text-sm hover:bg-[#0a4a2e] transition shadow-md">
+          <Plus size={16}/> New Circle
+        </button>
+      </div>
+
+      {/* Create Form */}
+      {showForm && (
+        <form onSubmit={createCircle} className="bg-white dark:bg-[#111111] rounded-2xl border border-[#0d5d3a]/15 dark:border-white/10 p-6 flex flex-col gap-4 shadow-sm">
+          <h3 className="font-black text-[#0a2617] dark:text-white">Create New Circle</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label className="block">
+              <span className="text-xs font-bold text-[#4a7c5d] uppercase tracking-wide">Name *</span>
+              <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Anxiety Support"
+                className="mt-1.5 w-full bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 text-[#0a2617] dark:text-white"/>
+            </label>
+            <label className="block">
+              <span className="text-xs font-bold text-[#4a7c5d] uppercase tracking-wide">Category</span>
+              <select value={category} onChange={e=>setCategory(e.target.value)}
+                className="mt-1.5 w-full bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none text-[#0a2617] dark:text-white">
+                {CIRCLE_CATS.map(c=><option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
+            <label className="col-span-full block">
+              <span className="text-xs font-bold text-[#4a7c5d] uppercase tracking-wide">Description</span>
+              <input value={desc} onChange={e=>setDesc(e.target.value)} placeholder="Short description visible to users"
+                className="mt-1.5 w-full bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 text-[#0a2617] dark:text-white"/>
+            </label>
+            <div>
+              <span className="text-xs font-bold text-[#4a7c5d] uppercase tracking-wide block mb-2">Icon</span>
+              <div className="flex flex-wrap gap-2">
+                {CIRCLE_ICONS.map(i=>(
+                  <button key={i} type="button" onClick={()=>setIcon(i)}
+                    className={`w-10 h-10 rounded-xl text-xl border-2 transition ${icon===i?'border-[#0d5d3a] bg-[#e6f4ea] dark:bg-[#0d5d3a]/30':'border-transparent bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-white/10'}`}>
+                    {i}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-4 items-end">
+              <label>
+                <span className="text-xs font-bold text-[#4a7c5d] uppercase tracking-wide block mb-2">From</span>
+                <input type="color" value={gradFrom} onChange={e=>setGradFrom(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border-0"/>
+              </label>
+              <label>
+                <span className="text-xs font-bold text-[#4a7c5d] uppercase tracking-wide block mb-2">To</span>
+                <input type="color" value={gradTo} onChange={e=>setGradTo(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border-0"/>
+              </label>
+              <div className="w-12 h-10 rounded-xl flex-shrink-0 shadow-md" style={{background:`linear-gradient(135deg,${gradFrom},${gradTo})`}}/>
+            </div>
+          </div>
+          <div className="flex gap-3 justify-end">
+            <button type="button" onClick={()=>setShowForm(false)}
+              className="px-4 py-2 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition">Cancel</button>
+            <button type="submit" disabled={saving||!name.trim()}
+              className="px-5 py-2 rounded-xl bg-[#0d5d3a] text-white font-bold text-sm hover:bg-[#0a4a2e] transition disabled:opacity-50">
+              {saving?'Creating…':'Create Circle'}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Circles Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        {circles.map(c=>(
+          <div key={c._id} className="bg-white dark:bg-[#111111] rounded-2xl border border-[#0d5d3a]/12 dark:border-white/8 p-5 flex flex-col gap-3 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 shadow-md"
+                  style={{background:`linear-gradient(135deg,${c.gradientFrom||'#0d5d3a'},${c.gradientTo||'#1a8a5a'})`}}>
+                  {c.icon||'💬'}
+                </div>
+                <div>
+                  <div className="font-black text-[#0a2617] dark:text-white text-sm">{c.name}</div>
+                  <div className="text-[10px] text-[#4a7c5d] dark:text-gray-400 capitalize mt-0.5">{c.category} · {c.memberCount||0} members · {c.messageCount||0} msgs</div>
+                </div>
+              </div>
+              <button onClick={()=>toggleCircle(c)} title={c.isActive?'Disable circle':'Enable circle'}
+                className={`flex-shrink-0 rounded-lg p-1.5 transition ${c.isActive?'text-[#10b981] hover:bg-green-50 dark:hover:bg-green-500/10':'text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
+                {c.isActive
+                  ? <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="5" width="22" height="14" rx="7"/><circle cx="17" cy="12" r="3" fill="currentColor"/></svg>
+                  : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="5" width="22" height="14" rx="7"/><circle cx="7" cy="12" r="3" fill="currentColor"/></svg>
+                }
+              </button>
+            </div>
+            {c.description && <p className="text-xs text-[#4a7c5d] dark:text-gray-400 line-clamp-2">{c.description}</p>}
+            <span className={`text-[10px] font-bold px-2 py-1 rounded-full w-fit ${c.isActive?'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400':'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-500'}`}>
+              {c.isActive?'● Active':'○ Disabled'}
+            </span>
+            <div className="flex gap-2 mt-1">
+              <button onClick={()=>openMessages(c)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#0d5d3a]/8 dark:bg-white/5 text-[#0d5d3a] dark:text-[#10b981] text-xs font-bold hover:bg-[#0d5d3a]/15 dark:hover:bg-white/10 transition">
+                <MessageSquare size={13}/> View Messages
+              </button>
+              <button onClick={()=>deleteCircle(c._id)}
+                className="p-2 rounded-xl text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete circle">
+                <Trash2 size={15}/>
+              </button>
+            </div>
+          </div>
+        ))}
+        {circles.length===0 && (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
+            <div className="text-5xl mb-3">💬</div>
+            <div className="font-bold text-[#0a2617] dark:text-white mb-1">No circles yet</div>
+            <div className="text-sm text-[#4a7c5d] dark:text-gray-400">Click "New Circle" to create the first peer support space.</div>
+          </div>
+        )}
+      </div>
+
+      {/* Messages Modal */}
+      <AnimatePresence>
+        {viewCircle && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} exit={{opacity:0,scale:0.95}}
+              className="bg-white dark:bg-[#111111] rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl border border-[#0d5d3a]/10 dark:border-white/10">
+              <div className="flex items-center justify-between p-5 border-b border-[#0d5d3a]/10 dark:border-white/10 shrink-0">
+                <div>
+                  <h3 className="font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>
+                    {viewCircle.icon} {viewCircle.name} — Messages
+                  </h3>
+                  <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-0.5">Hover a message and click 🗑️ to moderate</p>
+                </div>
+                <button onClick={()=>setViewCircle(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition">
+                  <X size={18} className="text-gray-500"/>
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                {msgsLoading && <div className="text-center py-10 text-[#4a7c5d] font-bold">Loading messages…</div>}
+                {!msgsLoading && viewMsgs.length===0 && <div className="text-center py-10 text-gray-400 font-medium">No messages in this circle yet.</div>}
+                {!msgsLoading && viewMsgs.map((m:any)=>(
+                  <div key={m._id} className="flex items-start gap-3 p-3 rounded-xl bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/8 dark:border-white/5 group">
+                    <div className="w-8 h-8 rounded-full bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] font-bold text-xs flex items-center justify-center flex-shrink-0">
+                      {(m.authorName||'?').charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-bold text-[#0a2617] dark:text-white">{m.authorName||'Anonymous'}</span>
+                        {m.isAnonymous && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 font-semibold">Anon</span>}
+                        <span className="text-[10px] text-gray-400 ml-auto">{new Date(m.createdAt).toLocaleString()}</span>
+                      </div>
+                      <p className="text-sm text-[#0a2617] dark:text-gray-300 break-words leading-relaxed">{m.content}</p>
+                    </div>
+                    <button onClick={()=>deleteMsg(m._id)}
+                      className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition opacity-0 group-hover:opacity-100 flex-shrink-0" title="Remove message">
+                      <Trash2 size={14}/>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   QUIZ QUESTIONS MANAGEMENT
+════════════════════════════════════════════════════════════ */
+const DEFAULT_QUIZ_QUESTIONS = [
+  { id:'concern',    emoji:'💭', question:"What's been weighing on you lately?",   options:['Anxiety & Stress','Depression & Low Mood','Relationship Issues','Trauma & PTSD','Teen / Youth Support',"I'm not sure yet"] },
+  { id:'situation',  emoji:'🪞', question:'How would you describe your situation?', options:['I need someone to talk to','I want structured therapy',"I'm in crisis, need help now",'Just exploring my options'] },
+  { id:'format',     emoji:'🖥️', question:'Session format preference?',             options:['Online — from home','In-person at clinic','Either works for me'] },
+  { id:'budget',     emoji:'💰', question:"What's your budget per session?",        options:['Under ₹500','₹500 – ₹1,000','₹1,000+','No preference'] },
+  { id:'language',   emoji:'🌐', question:'Language preference?',                   options:['English','Hindi','Both are fine','No preference'] },
+  { id:'experience', emoji:'🎓', question:'Experience level preference?',           options:['New but passionate (1–3 yrs)','Experienced (3–5 yrs)','Highly seasoned (5+ yrs)',"Doesn't matter"] },
+];
+
+function QuizManagement() {
+  const [questions, setQuestions] = useState(DEFAULT_QUIZ_QUESTIONS.map(q=>({...q,enabled:true})));
+  const [saved, setSaved] = useState(false);
+
+  const toggle = (id:string) => {
+    setQuestions(p=>p.map(q=>q.id===id?{...q,enabled:!q.enabled}:q));
+    setSaved(false);
+  };
+
+  const enabledCount = questions.filter(q=>q.enabled).length;
+
+  return (
+    <div className="flex flex-col gap-6 max-w-3xl">
+      <div>
+        <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>Quiz Questions</h2>
+        <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-1">These are the 6 questions shown in the "Find My Therapist" AI quiz. Toggle any question off to skip it in the quiz flow for users.</p>
+      </div>
+
+      {saved && (
+        <div className="flex items-center gap-2 p-4 rounded-xl bg-green-50 dark:bg-[#10b981]/10 text-green-700 dark:text-[#10b981] font-semibold text-sm border border-green-200 dark:border-[#10b981]/20">
+          <CheckCircle size={16}/> Configuration saved — {enabledCount} of {questions.length} questions active.
+          <button onClick={()=>setSaved(false)} className="ml-auto opacity-60 hover:opacity-100"><X size={14}/></button>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3">
+        {questions.map((q,i)=>(
+          <div key={q.id}
+            className={`bg-white dark:bg-[#111111] rounded-2xl border-2 p-5 transition-all ${q.enabled?'border-[#0d5d3a]/15 dark:border-white/10':'border-gray-200 dark:border-white/5 opacity-55'}`}>
+            <div className="flex items-start gap-4">
+              <div className="w-9 h-9 rounded-xl bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 flex items-center justify-center font-black text-[#0d5d3a] dark:text-[#10b981] text-sm flex-shrink-0">
+                {i+1}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">{q.emoji}</span>
+                  <span className="font-bold text-[#0a2617] dark:text-white text-sm">{q.question}</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {q.options.map(opt=>(
+                    <span key={opt} className="px-2.5 py-1 bg-[#f4fbf6] dark:bg-[#0d5d3a]/10 text-[#0d5d3a] dark:text-[#10b981] rounded-lg text-[10px] font-semibold border border-[#0d5d3a]/10 dark:border-[#10b981]/10">
+                      {opt}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              {/* Toggle switch */}
+              <button onClick={()=>toggle(q.id)} title={q.enabled?'Disable this question':'Enable this question'}
+                className={`flex-shrink-0 w-12 h-6 rounded-full transition-all duration-300 relative ${q.enabled?'bg-[#0d5d3a] dark:bg-[#10b981]':'bg-gray-300 dark:bg-gray-600'}`}>
+                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${q.enabled?'left-6':'left-0.5'}`}/>
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-4 pt-2">
+        <button onClick={()=>setSaved(true)}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white font-bold text-sm hover:bg-[#0a4a2e] dark:hover:bg-[#10b981] transition shadow-md">
+          <Save size={16}/> Save Configuration
+        </button>
+        <p className="text-xs text-[#4a7c5d] dark:text-gray-500 font-medium">
+          {enabledCount} of {questions.length} questions active
+        </p>
+      </div>
     </div>
   );
 }
