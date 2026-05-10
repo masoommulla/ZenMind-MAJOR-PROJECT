@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Hero from './components/Hero';
@@ -20,8 +20,6 @@ import LoadingScreen from './components/LoadingScreen';
 import ProductPage from './components/ProductPage';
 import { apiFetch } from './api/client';
 
-// Code-split Spline so it never blocks initial page render
-const Spline = lazy(() => import('@splinetool/react-spline'));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -197,138 +195,122 @@ export default function App() {
   );
 }
 
-/* ─────────────────────────────────────────────────────────
-   RobotWidget
-   - Uses @splinetool/react-spline (no iframe, cursor-aware)
-   - Injected only after requestIdleCallback → zero render lag
-   - Watermark overlay covers "Built with Spline" badge
-───────────────────────────────────────────────────────── */
+/* ── Pure CSS Robot Widget — zero dependencies, zero lag ── */
 function RobotWidget({ onOpen }: { onOpen: () => void }) {
-  const [ready, setReady]     = useState(false);
   const [hovered, setHovered] = useState(false);
-
-  useEffect(() => {
-    // Wait until browser is fully idle, then mount the heavy 3D scene
-    const cb = () => setReady(true);
-    if ('requestIdleCallback' in window) {
-      const id = (window as any).requestIdleCallback(cb, { timeout: 4000 });
-      return () => (window as any).cancelIdleCallback(id);
-    } else {
-      const id = window.setTimeout(cb, 3500);
-      return () => window.clearTimeout(id);
-    }
-  }, []);
 
   return (
     <div
+      onClick={onOpen}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        position: 'fixed',
-        bottom: '0px',
-        right: '0px',
-        width: '120px',
-        height: '140px',
-        zIndex: 9999,
-        cursor: 'pointer',
-        background: 'transparent',
-        overflow: 'hidden',
+        position: 'fixed', bottom: '18px', right: '18px',
+        zIndex: 9999, cursor: 'pointer',
+        width: '72px', height: '90px',
+        animation: 'robotFloat 3s ease-in-out infinite',
+        filter: hovered ? 'drop-shadow(0 8px 24px rgba(13,93,58,0.55))' : 'drop-shadow(0 4px 12px rgba(13,93,58,0.3))',
+        transform: hovered ? 'scale(1.1)' : 'scale(1)',
+        transition: 'transform 0.25s ease, filter 0.25s ease',
       }}
     >
-      {/* Clickable invisible overlay on top so cursor interaction still works below */}
-      <div
-        onClick={onOpen}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 2,
-          cursor: 'pointer',
-          // Let mouse events pass through to Spline canvas for cursor tracking
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Tooltip on hover */}
+      {/* Tooltip */}
       {hovered && (
         <div style={{
-          position: 'absolute',
-          bottom: '105%',
-          right: '4px',
+          position: 'absolute', bottom: '105%', right: 0,
           background: 'linear-gradient(135deg,#0d5d3a,#1a8a5a)',
-          color: '#fff',
-          fontSize: '11px',
-          fontWeight: 700,
-          padding: '6px 11px',
-          borderRadius: '10px',
-          whiteSpace: 'nowrap',
-          pointerEvents: 'none',
-          boxShadow: '0 4px 14px rgba(13,93,58,0.4)',
-          fontFamily: 'Inter,sans-serif',
-          zIndex: 10,
-          animation: 'fadeInUp 0.18s ease',
+          color: '#fff', fontSize: '11px', fontWeight: 700,
+          padding: '6px 12px', borderRadius: '10px', whiteSpace: 'nowrap',
+          pointerEvents: 'none', boxShadow: '0 4px 14px rgba(13,93,58,0.4)',
+          fontFamily: 'Inter,sans-serif', animation: 'fadeInUp 0.18s ease',
         }}>
           👋 Let&apos;s get started!
           <span style={{
             position: 'absolute', bottom: '-6px', right: '12px',
             width: 0, height: 0,
-            borderLeft: '6px solid transparent',
-            borderRight: '6px solid transparent',
+            borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
             borderTop: '6px solid #1a8a5a',
           }} />
         </div>
       )}
 
-      {ready ? (
-        /* Spline scene — cursor tracking works natively on the canvas */
-        <div
-          onClick={onOpen}
-          style={{ width: '240px', height: '260px', marginLeft: '-60px', marginTop: '-60px', position: 'relative' }}
-        >
-          <Suspense fallback={null}>
-            <Spline
-              scene="https://prod.spline.design/genkubgreetingrobot-CyA4TkBNYMI56xiY5EZhAr2D/scene.splinecode"
-              style={{ width: '100%', height: '100%' }}
-            />
-          </Suspense>
+      {/* SVG Robot */}
+      <svg viewBox="0 0 72 90" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
+        {/* Antenna */}
+        <line x1="36" y1="8" x2="36" y2="18" stroke="#0d5d3a" strokeWidth="2.5" strokeLinecap="round"/>
+        <circle cx="36" cy="6" r="4" fill="#10b981" style={{ animation: 'antennaPulse 1.8s ease-in-out infinite' }}/>
 
-          {/* ── Hide "Built with Spline" watermark (bottom-left of canvas) ── */}
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            width: '120px',
-            height: '28px',
-            background: 'transparent',
-            zIndex: 5,
-            pointerEvents: 'none',
-          }} />
-        </div>
-      ) : (
-        /* Placeholder — pulsing robot emoji while idle callback fires */
-        <div
-          onClick={onOpen}
-          style={{
-            width: '64px',
-            height: '64px',
-            margin: '38px auto 0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '28px',
-            animation: 'robotDotPulse 1.5s ease-in-out infinite',
-            cursor: 'pointer',
-          }}
-        >🤖</div>
-      )}
+        {/* Head */}
+        <rect x="14" y="18" width="44" height="32" rx="10" fill="url(#headGrad)" />
+        <rect x="14" y="18" width="44" height="32" rx="10" fill="none" stroke="#0d5d3a" strokeWidth="1.5"/>
+
+        {/* Eyes */}
+        <ellipse cx="26" cy="32" rx="6" ry="6" fill="#fff"/>
+        <ellipse cx="46" cy="32" rx="6" ry="6" fill="#fff"/>
+        <circle cx="27" cy="32" r="3.5" fill="#10b981" style={{ animation: 'eyeGlow 2s ease-in-out infinite' }}/>
+        <circle cx="47" cy="32" r="3.5" fill="#10b981" style={{ animation: 'eyeGlow 2s ease-in-out infinite 0.1s' }}/>
+        <circle cx="28" cy="31" r="1.2" fill="#fff"/>
+        <circle cx="48" cy="31" r="1.2" fill="#fff"/>
+
+        {/* Mouth */}
+        <rect x="24" y="42" width="24" height="4" rx="2" fill="#0d5d3a" opacity="0.7"/>
+        <rect x="27" y="42" width="5" height="4" rx="1" fill="#10b981" opacity="0.9"/>
+        <rect x="34" y="42" width="5" height="4" rx="1" fill="#10b981" opacity="0.9"/>
+
+        {/* Body */}
+        <rect x="18" y="52" width="36" height="28" rx="8" fill="url(#bodyGrad)"/>
+        <rect x="18" y="52" width="36" height="28" rx="8" fill="none" stroke="#0d5d3a" strokeWidth="1.5"/>
+
+        {/* Chest panel */}
+        <rect x="26" y="58" width="20" height="14" rx="4" fill="#0d5d3a" opacity="0.25"/>
+        <circle cx="31" cy="65" r="3" fill="#10b981" opacity="0.9" style={{ animation: 'eyeGlow 1.6s ease-in-out infinite 0.3s' }}/>
+        <circle cx="41" cy="65" r="3" fill="#10b981" opacity="0.5"/>
+        <rect x="34" y="62" width="2" height="6" rx="1" fill="#10b981" opacity="0.7"/>
+
+        {/* Left arm */}
+        <rect x="6" y="54" width="10" height="22" rx="5" fill="url(#headGrad)" stroke="#0d5d3a" strokeWidth="1.5"
+          style={{ transformOrigin:'8px 54px', animation: 'waveArm 2.5s ease-in-out infinite' }}/>
+
+        {/* Right arm */}
+        <rect x="56" y="54" width="10" height="22" rx="5" fill="url(#headGrad)" stroke="#0d5d3a" strokeWidth="1.5"/>
+
+        {/* Legs */}
+        <rect x="23" y="80" width="10" height="10" rx="4" fill="url(#headGrad)" stroke="#0d5d3a" strokeWidth="1.5"/>
+        <rect x="39" y="80" width="10" height="10" rx="4" fill="url(#headGrad)" stroke="#0d5d3a" strokeWidth="1.5"/>
+
+        <defs>
+          <linearGradient id="headGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#e6f4ea"/>
+            <stop offset="100%" stopColor="#c8e6c9"/>
+          </linearGradient>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#d4edda"/>
+            <stop offset="100%" stopColor="#b2dfdb"/>
+          </linearGradient>
+        </defs>
+      </svg>
 
       <style>{`
-        @keyframes robotDotPulse {
-          0%,100% { transform: scale(1); opacity: 0.8; }
-          50%      { transform: scale(1.12); opacity: 1; }
+        @keyframes robotFloat {
+          0%,100% { transform: translateY(0px); }
+          50%      { transform: translateY(-7px); }
+        }
+        @keyframes antennaPulse {
+          0%,100% { r: 4; opacity:1; }
+          50%      { r: 5.5; opacity:0.7; }
+        }
+        @keyframes eyeGlow {
+          0%,100% { opacity:1; }
+          50%      { opacity:0.4; }
+        }
+        @keyframes waveArm {
+          0%,100% { transform: rotate(0deg); }
+          30%      { transform: rotate(-22deg); }
+          60%      { transform: rotate(8deg); }
         }
         @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(5px); }
-          to   { opacity: 1; transform: translateY(0); }
+          from { opacity:0; transform:translateY(6px); }
+          to   { opacity:1; transform:translateY(0); }
         }
       `}</style>
     </div>
