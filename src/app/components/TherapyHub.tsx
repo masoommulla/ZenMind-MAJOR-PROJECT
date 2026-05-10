@@ -157,9 +157,11 @@ export default function TherapyHub({ onSessionBooked, onStartChat }: { onSession
                         <div className="text-sm text-gray-500 italic py-4 text-center md:text-left">No slots scheduled.</div>
                       ) : (
                         (() => {
+                          const BOOKING_CUTOFF_MS = 12 * 60 * 1000; // 12 minutes
                           const available = selectedTherapist.availableSlots.filter((s: string) => {
                             const d = new Date(s);
-                            return d.toDateString() === selectedDate.toDateString() && d > new Date();
+                            return d.toDateString() === selectedDate.toDateString() &&
+                              d.getTime() - Date.now() > BOOKING_CUTOFF_MS;
                           });
                           if (available.length === 0) return <div className="text-sm text-gray-500 italic py-4 text-center md:text-left">No available slots on this date.</div>;
                           

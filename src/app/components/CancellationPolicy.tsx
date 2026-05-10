@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ChevronLeft, ShieldAlert, Clock, IndianRupee, Info } from 'lucide-react';
+import { ChevronLeft, ShieldAlert, Clock, IndianRupee, Info, AlertTriangle } from 'lucide-react';
 
 export default function CancellationPolicy({ onClose }: { onClose: () => void }) {
   return (
@@ -46,7 +46,9 @@ export default function CancellationPolicy({ onClose }: { onClose: () => void })
             Refund Structure
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* 4-card 2×2 grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* 100% */}
             <div className="bg-white dark:bg-[#111] border border-[#0d5d3a]/10 dark:border-white/10 rounded-3xl p-6 shadow-sm hover:shadow-md transition">
               <div className="w-14 h-14 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 rounded-2xl flex items-center justify-center mb-6">
                 <span className="text-xl font-black">100%</span>
@@ -57,6 +59,7 @@ export default function CancellationPolicy({ onClose }: { onClose: () => void })
               </p>
             </div>
 
+            {/* 80% */}
             <div className="bg-white dark:bg-[#111] border border-[#0d5d3a]/10 dark:border-white/10 rounded-3xl p-6 shadow-sm hover:shadow-md transition">
               <div className="w-14 h-14 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center mb-6">
                 <span className="text-xl font-black">80%</span>
@@ -67,13 +70,44 @@ export default function CancellationPolicy({ onClose }: { onClose: () => void })
               </p>
             </div>
 
+            {/* 70% */}
             <div className="bg-white dark:bg-[#111] border border-[#0d5d3a]/10 dark:border-white/10 rounded-3xl p-6 shadow-sm hover:shadow-md transition">
               <div className="w-14 h-14 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center mb-6">
                 <span className="text-xl font-black">70%</span>
               </div>
-              <h4 className="text-lg font-bold text-[#0a2617] dark:text-white mb-2">Instant / Late Cancel</h4>
+              <h4 className="text-lg font-bold text-[#0a2617] dark:text-white mb-2">Late Cancel (12 min – 48 hrs)</h4>
               <p className="text-[#4a7c5d] dark:text-gray-400 text-sm leading-relaxed">
-                Cancellations made within 48 hours or instant cancellations yield a 70% refund. 30% covers platform and therapist reservation charges.
+                Cancellations made within 48 hours but <strong>more than 12 minutes</strong> before the session yield a 70% refund. 30% covers platform and therapist reservation charges.
+              </p>
+            </div>
+
+            {/* 50% — Critical Time card */}
+            <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-500/40 rounded-3xl p-6 shadow-sm hover:shadow-md transition relative overflow-hidden">
+              <div className="absolute -right-4 -top-4 opacity-10 text-red-500 pointer-events-none">
+                <AlertTriangle size={120} />
+              </div>
+              <div className="relative z-10">
+                <div className="w-14 h-14 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 rounded-2xl flex items-center justify-center mb-6">
+                  <span className="text-xl font-black">50%</span>
+                </div>
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <h4 className="text-lg font-bold text-red-700 dark:text-red-400">Critical Time (&lt;12 Min Before)</h4>
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-red-200 dark:bg-red-500/30 text-red-800 dark:text-red-300 px-2 py-0.5 rounded-md">Critical</span>
+                </div>
+                <p className="text-red-700/80 dark:text-red-300/80 text-sm leading-relaxed">
+                  If you cancel within <strong>12 minutes</strong> of the session start time, only <strong>50% is refunded</strong>. The remaining 50% is retained as a platform fee to compensate for the last-minute disruption. The vacated slot will <strong>not</strong> be reopened for new bookings.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Booking cutoff notice */}
+          <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-500/30 rounded-2xl p-5 flex flex-col sm:flex-row gap-4 items-start">
+            <AlertTriangle className="text-orange-500 dark:text-orange-400 shrink-0 mt-0.5" size={22} />
+            <div>
+              <h4 className="font-bold text-orange-900 dark:text-orange-300 mb-1">12-Minute Booking Cutoff</h4>
+              <p className="text-orange-800/80 dark:text-orange-400/80 text-sm leading-relaxed">
+                Sessions starting within <strong>12 minutes</strong> cannot be booked at all. These slots are automatically hidden from the booking calendar so both you and your therapist have adequate preparation time.
               </p>
             </div>
           </div>

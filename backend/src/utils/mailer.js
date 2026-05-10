@@ -48,15 +48,19 @@ function infoRow(label, value) {
   </tr>`;
 }
 const POLICY_HTML = `<div style="background:#f0fbf4;border-left:4px solid #0d5d3a;border-radius:0 8px 8px 0;padding:16px 20px;margin-top:20px;">
-  <p style="margin:0 0 8px;font-weight:700;color:#0a2617;font-size:14px;">&#128203; Cancellation Policy</p>
+  <p style="margin:0 0 8px;font-weight:700;color:#0a2617;font-size:14px;">&#128203; Cancellation &amp; Refund Policy</p>
   <table style="width:100%;border-collapse:collapse;font-size:13px;">
     <tr><td style="padding:4px 8px 4px 0;color:#4a7c5d;">3+ days before</td><td style="color:#0d5d3a;font-weight:700;">100% refund</td></tr>
     <tr><td style="padding:4px 8px 4px 0;color:#4a7c5d;">2 days before</td><td style="color:#f59e0b;font-weight:700;">80% refund</td></tr>
     <tr><td style="padding:4px 8px 4px 0;color:#4a7c5d;">Within 48 hrs / immediate</td><td style="color:#ef4444;font-weight:700;">70% refund</td></tr>
+    <tr><td style="padding:4px 8px 4px 0;color:#4a7c5d;">Critical window (&lt;12 min before)</td><td style="color:#dc2626;font-weight:700;">50% refund — 50% platform fee</td></tr>
   </table>
 </div>
 <div style="background:#fff8e1;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:14px 20px;margin-top:12px;">
-  <p style="margin:0;font-size:13px;color:#92400e;">&#9203; <strong>10-Minute Rule:</strong> If you don't join within 10 minutes of the session start, it will be auto-cancelled (70% refund). If the therapist doesn't join within 10 minutes, you receive a <strong>100% refund</strong>.</p>
+  <p style="margin:0;font-size:13px;color:#92400e;">&#9203; <strong>10-Minute No-Show Rule:</strong> If you don't join within 10 minutes of the session start, it will be auto-cancelled (70% refund). If the therapist doesn't join within 10 minutes, you receive a <strong>100% refund</strong>.</p>
+</div>
+<div style="background:#fef2f2;border-left:4px solid #dc2626;border-radius:0 8px 8px 0;padding:14px 20px;margin-top:12px;">
+  <p style="margin:0;font-size:13px;color:#991b1b;">&#9888;&#65039; <strong>Critical Time Window:</strong> If you cancel within 12 minutes of the session start time, only <strong>50% is refunded</strong> and 50% is retained as a platform fee. The vacated slot will <em>not</em> be reopened for new bookings at this stage.</p>
 </div>`;
 
 // ─── Core send — Brevo HTTP API (HTTPS 443, never blocked) ───────────────────
@@ -236,6 +240,8 @@ export async function sendCancellationUser({ toEmail, userName, therapistName, s
   const color = refundPct === 100 ? '#0d5d3a' : refundPct === 80 ? '#f59e0b' : '#ef4444';
   const reasonText = reason === 'noshow'
     ? 'Your session was automatically cancelled because you did not join within the 10-minute grace period.'
+    : reason === 'critical'
+    ? 'Your session was cancelled within the 12-minute critical window before the session start time.'
     : 'Your session has been cancelled as requested.';
   const html = wrap(`
     ${header('&#128203; Session Cancellation Notice', 'Details of your refund are below.')}

@@ -251,8 +251,7 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
             </div>
           ) : tab === 'aichat' ? (
             <div className="flex-1 overflow-hidden flex flex-col min-h-0 px-4 sm:px-6 py-4">
-              {/* No profile-error shown here — irrelevant to AI chat */}
-              <AiChatPanel />
+              <AiChatPanel onNavigateToTherapy={() => setTab('therapy')} />
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto">
@@ -271,10 +270,10 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
 }
 
 /* AI CHAT */
-function AiChatPanel() {
+function AiChatPanel({ onNavigateToTherapy }: { onNavigateToTherapy?: () => void }) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="h-full">
-      <ZenAvatarChat />
+      <ZenAvatarChat onNavigateToTherapy={onNavigateToTherapy} />
     </motion.div>
   );
 }

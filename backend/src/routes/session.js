@@ -44,9 +44,17 @@ function fmtTime(d) {
   return new Date(d).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
 }
 
-// ─── Helper: refund % based on days until session ────────────────────────────
+// ─── Helper: minutes until session ──────────────────────────────────────────
+function minutesUntil(sessionDate) {
+  return (new Date(sessionDate) - Date.now()) / (1000 * 60);
+}
+
+// ─── Helper: refund % based on time until session ────────────────────────────
+// Critical window: < 12 minutes → 50% refund (platform keeps 50% as fee)
 function refundPercent(sessionDate) {
-  const days = (new Date(sessionDate) - Date.now()) / (1000 * 60 * 60 * 24);
+  const minsLeft = minutesUntil(sessionDate);
+  if (minsLeft < 12) return 50;  // critical time — 50% retained as platform fee
+  const days = minsLeft / (60 * 24);
   if (days >= 3) return 100;
   if (days >= 2) return 80;
   return 70;
@@ -57,6 +65,14 @@ router.post('/book', requireAuth, async (req, res) => {
   try {
     const { therapistId, slotISO } = req.body;
     if (!therapistId || !slotISO) return res.status(400).json({ error: 'Missing therapistId or slotISO' });
+
+    // ── 12-minute booking cutoff ──────────────────────────────────────────────
+    const minsToSession = minutesUntil(slotISO);
+    if (minsToSession < 12) {
+      return res.status(400).json({
+        error: 'This session starts in less than 12 minutes and can no longer be booked. Please choose another slot.'
+      });
+    }
 
     const therapist = await Therapist.findById(therapistId);
     if (!therapist) return res.status(404).json({ error: 'Therapist not found' });
@@ -227,13 +243,25 @@ router.post('/:id/cancel', async (req, res) => {
     const session = await Session.findById(req.params.id).populate('user', 'name email phone');
     if (!session) return res.status(404).json({ error: 'Session not found' });
 
-    const therapist = await Therapist.findById(session.therapist).lean();
-    const refundPct = refundPercent(session.date);
+    const therapist = await Therapist.findById(session.therapist);
+    const minsLeft   = minutesUntil(session.date);
+    const isCritical = minsLeft > 0 && minsLeft < 12; // within 12-min critical window
+    const refundPct  = refundPercent(session.date);
     const sd = fmtDate(session.date);
     const st = fmtTime(session.date);
 
     session.status = 'cancelled';
     await session.save();
+
+    // ── Restore slot only if session is still >12 minutes away ───────────────
+    // (If within the critical window, the slot is too close to be re-booked)
+    if (therapist && minsLeft > 12) {
+      const slotISO = new Date(session.date).toISOString();
+      if (!therapist.availableSlots.includes(slotISO)) {
+        therapist.availableSlots.push(slotISO);
+        await therapist.save();
+      }
+    }
 
     // Email user with refund details
     if (session.user) {
@@ -241,7 +269,8 @@ router.post('/:id/cancel', async (req, res) => {
         toEmail: session.user.email, userName: session.user.name,
         therapistName: session.therapistName,
         sessionDate: sd, sessionTime: st,
-        amountPaid: session.amountPaid, refundPct, reason: 'manual'
+        amountPaid: session.amountPaid, refundPct,
+        reason: isCritical ? 'critical' : 'manual'
       }).catch(e => console.error('[Mailer] cancel-user:', e.message));
     }
 
@@ -253,7 +282,7 @@ router.post('/:id/cancel', async (req, res) => {
       }).catch(e => console.error('[Mailer] cancel-therapist:', e.message));
     }
 
-    return res.json({ ok: true, session, refundPct });
+    return res.json({ ok: true, session, refundPct, isCritical });
   } catch (err) {
     return res.status(500).json({ error: 'Failed to cancel session' });
   }
