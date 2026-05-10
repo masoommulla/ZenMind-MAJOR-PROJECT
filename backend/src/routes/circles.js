@@ -181,4 +181,57 @@ router.delete('/admin/messages/:msgId', requireAdmin, async (req, res) => {
   }
 });
 
+/* GET /api/circles/admin/:id/messages — admin view messages (fixes 401) */
+router.get('/admin/:id/messages', requireAdmin, async (req, res) => {
+  try {
+    const limit  = Math.min(100, Number(req.query.limit) || 50);
+    const messages = await CircleMessage.find({
+      circleId:  req.params.id,
+      isDeleted: false,
+    })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+    res.json({ ok: true, messages: messages.reverse() });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch messages.' });
+  }
+});
+
+/* DELETE /api/circles/admin/members/:userId/circle/:circleId — remove user from a circle */
+router.delete('/admin/members/:userId/circle/:circleId', requireAdmin, async (req, res) => {
+  try {
+    await CircleMember.deleteOne({ userId: req.params.userId, circleId: req.params.circleId });
+    await Circle.findByIdAndUpdate(req.params.circleId, { $inc: { memberCount: -1 } });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to remove member.' });
+  }
+});
+
+/* GET /api/circles/admin/flagged — all non-deleted messages (admin scans for bad words client-side) */
+router.get('/admin/flagged', requireAdmin, async (req, res) => {
+  try {
+    const messages = await CircleMessage.find({ isDeleted: false })
+      .sort({ createdAt: -1 })
+      .limit(500)
+      .lean();
+
+    // Attach circle info
+    const circleIds = [...new Set(messages.map(m => String(m.circleId)))];
+    const circles   = await Circle.find({ _id: { $in: circleIds } }).select('name icon').lean();
+    const circleMap = Object.fromEntries(circles.map(c => [String(c._id), c]));
+
+    const enriched = messages.map(m => ({
+      ...m,
+      circleName: circleMap[String(m.circleId)]?.name || 'Unknown',
+      circleIcon: circleMap[String(m.circleId)]?.icon || '💬',
+    }));
+
+    res.json({ ok: true, messages: enriched });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch messages.' });
+  }
+});
+
 export default router;

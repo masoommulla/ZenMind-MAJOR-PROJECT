@@ -62,9 +62,15 @@ router.get('/me', requireAdmin, async (req, res) => {
 
 /* ── GET /admin/users ── */
 router.get('/users', requireAdmin, async (req, res) => {
+  // Auto-unsuspend any users whose suspension period has expired
+  await User.updateMany(
+    { isSuspended: true, suspendedUntil: { $lte: new Date() } },
+    { $set: { isSuspended: false, suspendedUntil: null } }
+  );
+
   const users = await User.find({}, '-passwordHash').sort({ createdAt: -1 }).lean();
 
-  const totalUsers = users.length;
+  const totalUsers     = users.length;
   const suspendedCount = users.filter(u => u.isSuspended).length;
 
   const today = new Date();
@@ -84,13 +90,28 @@ router.get('/users', requireAdmin, async (req, res) => {
 });
 
 /* ── PUT /admin/users/:id/suspend ── */
+// Body: { durationHours?: number }  — omit for permanent toggle
 router.put('/users/:id/suspend', requireAdmin, async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) return res.status(404).json({ error: 'User not found' });
 
-  user.isSuspended = !user.isSuspended;
+  const { durationHours } = req.body; // optional — hours until auto-unsuspend
+
+  if (user.isSuspended && !durationHours) {
+    // Toggle off (unsuspend)
+    user.isSuspended   = false;
+    user.suspendedUntil = null;
+  } else {
+    // Suspend
+    user.isSuspended = true;
+    if (durationHours && durationHours > 0) {
+      user.suspendedUntil = new Date(Date.now() + durationHours * 60 * 60 * 1000);
+    } else {
+      user.suspendedUntil = null; // permanent
+    }
+  }
   await user.save();
-  return res.json({ ok: true, isSuspended: user.isSuspended });
+  return res.json({ ok: true, isSuspended: user.isSuspended, suspendedUntil: user.suspendedUntil });
 });
 
 /* ── DELETE /admin/users/:id ── */

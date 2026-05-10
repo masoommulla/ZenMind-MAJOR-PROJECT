@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     gender: { type: String, enum: ['male', 'female', 'other'], required: true },
     passwordHash: { type: String, required: true },
     isSuspended: { type: Boolean, default: false },
+    suspendedUntil: { type: Date, default: null }, // null = permanent when isSuspended=true
     avatar: {
       mime: { type: String },
       data: { type: String } // base64 (no local storage)

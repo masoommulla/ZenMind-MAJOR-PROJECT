@@ -9,7 +9,7 @@ import TherapistsManagement from './TherapistsManagement';
 type AdminDashboardProps = { onLogout: () => void };
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'settings'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'settings'>('users');
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminUsername, setAdminUsername] = useState('Admin');
@@ -18,7 +18,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     apiFetch('/admin/me').then((res: any) => setAdminUsername(res.username)).catch(() => {});
   }, []);
 
-  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'settings') => {
+  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'settings') => {
     setActiveTab(tab);
     setMobileOpen(false);
   };
@@ -38,6 +38,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <NavItem icon={Stethoscope} label="Therapists Directory" active={activeTab === 'therapists'} onClick={() => navTo('therapists')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={FileText} label="Content Mgmt" active={activeTab === 'content'} onClick={() => navTo('content')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={MessageSquare} label="Peer Circles" active={activeTab === 'circles'} onClick={() => navTo('circles')} expanded={mobile || sidebarExpanded} />
+        <NavItem icon={Shield} label="Flagged Content" active={activeTab === 'flagged'} onClick={() => navTo('flagged')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Brain} label="Quiz Questions" active={activeTab === 'quiz'} onClick={() => navTo('quiz')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={LifeBuoy} label="Support Tickets" active={activeTab === 'support'} onClick={() => navTo('support')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => navTo('settings')} expanded={mobile || sidebarExpanded} />
@@ -92,7 +93,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <Menu size={20} />
             </button>
             <h1 className="text-lg sm:text-2xl font-bold text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>
-            {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : 'Admin Settings'}
+            {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? '🚨 Flagged Content' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : 'Admin Settings'}
             </h1>
           </div>
           <div className="flex items-center gap-4">
@@ -115,6 +116,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             {activeTab === 'therapists' && <TherapistsManagement />}
             {activeTab === 'content' && <ContentManagement />}
             {activeTab === 'circles' && <PeerCirclesManagement />}
+            {activeTab === 'flagged' && <FlaggedContent />}
             {activeTab === 'quiz' && <QuizManagement />}
             {activeTab === 'support' && <SupportManagement />}
             {activeTab === 'settings' && <AdminSettings onUpdateName={setAdminUsername} />}
@@ -1262,6 +1264,10 @@ function PeerCirclesManagement() {
   const [viewCircle, setViewCircle] = useState<any|null>(null);
   const [viewMsgs, setViewMsgs]     = useState<any[]>([]);
   const [msgsLoading, setMsgsLoading] = useState(false);
+  // Suspend modal state
+  const [suspendTarget, setSuspendTarget] = useState<{userId:string;name:string;circleId:string}|null>(null);
+  const [suspendHours, setSuspendHours]   = useState(24);
+  const [suspending, setSuspending]       = useState(false);
 
   const [name, setName]         = useState('');
   const [desc, setDesc]         = useState('');
@@ -1280,7 +1286,8 @@ function PeerCirclesManagement() {
 
   const openMessages = async (c:any) => {
     setViewCircle(c); setViewMsgs([]); setMsgsLoading(true);
-    try { const r = await apiFetch<any>(`/circles/${c._id}/messages?limit=50`); setViewMsgs(r.messages||[]); }
+    // FIX: use admin-auth route instead of user-auth /circles/:id/messages
+    try { const r = await apiFetch<any>(`/circles/admin/${c._id}/messages?limit=100`); setViewMsgs(r.messages||[]); }
     catch(e:any){ setMsg({text:e.message,ok:false}); }
     finally { setMsgsLoading(false); }
   };
@@ -1290,6 +1297,31 @@ function PeerCirclesManagement() {
       await apiFetch(`/circles/admin/messages/${msgId}`,{method:'DELETE'});
       setViewMsgs(p=>p.filter((m:any)=>m._id!==msgId));
     } catch(e:any){ setMsg({text:e.message,ok:false}); }
+  };
+
+  const removeMember = async (userId:string, circleId:string, msgId:string) => {
+    if(!confirm('Remove this user from the circle?')) return;
+    try {
+      await apiFetch(`/circles/admin/members/${userId}/circle/${circleId}`,{method:'DELETE'});
+      setViewMsgs(p=>p.filter((m:any)=>m._id!==msgId));
+      setMsg({text:'User removed from circle.',ok:true});
+    } catch(e:any){ setMsg({text:e.message,ok:false}); }
+  };
+
+  const doSuspend = async () => {
+    if(!suspendTarget) return;
+    setSuspending(true);
+    try {
+      await apiFetch(`/admin/users/${suspendTarget.userId}/suspend`,{
+        method:'PUT',
+        body:JSON.stringify({durationHours:suspendHours})
+      });
+      // Also remove from circle
+      await apiFetch(`/circles/admin/members/${suspendTarget.userId}/circle/${suspendTarget.circleId}`,{method:'DELETE'});
+      setMsg({text:`${suspendTarget.name} suspended for ${suspendHours}h and removed from circle.`,ok:true});
+      setSuspendTarget(null);
+    } catch(e:any){ setMsg({text:e.message,ok:false}); }
+    finally { setSuspending(false); }
   };
 
   const toggleCircle = async (c:any) => {
@@ -1481,13 +1513,67 @@ function PeerCirclesManagement() {
                         <span className="text-[10px] text-gray-400 ml-auto">{new Date(m.createdAt).toLocaleString()}</span>
                       </div>
                       <p className="text-sm text-[#0a2617] dark:text-gray-300 break-words leading-relaxed">{m.content}</p>
+                      {/* Action buttons — visible on hover */}
+                      <div className="flex gap-1.5 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={()=>deleteMsg(m._id)}
+                          className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete message">
+                          <Trash2 size={11}/> Delete Msg
+                        </button>
+                        {m.userId && !m.isAnonymous && (
+                          <>
+                            <button onClick={()=>removeMember(m.userId, viewCircle._id, m._id)}
+                              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition">
+                              <UserX size={11}/> Remove from Circle
+                            </button>
+                            <button onClick={()=>setSuspendTarget({userId:m.userId, name:m.authorName, circleId:viewCircle._id})}
+                              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-500/10 transition">
+                              <Clock size={11}/> Suspend User
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <button onClick={()=>deleteMsg(m._id)}
-                      className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition opacity-0 group-hover:opacity-100 flex-shrink-0" title="Remove message">
-                      <Trash2 size={14}/>
-                    </button>
                   </div>
                 ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Suspend Modal */}
+      <AnimatePresence>
+        {suspendTarget && (
+          <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} exit={{opacity:0,scale:0.95}}
+              className="bg-white dark:bg-[#111111] rounded-2xl w-full max-w-sm p-6 shadow-2xl border border-[#0d5d3a]/15 dark:border-white/10">
+              <h3 className="font-black text-[#0a2617] dark:text-white mb-1" style={{fontFamily:'Syne,sans-serif'}}>⏳ Timed Suspension</h3>
+              <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mb-5">Suspending <strong className="text-[#0a2617] dark:text-white">{suspendTarget.name}</strong>. They will be auto-unsuspended after the set duration.</p>
+              <div className="mb-5">
+                <label className="text-xs font-bold text-[#4a7c5d] uppercase tracking-wide block mb-2">Suspension Duration</label>
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  {[1,6,12,24,48,72].map(h=>(
+                    <button key={h} onClick={()=>setSuspendHours(h)}
+                      className={`py-2 rounded-xl text-xs font-bold border-2 transition ${suspendHours===h?'border-purple-500 bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300':'border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-purple-300'}`}>
+                      {h}h
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-3">
+                  <input type="number" min={1} max={720} value={suspendHours} onChange={e=>setSuspendHours(Number(e.target.value))}
+                    className="flex-1 bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-purple-400 text-[#0a2617] dark:text-white"/>
+                  <span className="text-sm text-[#4a7c5d] font-semibold">hours</span>
+                </div>
+                <p className="text-[10px] text-[#4a7c5d] dark:text-gray-500 mt-2">
+                  Auto-unsuspends: <strong>{new Date(Date.now()+suspendHours*3600000).toLocaleString()}</strong>
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={()=>setSuspendTarget(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition">Cancel</button>
+                <button onClick={doSuspend} disabled={suspending}
+                  className="flex-1 py-2.5 rounded-xl bg-purple-600 text-white font-bold text-sm hover:bg-purple-700 transition disabled:opacity-50">
+                  {suspending ? 'Suspending…' : `Suspend ${suspendHours}h`}
+                </button>
               </div>
             </motion.div>
           </div>
@@ -1574,6 +1660,228 @@ function QuizManagement() {
           {enabledCount} of {questions.length} questions active
         </p>
       </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   FLAGGED CONTENT — AI bad-word detection + moderation
+════════════════════════════════════════════════════════════ */
+const BAD_WORDS = ['fuck','fuk','f*ck','f**k','shit','sh!t','s**t','bitch','b*tch','bastard','asshole','ass',
+  'dick','cock','pussy','cunt','whore','slut','nigger','nigga','faggot','retard','rape','kill yourself',
+  'kys','suicide','idiot','stupid','moron','loser','hate you','ugly','worthless','die','chutiya','madarchod',
+  'bhenchod','lund','gaand','sala','saala','randi','haramzada','bakwas','harami','kamina','gandu','behen ke',
+  'maa ki','teri maa','teri behen','sexy','porn','sex','nude','naked','abuse','violent','threat'];
+
+function containsBadWord(text: string): string[] {
+  const lower = text.toLowerCase();
+  return BAD_WORDS.filter(w => lower.includes(w));
+}
+
+function SuspendCountdown({ until }: { until: string }) {
+  const [remaining, setRemaining] = useState('');
+  useEffect(() => {
+    const update = () => {
+      const diff = new Date(until).getTime() - Date.now();
+      if (diff <= 0) { setRemaining('Expired'); return; }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setRemaining(`${h}h ${m}m ${s}s`);
+    };
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, [until]);
+  return <span className="font-mono text-purple-600 dark:text-purple-300">{remaining}</span>;
+}
+
+function FlaggedContent() {
+  const [messages, setMessages]     = useState<any[]>([]);
+  const [filtered, setFiltered]     = useState<any[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [msg, setMsg]               = useState<{text:string;ok:boolean}|null>(null);
+  const [suspendTarget, setSuspendTarget] = useState<{userId:string;name:string;circleId:string}|null>(null);
+  const [suspendHours, setSuspendHours]   = useState(24);
+  const [suspending, setSuspending]       = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const r = await apiFetch<any>('/circles/admin/flagged');
+      const all = r.messages || [];
+      // Filter client-side using bad word list
+      const flagged = all
+        .map((m: any) => ({ ...m, flaggedWords: containsBadWord(m.content) }))
+        .filter((m: any) => m.flaggedWords.length > 0);
+      setMessages(all);
+      setFiltered(flagged);
+    } catch(e:any){ setMsg({text:e.message,ok:false}); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { load(); }, []);
+
+  const deleteMsg = async (msgId: string) => {
+    try {
+      await apiFetch(`/circles/admin/messages/${msgId}`, { method: 'DELETE' });
+      setFiltered(p => p.filter((m: any) => m._id !== msgId));
+      setMsg({ text: 'Message removed.', ok: true });
+    } catch(e:any){ setMsg({text:e.message,ok:false}); }
+  };
+
+  const removeMember = async (userId: string, circleId: string, msgId: string) => {
+    if (!confirm('Remove this user from the circle?')) return;
+    try {
+      await apiFetch(`/circles/admin/members/${userId}/circle/${circleId}`, { method: 'DELETE' });
+      setFiltered(p => p.filter((m: any) => m._id !== msgId));
+      setMsg({ text: 'User removed from circle.', ok: true });
+    } catch(e:any){ setMsg({text:e.message,ok:false}); }
+  };
+
+  const doSuspend = async () => {
+    if (!suspendTarget) return;
+    setSuspending(true);
+    try {
+      await apiFetch(`/admin/users/${suspendTarget.userId}/suspend`, {
+        method: 'PUT', body: JSON.stringify({ durationHours: suspendHours })
+      });
+      await apiFetch(`/circles/admin/members/${suspendTarget.userId}/circle/${suspendTarget.circleId}`, { method: 'DELETE' });
+      setMsg({ text: `${suspendTarget.name} suspended for ${suspendHours}h.`, ok: true });
+      setSuspendTarget(null);
+    } catch(e:any){ setMsg({text:e.message,ok:false}); }
+    finally { setSuspending(false); }
+  };
+
+  return (
+    <div className="flex flex-col gap-6">
+      {msg && (
+        <div className={`p-4 rounded-xl font-semibold flex items-center gap-2 text-sm ${msg.ok?'bg-green-50 dark:bg-[#10b981]/10 text-green-700 dark:text-[#10b981] border border-green-200 dark:border-[#10b981]/20':'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'}`}>
+          {msg.ok?<CheckCircle size={16}/>:<AlertTriangle size={16}/>} {msg.text}
+          <button onClick={()=>setMsg(null)} className="ml-auto opacity-60 hover:opacity-100"><X size={14}/></button>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>🚨 Flagged Content</h2>
+          <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-0.5">
+            {loading ? 'Scanning…' : `${filtered.length} flagged message${filtered.length!==1?'s':''} detected across all circles`}
+          </p>
+        </div>
+        <button onClick={load} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#0d5d3a]/20 dark:border-white/10 text-sm font-bold text-[#0d5d3a] dark:text-[#10b981] hover:bg-[#0d5d3a]/5 transition">
+          ↻ Rescan
+        </button>
+      </div>
+
+      {/* Info banner */}
+      <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-sm text-amber-800 dark:text-amber-300">
+        <AlertTriangle size={16} className="shrink-0 mt-0.5"/>
+        <p>Messages are scanned using a built-in bad-word filter ({BAD_WORDS.length} patterns). Anonymous messages can only have the message deleted — user actions require a known identity.</p>
+      </div>
+
+      {loading && <div className="text-center py-20 text-[#4a7c5d] font-bold">🔍 Scanning all circle messages…</div>}
+
+      {!loading && filtered.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-24 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
+          <div className="text-5xl mb-3">✅</div>
+          <div className="font-bold text-[#0a2617] dark:text-white mb-1">No flagged content</div>
+          <div className="text-sm text-[#4a7c5d] dark:text-gray-400">All messages are clean. Last scanned {new Date().toLocaleTimeString()}.</div>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3">
+        {filtered.map((m:any) => (
+          <div key={m._id} className="bg-white dark:bg-[#111111] rounded-2xl border-2 border-red-200 dark:border-red-500/20 p-5 shadow-sm">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center text-lg flex-shrink-0">{m.circleIcon}</div>
+                <div>
+                  <div className="text-xs font-bold text-[#4a7c5d] dark:text-gray-400 uppercase tracking-wide">{m.circleName}</div>
+                  <div className="font-bold text-[#0a2617] dark:text-white text-sm flex items-center gap-1.5">
+                    {m.authorName || 'Anonymous'}
+                    {m.isAnonymous && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 font-semibold">Anon</span>}
+                  </div>
+                  <div className="text-[10px] text-gray-400">{new Date(m.createdAt).toLocaleString()}</div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1.5 justify-end">
+                {m.flaggedWords.map((w:string) => (
+                  <span key={w} className="px-2 py-0.5 bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-400 text-[10px] font-bold rounded-full border border-red-200 dark:border-red-500/20">
+                    ⚠️ {w}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Message content — bad words highlighted */}
+            <div className="bg-red-50/50 dark:bg-red-500/5 rounded-xl p-3 mb-3 text-sm text-[#0a2617] dark:text-gray-300 border border-red-100 dark:border-red-500/10 leading-relaxed">
+              {m.content}
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-wrap gap-2">
+              <button onClick={()=>deleteMsg(m._id)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 border border-red-200 dark:border-red-500/20 transition">
+                <Trash2 size={12}/> Delete Message
+              </button>
+              {m.userId && !m.isAnonymous && (
+                <>
+                  <button onClick={()=>removeMember(m.userId, m.circleId, m._id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 transition">
+                    <UserX size={12}/> Remove from Circle
+                  </button>
+                  <button onClick={()=>setSuspendTarget({userId:m.userId, name:m.authorName, circleId:m.circleId})}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 transition">
+                    <Clock size={12}/> Timed Suspend
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Suspend Modal */}
+      <AnimatePresence>
+        {suspendTarget && (
+          <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} exit={{opacity:0,scale:0.95}}
+              className="bg-white dark:bg-[#111111] rounded-2xl w-full max-w-sm p-6 shadow-2xl border border-[#0d5d3a]/15 dark:border-white/10">
+              <h3 className="font-black text-[#0a2617] dark:text-white mb-1" style={{fontFamily:'Syne,sans-serif'}}>⏳ Timed Suspension</h3>
+              <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mb-5">
+                Suspending <strong className="text-[#0a2617] dark:text-white">{suspendTarget.name}</strong>. Auto-unsuspended after the set duration.
+              </p>
+              <div className="mb-5">
+                <label className="text-xs font-bold text-[#4a7c5d] uppercase tracking-wide block mb-2">Duration</label>
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  {[1,6,12,24,48,72].map(h=>(
+                    <button key={h} onClick={()=>setSuspendHours(h)}
+                      className={`py-2 rounded-xl text-xs font-bold border-2 transition ${suspendHours===h?'border-purple-500 bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300':'border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-purple-300'}`}>
+                      {h}h
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-3">
+                  <input type="number" min={1} max={720} value={suspendHours} onChange={e=>setSuspendHours(Number(e.target.value))}
+                    className="flex-1 bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-purple-400 text-[#0a2617] dark:text-white"/>
+                  <span className="text-sm text-[#4a7c5d] font-semibold">hours</span>
+                </div>
+                <p className="text-[10px] text-[#4a7c5d] dark:text-gray-500 mt-2">
+                  Live countdown: <SuspendCountdown until={new Date(Date.now()+suspendHours*3600000).toISOString()}/>
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={()=>setSuspendTarget(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition">Cancel</button>
+                <button onClick={doSuspend} disabled={suspending}
+                  className="flex-1 py-2.5 rounded-xl bg-purple-600 text-white font-bold text-sm hover:bg-purple-700 transition disabled:opacity-50">
+                  {suspending ? 'Suspending…' : `Suspend ${suspendHours}h`}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
