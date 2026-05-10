@@ -56,13 +56,17 @@ Remember: You are Zen, not an AI assistant. You are a caring companion.`
 
   const fullMessages = [systemPrompt, ...messages];
 
+  // 25s server-side timeout — must respond before the frontend 30s AbortController fires
+  const aiController = new AbortController();
+  const aiTimeout = setTimeout(() => aiController.abort(), 25000);
+
   try {
     const response = await fetch(`${apiUrl}/chat/completions`, {
       method: 'POST',
+      signal: aiController.signal,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
-        // OpenRouter-specific headers (ignored by other providers)
         'HTTP-Referer': process.env.FRONTEND_URL || 'https://zenmind.onrender.com',
         'X-Title': 'ZenMind',
       },
@@ -74,9 +78,20 @@ Remember: You are Zen, not an AI assistant. You are a caring companion.`
       }),
     });
 
+    clearTimeout(aiTimeout);
+
     if (!response.ok) {
       const errText = await response.text();
       console.error('[ZenChat] AI API error:', response.status, errText);
+
+      // Specific user-friendly messages for common failures
+      if (response.status === 429) {
+        return res.status(429).json({ error: 'AI service is busy right now. Please wait a moment and try again.' });
+      }
+      if (response.status === 401) {
+        return res.status(502).json({ error: 'AI service configuration error. Please contact support.' });
+      }
+
       let errMsg = 'AI service error. Please try again.';
       try { errMsg = JSON.parse(errText)?.error?.message || errMsg; } catch {}
       return res.status(502).json({ error: errMsg });
@@ -91,7 +106,14 @@ Remember: You are Zen, not an AI assistant. You are a caring companion.`
 
     return res.json({ reply });
   } catch (err) {
+    clearTimeout(aiTimeout);
     console.error('[ZenChat] Error:', err.message);
+
+    // AbortError means our 25s timeout fired — give a clean message
+    if (err.name === 'AbortError') {
+      return res.status(504).json({ error: 'AI service took too long to respond. Please try again.' });
+    }
+
     return res.status(500).json({ error: 'Failed to connect to AI service.' });
   }
 });

@@ -113,12 +113,27 @@ export default function ZenAvatarChat() {
     setLoading(true); setAvatarState('thinking');
     try {
       const history = [...messages, userMsg].slice(-12).map(({ role, content }) => ({ role, content }));
-      const { reply } = await apiFetch<{ reply: string }>('/zen-chat', { method: 'POST', body: JSON.stringify({ messages: history }) });
+      const { reply } = await apiFetch<{ reply: string }>('/zen-chat', {
+        method: 'POST',
+        body: JSON.stringify({ messages: history }),
+        timeoutMs: 28000, // backend has a 25s timeout — this gives it time to respond first
+      });
       const botMsg: Message = { role: 'assistant', content: reply, id: uid() };
       setMessages(prev => [...prev, botMsg]);
       setAvatarState('idle');
       if (voiceOn) speakText(botMsg);
-    } catch (e: any) { setAvatarState('idle'); setError(e.message || 'Could not reach Zen.'); }
+    } catch (e: any) {
+      setAvatarState('idle');
+      // Show a clean message — not the raw "Request timed out after Nms" text
+      const msg = e?.message || '';
+      if (msg.includes('timed out') || msg.includes('took too long')) {
+        setError('Zen is taking a moment to respond. Please try again.');
+      } else if (msg.includes('fetch') || msg.includes('connect') || msg.includes('Failed')) {
+        setError('Could not reach Zen. Please check your connection.');
+      } else {
+        setError(msg || 'Something went wrong. Please try again.');
+      }
+    }
     finally { setLoading(false); }
   }, [messages, loading, voiceOn, speakText]);
 
