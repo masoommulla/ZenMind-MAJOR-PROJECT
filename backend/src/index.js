@@ -20,6 +20,7 @@ import Story from './models/Story.js';
 import SiteSettings from './models/SiteSettings.js';
 import { Therapist } from './models/Therapist.js';
 import Resource from './models/Resource.js';
+import { Circle, CircleMessage } from './models/Circle.js';
 import bcrypt from 'bcryptjs';
 
 const app = express();
@@ -74,6 +75,8 @@ import resourcesRoute from './routes/resources.js';
 app.use('/api/resources', resourcesRoute);
 import journalRoute from './routes/journal.js';
 app.use('/api/journal', journalRoute);
+import circlesRoute from './routes/circles.js';
+app.use('/api/circles', circlesRoute);
 
 const port = process.env.PORT || 5000;
 const mongoUri = process.env.MONGODB_URI;
@@ -211,6 +214,22 @@ if (resourceCount === 0) {
   console.log('Default Wellness Resources seeded (10 items)');
 }
 
+// Seed Peer Support Circles
+const circleCount = await Circle.countDocuments();
+if (circleCount === 0) {
+  await Circle.insertMany([
+    { name: 'Anxiety Support',    description: 'A safe space to share your anxiety experiences and coping tips.',     category: 'anxiety',       icon: '🫶', gradientFrom: '#7c3aed', gradientTo: '#a78bfa' },
+    { name: 'Exam & Study Stress', description: 'Surviving exams together — study tips, venting, and motivation.',    category: 'exam_pressure', icon: '📚', gradientFrom: '#0369a1', gradientTo: '#38bdf8' },
+    { name: 'Sleep Struggles',    description: 'For those battling insomnia, nightmares, or restless nights.',         category: 'sleep',         icon: '🌙', gradientFrom: '#1e40af', gradientTo: '#6366f1' },
+    { name: 'Loneliness & Connection', description: 'You are not alone. Connect with others who understand.',          category: 'loneliness',    icon: '🌿', gradientFrom: '#0d5d3a', gradientTo: '#10b981' },
+    { name: 'Self-Esteem & Confidence', description: 'Building self-worth, one day at a time.',                       category: 'self_esteem',   icon: '✨', gradientFrom: '#b45309', gradientTo: '#f59e0b' },
+    { name: 'Family & Relationships', description: 'Navigating family tensions, friendships, and heartbreak.',          category: 'family',        icon: '🏠', gradientFrom: '#be123c', gradientTo: '#fb7185' },
+    { name: 'Motivation & Goals',  description: 'Accountability, habit building, and staying on track.',                category: 'motivation',    icon: '🚀', gradientFrom: '#065f46', gradientTo: '#34d399' },
+    { name: 'General Wellness',   description: 'Anything and everything about mental wellness — open to all.',          category: 'general',       icon: '💬', gradientFrom: '#374151', gradientTo: '#6b7280' },
+  ]);
+  console.log('Default Peer Support Circles seeded (8 circles)');
+}
+
 // Seed exactly 12 Therapists (7 online, 5 offline)
 const therapistCount = await Therapist.countDocuments();
 if (therapistCount !== 12) {
@@ -285,6 +304,26 @@ io.on('connection', (socket) => {
     socket.to(`chat_${data.chatId}`).emit('chat-message-deleted', data);
   });
   // ------------------
+
+  // --- Peer Support Circles ---
+  socket.on('join-circle', (circleId) => {
+    socket.join(`circle_${circleId}`);
+  });
+
+  socket.on('leave-circle', (circleId) => {
+    socket.leave(`circle_${circleId}`);
+  });
+
+  socket.on('circle-message', (data) => {
+    // data: { circleId, message } — broadcast to everyone in the circle room (including sender)
+    io.to(`circle_${data.circleId}`).emit('circle-new-message', data.message);
+  });
+
+  socket.on('circle-message-deleted', (data) => {
+    // data: { circleId, messageId } — admin moderation
+    io.to(`circle_${data.circleId}`).emit('circle-message-removed', data.messageId);
+  });
+  // ----------------------------
 
   // --- Video Conference Logic ---
   socket.on('join-room', (roomId) => {
