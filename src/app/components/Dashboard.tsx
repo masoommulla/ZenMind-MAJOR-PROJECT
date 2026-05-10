@@ -746,6 +746,7 @@ function MySessionsPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPast, setSelectedPast] = useState<string[]>([]);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[] | null>(null); // null = modal closed
   const [now, setNow] = useState(new Date());
   const [activeVideoSession, setActiveVideoSession] = useState<string | null>(null);
   
@@ -808,14 +809,22 @@ function MySessionsPanel() {
     return () => clearInterval(interval);
   }, []);
 
+  // Opens the confirm modal for deleting specific ids (or current selection)
+  const confirmDeletePast = (ids?: string[]) => {
+    const toDelete = ids ?? selectedPast;
+    if (toDelete.length === 0) return;
+    setPendingDeleteIds(toDelete);
+  };
+
   const handleDeletePast = async () => {
-    if (selectedPast.length === 0) return;
+    if (!pendingDeleteIds || pendingDeleteIds.length === 0) return;
     try {
       await apiFetch('/sessions/past', {
         method: 'DELETE',
-        body: JSON.stringify({ sessionIds: selectedPast })
+        body: JSON.stringify({ sessionIds: pendingDeleteIds })
       });
-      setSelectedPast([]);
+      setSelectedPast(prev => prev.filter(id => !pendingDeleteIds.includes(id)));
+      setPendingDeleteIds(null);
       fetchSessions();
     } catch (e: any) {
       alert(e.message || 'Failed to delete');
@@ -1001,7 +1010,7 @@ function MySessionsPanel() {
                 {selectedPast.length === past.length ? 'Deselect All' : 'Select All'}
               </button>
               {selectedPast.length > 0 && (
-                <button onClick={handleDeletePast} className="text-xs font-bold text-white bg-red-500 px-3 py-1.5 rounded-lg hover:bg-red-600 transition flex items-center gap-1">
+                <button onClick={() => confirmDeletePast()} className="text-xs font-bold text-white bg-red-500 px-3 py-1.5 rounded-lg hover:bg-red-600 transition flex items-center gap-1">
                   <Trash2 size={12} /> Delete ({selectedPast.length})
                 </button>
               )}
@@ -1018,11 +1027,11 @@ function MySessionsPanel() {
             {past.map(s => {
               const selected = selectedPast.includes(s._id);
               return (
-                <div key={s._id} onClick={() => togglePastSelect(s._id)} 
+                <div key={s._id}
                   className={`border rounded-3xl p-5 cursor-pointer transition-all ${selected ? 'bg-[#e6f4ea]/50 dark:bg-[#0d5d3a]/10 border-[#0d5d3a] dark:border-[#10b981]' : 'bg-white dark:bg-[#111111] border-gray-100 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/20'}`}>
                   
                   <div className="flex justify-between items-start mb-3">
-                    <h4 className="font-bold text-[#0a2617] dark:text-white flex items-center gap-2">
+                    <h4 onClick={() => togglePastSelect(s._id)} className="font-bold text-[#0a2617] dark:text-white flex items-center gap-2 flex-1 cursor-pointer">
                       {s.therapistName}
                       {s.status === 'cancelled' && (
                         <span className="text-[10px] font-black uppercase tracking-wider bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400 px-2 py-0.5 rounded-md">
@@ -1030,15 +1039,24 @@ function MySessionsPanel() {
                         </span>
                       )}
                     </h4>
-                    <div className={`w-5 h-5 rounded border flex items-center justify-center ${selected ? 'bg-[#0d5d3a] border-[#0d5d3a] text-white' : 'border-gray-300 dark:border-gray-600'}`}>
-                      {selected && <CheckSquare size={12} />}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); confirmDeletePast([s._id]); }}
+                        className="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 flex items-center justify-center transition"
+                        title="Delete this session"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                      <div onClick={() => togglePastSelect(s._id)} className={`w-5 h-5 rounded border flex items-center justify-center cursor-pointer ${selected ? 'bg-[#0d5d3a] border-[#0d5d3a] text-white' : 'border-gray-300 dark:border-gray-600'}`}>
+                        {selected && <CheckSquare size={12} />}
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs font-medium mb-1">
+                  <div onClick={() => togglePastSelect(s._id)} className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs font-medium mb-1">
                     <Calendar size={12} /> {new Date(s.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>
-                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs font-medium">
+                  <div onClick={() => togglePastSelect(s._id)} className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs font-medium">
                     <Clock size={12} /> {new Date(s.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} • ₹{s.amountPaid}
                   </div>
                 </div>
@@ -1058,6 +1076,72 @@ function MySessionsPanel() {
           fetchSessions();
         }} />
       )}
+
+      {/* DELETE PAST SESSIONS CONFIRM MODAL */}
+      <AnimatePresence>
+        {pendingDeleteIds !== null && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0, y: 16 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.92, opacity: 0, y: 16 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+              className="bg-white dark:bg-[#111111] rounded-3xl p-7 max-w-sm w-full shadow-2xl relative border border-red-200/60 dark:border-red-500/20"
+            >
+              {/* Icon */}
+              <div className="flex justify-center mb-5">
+                <div className="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
+                  <Trash2 size={30} className="text-red-500" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h3
+                className="text-xl font-black text-center text-[#0a2617] dark:text-white mb-2"
+                style={{ fontFamily: 'Syne, sans-serif' }}
+              >
+                Delete {pendingDeleteIds.length === 1 ? 'Session' : `${pendingDeleteIds.length} Sessions`}?
+              </h3>
+
+              {/* Body */}
+              <p className="text-center text-[#4a7c5d] dark:text-gray-400 text-sm font-medium mb-2">
+                This will permanently remove
+                {pendingDeleteIds.length === 1
+                  ? ' this session'
+                  : ` these ${pendingDeleteIds.length} sessions`}{' '}
+                from your history.
+              </p>
+              <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-4 py-3 mb-6">
+                <Star size={14} className="text-amber-500 mt-0.5 shrink-0" />
+                <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                  The review you gave for{' '}
+                  {pendingDeleteIds.length === 1 ? 'this session' : 'these sessions'}{' '}
+                  will also be deleted permanently.
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setPendingDeleteIds(null)}
+                  className="flex-1 py-3 rounded-xl bg-[#f4f4f4] dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 text-[#0a2617] dark:text-white font-bold hover:bg-gray-200 dark:hover:bg-white/5 transition"
+                >
+                  Keep It
+                </button>
+                <button
+                  onClick={handleDeletePast}
+                  className="flex-1 py-3 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700 transition shadow-md"
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* RATING MODAL */}
       <AnimatePresence>
