@@ -185,6 +185,77 @@ export default function App() {
             }}
           />
           {activeFooterPage && <ProductPage page={activeFooterPage} onClose={() => setActiveFooterPage(null)} />}
+
+          {/* ── 3D Robot Widget (fixed bottom-right) ── */}
+          <div
+            onClick={() => setShowAuth(true)}
+            title="Chat with ZenMind — Get Started"
+            style={{
+              position: 'fixed',
+              bottom: '24px',
+              right: '24px',
+              width: '110px',
+              height: '110px',
+              zIndex: 9999,
+              cursor: 'pointer',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              boxShadow: '0 8px 32px rgba(13,93,58,0.35), 0 2px 8px rgba(0,0,0,0.18)',
+              border: '3px solid rgba(13,93,58,0.5)',
+              animation: 'robotPulse 2.8s ease-in-out infinite',
+              background: '#0a1a12',
+            }}
+          >
+            {/* Tooltip */}
+            <div style={{
+              position: 'absolute',
+              bottom: '115%',
+              right: 0,
+              background: 'linear-gradient(135deg,#0d5d3a,#1a8a5a)',
+              color: '#fff',
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '6px 12px',
+              borderRadius: '12px',
+              whiteSpace: 'nowrap',
+              pointerEvents: 'none',
+              boxShadow: '0 4px 12px rgba(13,93,58,0.3)',
+              fontFamily: 'Inter, sans-serif',
+              letterSpacing: '0.3px',
+            }}>
+              👋 Hi! Let&apos;s get started
+              <span style={{
+                position: 'absolute', bottom: '-6px', right: '16px',
+                width: 0, height: 0,
+                borderLeft: '6px solid transparent',
+                borderRight: '6px solid transparent',
+                borderTop: '6px solid #1a8a5a',
+              }}/>
+            </div>
+
+            {/* Spline iframe — pointer-events none so click goes to wrapper */}
+            <iframe
+              src="https://my.spline.design/genkubgreetingrobot-CyA4TkBNYMI56xiY5EZhAr2D/"
+              frameBorder="0"
+              style={{
+                width: '180px',
+                height: '180px',
+                marginLeft: '-35px',
+                marginTop: '-35px',
+                pointerEvents: 'none',
+                border: 'none',
+              }}
+              title="ZenMind Robot"
+            />
+          </div>
+
+          {/* Pulse keyframe */}
+          <style>{`
+            @keyframes robotPulse {
+              0%,100% { box-shadow: 0 8px 32px rgba(13,93,58,0.35), 0 0 0 0 rgba(13,93,58,0.4); }
+              50%      { box-shadow: 0 8px 32px rgba(13,93,58,0.35), 0 0 0 10px rgba(13,93,58,0); }
+            }
+          `}</style>
         </>
       )}
     </div>
