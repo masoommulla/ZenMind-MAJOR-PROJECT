@@ -186,78 +186,121 @@ export default function App() {
           />
           {activeFooterPage && <ProductPage page={activeFooterPage} onClose={() => setActiveFooterPage(null)} />}
 
-          {/* ── 3D Robot Widget (fixed bottom-right) ── */}
-          <div
-            onClick={() => setShowAuth(true)}
-            title="Chat with ZenMind — Get Started"
-            style={{
-              position: 'fixed',
-              bottom: '24px',
-              right: '24px',
-              width: '110px',
-              height: '110px',
-              zIndex: 9999,
-              cursor: 'pointer',
-              borderRadius: '50%',
-              overflow: 'hidden',
-              boxShadow: '0 8px 32px rgba(13,93,58,0.35), 0 2px 8px rgba(0,0,0,0.18)',
-              border: '3px solid rgba(13,93,58,0.5)',
-              animation: 'robotPulse 2.8s ease-in-out infinite',
-              background: '#0a1a12',
-            }}
-          >
-            {/* Tooltip */}
-            <div style={{
-              position: 'absolute',
-              bottom: '115%',
-              right: 0,
-              background: 'linear-gradient(135deg,#0d5d3a,#1a8a5a)',
-              color: '#fff',
-              fontSize: '11px',
-              fontWeight: 700,
-              padding: '6px 12px',
-              borderRadius: '12px',
-              whiteSpace: 'nowrap',
-              pointerEvents: 'none',
-              boxShadow: '0 4px 12px rgba(13,93,58,0.3)',
-              fontFamily: 'Inter, sans-serif',
-              letterSpacing: '0.3px',
-            }}>
-              👋 Hi! Let&apos;s get started
-              <span style={{
-                position: 'absolute', bottom: '-6px', right: '16px',
-                width: 0, height: 0,
-                borderLeft: '6px solid transparent',
-                borderRight: '6px solid transparent',
-                borderTop: '6px solid #1a8a5a',
-              }}/>
-            </div>
-
-            {/* Spline iframe — pointer-events none so click goes to wrapper */}
-            <iframe
-              src="https://my.spline.design/genkubgreetingrobot-CyA4TkBNYMI56xiY5EZhAr2D/"
-              frameBorder="0"
-              style={{
-                width: '180px',
-                height: '180px',
-                marginLeft: '-35px',
-                marginTop: '-35px',
-                pointerEvents: 'none',
-                border: 'none',
-              }}
-              title="ZenMind Robot"
-            />
-          </div>
-
-          {/* Pulse keyframe */}
-          <style>{`
-            @keyframes robotPulse {
-              0%,100% { box-shadow: 0 8px 32px rgba(13,93,58,0.35), 0 0 0 0 rgba(13,93,58,0.4); }
-              50%      { box-shadow: 0 8px 32px rgba(13,93,58,0.35), 0 0 0 10px rgba(13,93,58,0); }
-            }
-          `}</style>
+          {/* ── 3D Robot Widget (fixed bottom-right, lazy-loaded) ── */}
+          <RobotWidget onOpen={() => setShowAuth(true)} />
         </>
       )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   RobotWidget — lazy loads Spline 3s after mount so it
+   never blocks the landing page from rendering smoothly.
+───────────────────────────────────────────────────────── */
+function RobotWidget({ onOpen }: { onOpen: () => void }) {
+  const [ready, setReady] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  // Defer iframe injection until after the page is fully idle
+  useEffect(() => {
+    const id = window.setTimeout(() => setReady(true), 3000);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  return (
+    <div
+      onClick={onOpen}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      title="Get started with ZenMind"
+      style={{
+        position: 'fixed',
+        bottom: '10px',
+        right: '10px',
+        width: '90px',
+        height: '110px',
+        zIndex: 9999,
+        cursor: 'pointer',
+        background: 'transparent',
+        border: 'none',
+        overflow: 'visible',
+        transform: hovered ? 'scale(1.08) translateY(-4px)' : 'scale(1)',
+        transition: 'transform 0.3s ease',
+      }}
+    >
+      {/* Tooltip — only on hover */}
+      {hovered && (
+        <div style={{
+          position: 'absolute',
+          bottom: '108%',
+          right: 0,
+          background: 'linear-gradient(135deg,#0d5d3a,#1a8a5a)',
+          color: '#fff',
+          fontSize: '11px',
+          fontWeight: 700,
+          padding: '6px 12px',
+          borderRadius: '10px',
+          whiteSpace: 'nowrap',
+          pointerEvents: 'none',
+          boxShadow: '0 4px 14px rgba(13,93,58,0.4)',
+          fontFamily: 'Inter,sans-serif',
+          letterSpacing: '0.2px',
+          animation: 'fadeInUp 0.2s ease',
+        }}>
+          👋 Let&apos;s get started!
+          <span style={{
+            position: 'absolute', bottom: '-6px', right: '14px',
+            width: 0, height: 0,
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderTop: '6px solid #1a8a5a',
+          }} />
+        </div>
+      )}
+
+      {/* Spline iframe — only mounted after 3s delay */}
+      {ready ? (
+        <iframe
+          src="https://my.spline.design/genkubgreetingrobot-CyA4TkBNYMI56xiY5EZhAr2D/"
+          frameBorder="0"
+          style={{
+            width: '200px',
+            height: '200px',
+            marginLeft: '-55px',
+            marginTop: '-45px',
+            pointerEvents: 'none',
+            border: 'none',
+            background: 'transparent',
+          }}
+          title="ZenMind Robot"
+        />
+      ) : (
+        /* Placeholder while loading — a subtle pulsing dot */
+        <div style={{
+          width: '56px',
+          height: '56px',
+          margin: '27px auto 0',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle,rgba(26,138,90,0.5),rgba(13,93,58,0.1))',
+          animation: 'robotDotPulse 1.4s ease-in-out infinite',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '22px',
+        }}>🤖</div>
+      )}
+
+      <style>{`
+        @keyframes robotDotPulse {
+          0%,100% { transform: scale(1); opacity: 0.7; }
+          50%      { transform: scale(1.15); opacity: 1; }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
