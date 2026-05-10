@@ -13,7 +13,7 @@ const router = Router();
 /* GET own lists */
 router.get('/therapist', requireTherapist, async (req, res) => {
   try {
-    const lists = await ReadingList.find({ therapistId: req.therapist.id })
+    const lists = await ReadingList.find({ therapistId: req.therapist._id })
       .sort({ createdAt: -1 }).lean();
     res.json({ ok: true, lists });
   } catch (err) {
@@ -33,7 +33,7 @@ router.post('/therapist', requireTherapist, async (req, res) => {
       category: category || 'general',
       tags: Array.isArray(tags) ? tags : [],
       coverEmoji: coverEmoji || '📚',
-      therapistId:   req.therapist.id,
+      therapistId:   req.therapist._id,
       therapistName: req.therapist.name,
       items: Array.isArray(items) ? items : [],
     });
@@ -46,7 +46,7 @@ router.post('/therapist', requireTherapist, async (req, res) => {
 /* PUT update a list */
 router.put('/therapist/:id', requireTherapist, async (req, res) => {
   try {
-    const list = await ReadingList.findOne({ _id: req.params.id, therapistId: req.therapist.id });
+    const list = await ReadingList.findOne({ _id: req.params.id, therapistId: req.therapist._id });
     if (!list) return res.status(404).json({ error: 'List not found.' });
 
     const { title, description, category, tags, coverEmoji, items, isPublished } = req.body;
@@ -77,7 +77,7 @@ router.put('/therapist/:id', requireTherapist, async (req, res) => {
 /* DELETE a list */
 router.delete('/therapist/:id', requireTherapist, async (req, res) => {
   try {
-    await ReadingList.findOneAndDelete({ _id: req.params.id, therapistId: req.therapist.id });
+    await ReadingList.findOneAndDelete({ _id: req.params.id, therapistId: req.therapist._id });
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
