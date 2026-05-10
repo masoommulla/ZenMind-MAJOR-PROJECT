@@ -2,9 +2,14 @@
  * ZenTalkingHead — Pure React animated doctor avatar.
  * No GLB, no Three.js, no external libraries.
  * Uses CSS keyframe animations + React state for lip-sync and idle behaviour.
+ *
+ * NOTE: useId() is used to generate unique SVG gradient/filter IDs per instance.
+ * Both mobile and desktop instances live in the DOM simultaneously (one is
+ * CSS-hidden, not unmounted), so shared IDs like "skin" would collide — the
+ * browser resolves fill="url(#id)" document-wide, not per-SVG.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 interface ZenTalkingHeadProps {
   speaking: boolean;
@@ -32,13 +37,15 @@ function getMouthShape(char: string): { w: number; h: number } {
 }
 
 export default function ZenTalkingHead({ speaking, text, onReady }: ZenTalkingHeadProps) {
+  // Unique prefix so gradient/filter IDs never collide across instances in the DOM
+  const uid = useId().replace(/:/g, '_');
+
   const [blink, setBlink]             = useState(false);
   const [mouthW, setMouthW]           = useState(16);
   const [mouthH, setMouthH]           = useState(4);
   const [headTilt, setHeadTilt]       = useState(0);
   const [breathScale, setBreathScale] = useState(1);
   const [eyeGaze, setEyeGaze]         = useState({ x: 0, y: 0 });
-  const [lipIndex, setLipIndex]       = useState(0);
 
   const prevTextRef    = useRef('');
   const lipTimerRef    = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -99,21 +106,16 @@ export default function ZenTalkingHead({ speaking, text, onReady }: ZenTalkingHe
     if (lipTimerRef.current) clearInterval(lipTimerRef.current);
 
     if (!speaking || !text) {
-      // Mouth closed
       setMouthW(16); setMouthH(3);
       return;
     }
 
-    // Build sequence from text
     const chars = (text !== prevTextRef.current ? text : text + ' ').split('');
     prevTextRef.current = text;
     let idx = 0;
-    setLipIndex(0);
 
     lipTimerRef.current = setInterval(() => {
-      if (idx >= chars.length) {
-        idx = 0; // loop
-      }
+      if (idx >= chars.length) idx = 0;
       const shape = getMouthShape(chars[idx] || ' ');
       setMouthW(shape.w);
       setMouthH(shape.h);
@@ -133,6 +135,16 @@ export default function ZenTalkingHead({ speaking, text, onReady }: ZenTalkingHe
 
   const eyeScaleY = blink ? 0.08 : 1;
 
+  // Unique IDs for this SVG instance — prevents cross-instance gradient collision
+  const ids = {
+    skin:  `${uid}_skin`,
+    coat:  `${uid}_coat`,
+    hair:  `${uid}_hair`,
+    iris:  `${uid}_iris`,
+    steth: `${uid}_steth`,
+    glow:  `${uid}_glow`,
+  };
+
   return (
     <div
       className="w-full h-full relative overflow-hidden"
@@ -151,50 +163,55 @@ export default function ZenTalkingHead({ speaking, text, onReady }: ZenTalkingHe
         className="absolute"
         style={{
           left: '50%',
-          top: '8%',
+          top: '0%',
           transform: `translateX(-50%) rotate(${headTilt}deg) scale(${breathScale})`,
-          transformOrigin: 'center bottom',
+          transformOrigin: 'center center',
           transition: 'transform 0.8s cubic-bezier(0.4,0,0.2,1)',
-          width: 'clamp(140px, 60%, 220px)',
-          aspectRatio: '1 / 1.5',
+          width: '100%',
+          height: '100%',
         }}
       >
+        {/*
+          viewBox crops to head + neck + top-of-shoulders only (passport view).
+          x: 20→200, y: 48→233 — shows hair-top through upper chest.
+          preserveAspectRatio="xMidYMid slice" fills the container, centred.
+        */}
         <svg
-          viewBox="0 0 220 320"
+          viewBox="5 30 210 220"
           xmlns="http://www.w3.org/2000/svg"
           width="100%"
           height="100%"
-          preserveAspectRatio="xMidYMin slice"
+          preserveAspectRatio="xMidYMid slice"
         >
           <defs>
-            {/* Skin gradient */}
-            <radialGradient id="skin" cx="45%" cy="38%" r="62%">
-              <stop offset="0%" stopColor="#f4c896" />
+            {/* Skin gradient — unique ID prevents collision with other instance */}
+            <radialGradient id={ids.skin} cx="45%" cy="38%" r="62%">
+              <stop offset="0%"   stopColor="#f4c896" />
               <stop offset="100%" stopColor="#d4956a" />
             </radialGradient>
             {/* Coat gradient */}
-            <linearGradient id="coat" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f0f8f2" />
+            <linearGradient id={ids.coat} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor="#f0f8f2" />
               <stop offset="100%" stopColor="#d8eede" />
             </linearGradient>
             {/* Hair */}
-            <linearGradient id="hair" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#2d1a0a" />
+            <linearGradient id={ids.hair} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor="#2d1a0a" />
               <stop offset="100%" stopColor="#1a0a00" />
             </linearGradient>
-            {/* Eye */}
-            <radialGradient id="iris" cx="35%" cy="35%" r="65%">
-              <stop offset="0%" stopColor="#4a9e70" />
-              <stop offset="60%" stopColor="#1a6a40" />
+            {/* Eye iris */}
+            <radialGradient id={ids.iris} cx="35%" cy="35%" r="65%">
+              <stop offset="0%"   stopColor="#4a9e70" />
+              <stop offset="60%"  stopColor="#1a6a40" />
               <stop offset="100%" stopColor="#0a3a20" />
             </radialGradient>
             {/* Stethoscope */}
-            <linearGradient id="steth" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#c0c0c0" />
+            <linearGradient id={ids.steth} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%"   stopColor="#c0c0c0" />
               <stop offset="100%" stopColor="#888" />
             </linearGradient>
             {/* Glow filter */}
-            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <filter id={ids.glow} x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
@@ -206,7 +223,7 @@ export default function ZenTalkingHead({ speaking, text, onReady }: ZenTalkingHe
           {/* ── White coat body ── */}
           <path
             d="M40 220 Q30 240 25 320 H195 Q190 240 180 220 Q160 210 110 210 Q60 210 40 220Z"
-            fill="url(#coat)"
+            fill={`url(#${ids.coat})`}
             stroke="#c8e4d0"
             strokeWidth="1"
           />
@@ -226,34 +243,34 @@ export default function ZenTalkingHead({ speaking, text, onReady }: ZenTalkingHe
           />
 
           {/* ── Neck ── */}
-          <rect x="95" y="185" width="30" height="30" rx="8" fill="url(#skin)" />
+          <rect x="95" y="185" width="30" height="30" rx="8" fill={`url(#${ids.skin})`} />
 
           {/* ── Head ── */}
-          <ellipse cx="110" cy="130" rx="62" ry="68" fill="url(#skin)" />
+          <ellipse cx="110" cy="130" rx="62" ry="68" fill={`url(#${ids.skin})`} />
           {/* Jaw / chin shape */}
-          <ellipse cx="110" cy="178" rx="42" ry="22" fill="url(#skin)" />
+          <ellipse cx="110" cy="178" rx="42" ry="22" fill={`url(#${ids.skin})`} />
 
           {/* ── Hair ── */}
           <path
             d="M50 115 Q52 62 110 58 Q168 62 170 115 Q165 90 155 78 Q140 65 110 63 Q80 65 65 78 Q55 90 50 115Z"
-            fill="url(#hair)"
+            fill={`url(#${ids.hair})`}
           />
           {/* Side hair */}
-          <path d="M50 115 Q44 130 46 148 Q52 135 56 120Z" fill="url(#hair)" />
-          <path d="M170 115 Q176 130 174 148 Q168 135 164 120Z" fill="url(#hair)" />
+          <path d="M50 115 Q44 130 46 148 Q52 135 56 120Z" fill={`url(#${ids.hair})`} />
+          <path d="M170 115 Q176 130 174 148 Q168 135 164 120Z" fill={`url(#${ids.hair})`} />
 
           {/* ── Ears ── */}
-          <ellipse cx="48" cy="135" rx="9" ry="13" fill="url(#skin)" />
-          <ellipse cx="172" cy="135" rx="9" ry="13" fill="url(#skin)" />
-          <ellipse cx="48" cy="135" rx="5" ry="8" fill="#e8a878" opacity="0.5" />
-          <ellipse cx="172" cy="135" rx="5" ry="8" fill="#e8a878" opacity="0.5" />
+          <ellipse cx="48"  cy="135" rx="9" ry="13" fill={`url(#${ids.skin})`} />
+          <ellipse cx="172" cy="135" rx="9" ry="13" fill={`url(#${ids.skin})`} />
+          <ellipse cx="48"  cy="135" rx="5" ry="8"  fill="#e8a878" opacity="0.5" />
+          <ellipse cx="172" cy="135" rx="5" ry="8"  fill="#e8a878" opacity="0.5" />
 
           {/* ── Eyebrows ── */}
-          <path d="M76 105 Q88 99 100 104" stroke="#4a2800" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M76 105 Q88 99 100 104"  stroke="#4a2800" strokeWidth="3" fill="none" strokeLinecap="round" />
           <path d="M120 104 Q132 99 144 105" stroke="#4a2800" strokeWidth="3" fill="none" strokeLinecap="round" />
 
-          {/* ── Eyes ── */}
-          <g transform={`translate(88, 124)`}>
+          {/* ── Left eye ── */}
+          <g transform="translate(88, 124)">
             <ellipse rx="12" ry="10" fill="white" />
             <ellipse
               rx="12" ry="10"
@@ -263,7 +280,7 @@ export default function ZenTalkingHead({ speaking, text, onReady }: ZenTalkingHe
             <ellipse
               cx={eyeGaze.x} cy={eyeGaze.y}
               rx="7" ry="7"
-              fill="url(#iris)"
+              fill={`url(#${ids.iris})`}
               style={{ transition: 'cx 0.4s, cy 0.4s' }}
             />
             <ellipse cx={eyeGaze.x} cy={eyeGaze.y} rx="4" ry="4" fill="#0a1a10" />
@@ -276,7 +293,9 @@ export default function ZenTalkingHead({ speaking, text, onReady }: ZenTalkingHe
               style={{ transition: 'opacity 0.06s' }}
             />
           </g>
-          <g transform={`translate(132, 124)`}>
+
+          {/* ── Right eye ── */}
+          <g transform="translate(132, 124)">
             <ellipse rx="12" ry="10" fill="white" />
             <ellipse
               rx="12" ry="10"
@@ -286,7 +305,7 @@ export default function ZenTalkingHead({ speaking, text, onReady }: ZenTalkingHe
             <ellipse
               cx={eyeGaze.x} cy={eyeGaze.y}
               rx="7" ry="7"
-              fill="url(#iris)"
+              fill={`url(#${ids.iris})`}
               style={{ transition: 'cx 0.4s, cy 0.4s' }}
             />
             <ellipse cx={eyeGaze.x} cy={eyeGaze.y} rx="4" ry="4" fill="#0a1a10" />
@@ -350,11 +369,11 @@ export default function ZenTalkingHead({ speaking, text, onReady }: ZenTalkingHe
           <path
             d="M88 198 Q75 205 72 220 Q68 238 76 244 Q84 250 90 244 Q96 238 92 222 Q108 218 128 222 Q124 238 130 244 Q136 250 144 244 Q152 238 148 220 Q145 205 132 198"
             fill="none"
-            stroke="url(#steth)"
+            stroke={`url(#${ids.steth})`}
             strokeWidth="3"
             strokeLinecap="round"
           />
-          <circle cx="90" cy="245" r="5" fill="#888" />
+          <circle cx="90"  cy="245" r="5" fill="#888" />
           <circle cx="130" cy="245" r="5" fill="#888" />
           {/* Chest piece */}
           <circle cx="110" cy="220" r="8" fill="none" stroke="#aaa" strokeWidth="2.5" />
@@ -364,7 +383,7 @@ export default function ZenTalkingHead({ speaking, text, onReady }: ZenTalkingHe
           {speaking && (
             <>
               <circle cx="110" cy="220" r="12" fill="none" stroke="#10b981" strokeWidth="1.5" opacity="0.6">
-                <animate attributeName="r" values="10;18;10" dur="1.2s" repeatCount="indefinite" />
+                <animate attributeName="r"       values="10;18;10" dur="1.2s" repeatCount="indefinite" />
                 <animate attributeName="opacity" values="0.6;0;0.6" dur="1.2s" repeatCount="indefinite" />
               </circle>
             </>

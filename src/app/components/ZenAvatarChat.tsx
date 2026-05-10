@@ -171,11 +171,11 @@ export default function ZenAvatarChat() {
       {/* ── DESKTOP: left panel ────────────────────────────────────────── */}
       <div className="hidden lg:flex flex-col flex-shrink-0 w-72 xl:w-80 gap-3">
 
-        {/* Avatar card — SAME 9:11 aspect ratio as mobile (w-36 h-44 = 144:176 = 9:11)
-             xMidYMin slice fills the card and shows ONLY head+shoulders, same as mobile */}
+        {/* Avatar card — head+shoulders passport view (same as mobile)
+             SVG viewBox crops to face/neck area — no full body visible */}
         <div
           className="relative w-full rounded-3xl overflow-hidden shadow-2xl flex-shrink-0"
-          style={{ aspectRatio: '9 / 11' }}
+          style={{ aspectRatio: '3 / 4' }}
         >
           <ZenTalkingHead speaking={speaking} text={lastBotText} />
 
