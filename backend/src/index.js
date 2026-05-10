@@ -1,4 +1,7 @@
 import 'dotenv/config';
+import { setDefaultResultOrder } from 'dns';
+// Force IPv4 DNS resolution — prevents ENETUNREACH on Render (IPv6 not routable to smtp.gmail.com)
+setDefaultResultOrder('ipv4first');
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
