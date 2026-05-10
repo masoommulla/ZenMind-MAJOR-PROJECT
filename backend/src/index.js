@@ -152,7 +152,7 @@ if (resourceCount === 0) {
     },
     {
       title: 'The Surprising Science of Happiness — TED Talk',
-      description: 'Dan Gilbert challenges the idea that we'll be miserable if we don't get what we want.',
+      description: 'Dan Gilbert challenges the idea that we\'ll be miserable if we don\'t get what we want.',
       type: 'link', sourceType: 'url',
       url: 'https://www.ted.com/talks/dan_gilbert_the_surprising_science_of_happiness',
       tags: ['Motivation', 'Happiness'],
