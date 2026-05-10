@@ -1,53 +1,38 @@
 /**
- * Nodemailer — Gmail SMTP
- * .env: EMAIL_USER, EMAIL_PASS (Gmail App Password), EMAIL_FROM_NAME
+ * Nodemailer — Brevo (formerly Sendinblue) SMTP
+ * smtp-relay.brevo.com:587 — IPv4, works reliably on Render
  *
- * Render IPv6 fix — THE definitive approach:
- *   Pre-resolve smtp.gmail.com to a raw IPv4 address at send time.
- *   Nodemailer receives an IP (e.g. 74.125.x.x), so it never does
- *   its own DNS lookup. No IPv6 possible. tls.servername preserves SNI.
+ * .env: BREVO_SMTP_USER  (your Brevo account email)
+ *       BREVO_SMTP_KEY   (SMTP key from Brevo → Settings → SMTP & API)
+ *       EMAIL_FROM       (verified sender address in Brevo)
+ *       EMAIL_FROM_NAME  (display name)
  */
 import nodemailer from 'nodemailer';
-import dns       from 'dns';
 
-// Cache the resolved IPv4 address so we only look it up once per process
-let _smtpIpv4 = null;
-async function resolveGmailIp() {
-  if (_smtpIpv4) return _smtpIpv4;
-  const { address } = await dns.promises.lookup('smtp.gmail.com', { family: 4 });
-  _smtpIpv4 = address;
-  console.log(`[Mailer] smtp.gmail.com resolved to IPv4 ${address}`);
-  return address;
-}
-
-async function getTransport() {
-  const user = process.env.EMAIL_USER;
-  const pass = (process.env.EMAIL_PASS || '').replace(/\s/g, '');
-  if (!user || !pass) throw new Error('[Mailer] EMAIL_USER or EMAIL_PASS missing from env');
-  const ip = await resolveGmailIp();
+function createTransport() {
+  const user = process.env.BREVO_SMTP_USER;
+  const pass = process.env.BREVO_SMTP_KEY;
+  if (!user || !pass) throw new Error('[Mailer] BREVO_SMTP_USER or BREVO_SMTP_KEY missing from env');
   return nodemailer.createTransport({
-    host: ip,          // raw IPv4 — no DNS lookup by nodemailer
+    host: 'smtp-relay.brevo.com',
     port: 587,
-    secure: false,     // STARTTLS
+    secure: false,
     requireTLS: true,
     auth: { user, pass },
     connectionTimeout: 20000,
     greetingTimeout:   20000,
     socketTimeout:     25000,
-    tls: {
-      servername: 'smtp.gmail.com',   // SNI: TLS cert check against hostname
-      rejectUnauthorized: false,
-    },
   });
 }
 
-const from = () => `"${process.env.EMAIL_FROM_NAME || 'ZenMind'}" <${process.env.EMAIL_USER}>`;
+const from = () =>
+  `"${process.env.EMAIL_FROM_NAME || 'ZenMind'}" <${process.env.EMAIL_FROM || process.env.BREVO_SMTP_USER}>`;
 
-const _u = process.env.EMAIL_USER;
-if (!_u || !process.env.EMAIL_PASS) {
-  console.warn('[Mailer] ⚠️  EMAIL_USER or EMAIL_PASS not set — emails will be skipped');
+const _u = process.env.BREVO_SMTP_USER;
+if (!_u || !process.env.BREVO_SMTP_KEY) {
+  console.warn('[Mailer] ⚠️  BREVO_SMTP_USER or BREVO_SMTP_KEY not set — emails will be skipped');
 } else {
-  console.log(`[Mailer] ✅ Gmail SMTP ready — will send as ${_u} (IPv4 pre-resolve on first send)`);
+  console.log(`[Mailer] ✅ Brevo SMTP ready — sending as ${process.env.EMAIL_FROM || _u}`);
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -94,8 +79,7 @@ const POLICY_HTML = `<div style="background:#f0fbf4;border-left:4px solid #0d5d3
 </div>`;
 
 async function send(to, subject, html) {
-  const transport = await getTransport();
-  await transport.sendMail({ from: from(), to, subject, html });
+  await createTransport().sendMail({ from: from(), to, subject, html });
   console.log(`[Mailer] ✅ "${subject}" → ${to}`);
 }
 
