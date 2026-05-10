@@ -58,6 +58,11 @@ export default defineConfig({
     emptyOutDir: true,
   },
 
+  optimizeDeps: {
+    include: ['@met4citizen/talkinghead'],
+    exclude: [],
+  },
+
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
-  assetsInclude: ['**/*.svg', '**/*.csv'],
+  assetsInclude: ['**/*.svg', '**/*.csv', '**/*.glb'],
 })

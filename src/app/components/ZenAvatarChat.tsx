@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mic, MicOff, Send, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 import { apiFetch } from '../api/client';
+import ZenTalkingHead from './ZenTalkingHead';
 
 type Message = { role: 'user' | 'assistant'; content: string; id: string };
 let _id = 0;
@@ -9,62 +10,7 @@ const uid = () => `m_${Date.now()}_${_id++}`;
 const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 const SS = window.speechSynthesis;
 
-/* ── SVG Avatar Face ─────────────────────────────────────────────────────── */
-function AvatarFace({ state }: { state: 'idle' | 'listening' | 'thinking' | 'speaking' }) {
-  const mouthOpen = state === 'speaking';
-  const eyeScale  = state === 'thinking' ? 0.6 : 1;
-  return (
-    <svg viewBox="0 0 120 120" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="faceGrad" cx="40%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="#1db975" />
-          <stop offset="100%" stopColor="#0a3d22" />
-        </radialGradient>
-        <radialGradient id="eyeGrad" cx="50%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#e8fff4" />
-          <stop offset="100%" stopColor="#a8f0cc" />
-        </radialGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="2.5" result="blur" />
-          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
-      </defs>
-      {/* Face */}
-      <circle cx="60" cy="60" r="55" fill="url(#faceGrad)" />
-      {/* Highlight */}
-      <ellipse cx="45" cy="38" rx="18" ry="10" fill="white" opacity="0.08" />
-      {/* Left eye */}
-      <g transform={`translate(38,48) scale(1,${eyeScale})`}>
-        <ellipse cx="0" cy="0" rx="7" ry="7" fill="url(#eyeGrad)" filter="url(#glow)" />
-        <circle cx="1" cy="-1" r="3.5" fill="#0a3d22" />
-        <circle cx="2.5" cy="-2.5" r="1.2" fill="white" opacity="0.9" />
-      </g>
-      {/* Right eye */}
-      <g transform={`translate(82,48) scale(1,${eyeScale})`}>
-        <ellipse cx="0" cy="0" rx="7" ry="7" fill="url(#eyeGrad)" filter="url(#glow)" />
-        <circle cx="1" cy="-1" r="3.5" fill="#0a3d22" />
-        <circle cx="2.5" cy="-2.5" r="1.2" fill="white" opacity="0.9" />
-      </g>
-      {/* Eyebrows */}
-      <path d="M31 39 Q38 35 45 39" stroke="#a8f0cc" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.6" />
-      <path d="M75 39 Q82 35 89 39" stroke="#a8f0cc" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.6" />
-      {/* Mouth */}
-      {mouthOpen ? (
-        <ellipse cx="60" cy="82" rx="14" ry="9" fill="#0a3d22" opacity="0.85" />
-      ) : (
-        <path d="M46 82 Q60 90 74 82" stroke="#a8f0cc" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      )}
-      {/* Listening dots */}
-      {state === 'listening' && (
-        <>
-          <circle cx="46" cy="82" r="2.5" fill="#10b981" opacity="0.9" />
-          <circle cx="60" cy="85" r="2.5" fill="#10b981" opacity="0.9" />
-          <circle cx="74" cy="82" r="2.5" fill="#10b981" opacity="0.9" />
-        </>
-      )}
-    </svg>
-  );
-}
+/* AvatarFace SVG removed — replaced by ZenTalkingHead 3D component */
 
 /* ── Waveform Visualizer ─────────────────────────────────────────────────── */
 function WaveVisualizer({ active }: { active: boolean }) {
@@ -114,6 +60,7 @@ export default function ZenAvatarChat() {
   const [speaking, setSpeaking]     = useState(false);
   const [voiceOn, setVoiceOn]       = useState(true);
   const [avatarState, setAvatarState] = useState<'idle'|'listening'|'thinking'|'speaking'>('idle');
+  const [lastBotText, setLastBotText] = useState('');     // drives ZenTalkingHead lip-sync
   const [error, setError]           = useState<string | null>(null);
 
   const recognitionRef = useRef<any>(null);
@@ -136,7 +83,7 @@ export default function ZenAvatarChat() {
     const voices = SS.getVoices();
     const v = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Samantha') || v.name.includes('Karen'));
     if (v) utt.voice = v;
-    utt.onstart  = () => { setSpeaking(true); setAvatarState('speaking'); };
+    utt.onstart  = () => { setSpeaking(true); setAvatarState('speaking'); setLastBotText(msg.content); };
     utt.onend    = () => { setSpeaking(false); setAvatarState('idle'); };
     utt.onerror  = () => { setSpeaking(false); setAvatarState('idle'); };
     SS.speak(utt);
@@ -185,17 +132,17 @@ export default function ZenAvatarChat() {
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-148px)] min-h-[560px]">
 
-      {/* ── MOBILE: two mini floating boxes ────────────────────────────── */}
+      {/* ── MOBILE: avatar strip ─────────────────────────────────────────── */}
       <div className="flex lg:hidden gap-3 flex-shrink-0">
-        {/* Mini avatar */}
-        <div className="w-28 h-28 rounded-2xl overflow-hidden bg-gradient-to-br from-[#0a2617] to-[#1a8a5a] p-3 flex-shrink-0 shadow-xl relative">
-          <AvatarFace state={avatarState} />
+        {/* 3D Avatar — taller on mobile for better view */}
+        <div className="w-36 h-44 rounded-2xl overflow-hidden flex-shrink-0 shadow-xl relative">
+          <ZenTalkingHead speaking={speaking} text={lastBotText} />
           <div className="absolute bottom-1.5 left-0 right-0 text-center">
             <div className={`inline-block w-1.5 h-1.5 rounded-full ${avatarState === 'idle' ? 'bg-[#10b981]/50' : 'bg-[#10b981] animate-pulse'}`} />
           </div>
         </div>
-        {/* Mini waveform */}
-        <div className="flex-1 h-28 rounded-2xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 shadow-xl overflow-hidden flex flex-col">
+        {/* Waveform + status */}
+        <div className="flex-1 h-44 rounded-2xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 shadow-xl overflow-hidden flex flex-col">
           <div className="text-[10px] font-semibold text-[#4a7c5d] dark:text-gray-400 px-3 pt-2 capitalize">{avatarState === 'idle' ? 'Ready' : avatarState + '...'}</div>
           <div className="flex-1"><WaveVisualizer active={speaking || listening} /></div>
         </div>
@@ -209,38 +156,38 @@ export default function ZenAvatarChat() {
       {/* ── DESKTOP: left panel ────────────────────────────────────────── */}
       <div className="hidden lg:flex flex-col flex-shrink-0 w-72 xl:w-80 gap-3">
 
-        {/* Avatar top section */}
-        <div className="relative flex-[3] rounded-3xl overflow-hidden bg-gradient-to-br from-[#071a0f] via-[#0d5d3a] to-[#0a3d22] flex flex-col items-center justify-center p-6 shadow-xl min-h-[220px]">
-          {/* Glow */}
-          <div className={`absolute inset-0 pointer-events-none transition-all duration-700 ${avatarState === 'speaking' ? 'opacity-100' : 'opacity-40'}`}>
-            <div className="absolute inset-[20%] rounded-full bg-[#10b981]/15 blur-2xl" />
-          </div>
-          {/* Pulse rings when speaking/listening */}
+        {/* 3D Avatar — fills the top card fully (passport view) */}
+        <div className="relative flex-[3] rounded-3xl overflow-hidden shadow-2xl min-h-[280px]">
+          <ZenTalkingHead speaking={speaking} text={lastBotText} />
+
+          {/* Subtle pulse rings on top of canvas when active */}
           <AnimatePresence>
-            {(avatarState === 'speaking' || avatarState === 'listening') && [1,2,3].map(i => (
-              <motion.div key={i} className="absolute rounded-full border border-[#10b981]/25"
-                style={{ inset: `${30 - i * 12}%` }}
-                animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0, 0.4] }}
-                transition={{ duration: 2, repeat: Infinity, delay: i * 0.4 }}
+            {(avatarState === 'speaking' || avatarState === 'listening') && [1, 2].map(i => (
+              <motion.div key={i}
+                className="absolute rounded-full border border-[#10b981]/20 pointer-events-none"
+                style={{ inset: `${25 - i * 10}%` }}
+                animate={{ scale: [1, 1.12, 1], opacity: [0.3, 0, 0.3] }}
+                transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.5 }}
               />
             ))}
           </AnimatePresence>
-          {/* Avatar face */}
-          <div className={`relative z-10 w-32 h-32 transition-transform duration-300 ${avatarState === 'speaking' ? 'scale-105' : 'scale-100'}`}>
-            <AvatarFace state={avatarState} />
-          </div>
-          {/* Name + status */}
-          <div className="relative z-10 text-center mt-3">
-            <div className="text-white text-lg font-bold tracking-wide" style={{ fontFamily: 'Syne,sans-serif' }}>Zen</div>
-            <div className="flex items-center justify-center gap-1.5 mt-1">
-              <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${avatarState === 'speaking' ? 'bg-[#10b981] animate-pulse' : avatarState === 'listening' ? 'bg-yellow-400 animate-pulse' : avatarState === 'thinking' ? 'bg-blue-400 animate-pulse' : 'bg-[#10b981]/40'}`} />
-              <span className="text-[#10b981]/70 text-xs capitalize">{avatarState === 'idle' ? 'Ready' : avatarState + '...'}</span>
+
+          {/* Name + status badge at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
+            <div className="text-white text-base font-bold tracking-wide" style={{ fontFamily: 'Syne,sans-serif' }}>Zen</div>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
+                avatarState === 'speaking' ? 'bg-[#10b981] animate-pulse' :
+                avatarState === 'listening' ? 'bg-yellow-400 animate-pulse' :
+                avatarState === 'thinking' ? 'bg-blue-400 animate-pulse' : 'bg-[#10b981]/40'
+              }`} />
+              <span className="text-white/70 text-xs capitalize">{avatarState === 'idle' ? 'Ready' : avatarState + '...'}</span>
             </div>
           </div>
         </div>
 
         {/* Waveform bottom section */}
-        <div className="flex-[2] rounded-3xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm overflow-hidden flex flex-col min-h-[120px]">
+        <div className="flex-[1] rounded-3xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm overflow-hidden flex flex-col min-h-[100px]">
           <div className="px-4 pt-3 pb-1 text-[11px] font-semibold text-[#4a7c5d] dark:text-gray-400 uppercase tracking-wider">Voice Activity</div>
           <div className="flex-1 pb-2"><WaveVisualizer active={speaking || listening} /></div>
         </div>
