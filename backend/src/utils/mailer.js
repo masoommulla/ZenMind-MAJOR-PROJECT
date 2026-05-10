@@ -2,51 +2,44 @@
  * Nodemailer — Gmail SMTP (smtp.gmail.com:587 STARTTLS)
  * .env: EMAIL_USER, EMAIL_PASS (Gmail App Password), EMAIL_FROM_NAME
  *
- * Cloud fix: port 587 + STARTTLS is far more reliably routed than 465/SSL.
- * dns.setDefaultResultOrder('ipv4first') forces ALL Node.js DNS lookups
- * to return IPv4 — prevents ENETUNREACH on IPv6-first hosts (Render, etc).
+ * Render IPv6 fix — three layers:
+ *  1. family:4      → tells net.Socket to bind IPv4 only (most reliable)
+ *  2. dnsLookup()   → per-transport DNS override, always returns IPv4 record
+ *  3. setDefaultResultOrder → global Node.js fallback
  */
 import nodemailer from 'nodemailer';
 import dns from 'dns';
 
-// ✅ Global: force all Node.js DNS resolution to prefer IPv4
-// This prevents ENETUNREACH when the host's DNS returns IPv6 addresses first.
 dns.setDefaultResultOrder('ipv4first');
 
 function createTransport() {
   const user = process.env.EMAIL_USER;
-  // Strip spaces from App Password in case they were pasted with spaces
   const pass = (process.env.EMAIL_PASS || '').replace(/\s/g, '');
   if (!user || !pass) throw new Error('[Mailer] EMAIL_USER or EMAIL_PASS missing from env');
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,          // ✅ STARTTLS — widely routed, not blocked like 465/SSL
-    secure: false,      // false = STARTTLS (upgraded after connect)
-    requireTLS: true,   // reject non-TLS connections
+    port: 587,
+    secure: false,      // STARTTLS — upgraded after connect
+    requireTLS: true,
+    family: 4,          // ✅ Force IPv4 socket — prevents ENETUNREACH on Render
+    dnsLookup: (hostname, _opts, cb) => dns.lookup(hostname, { family: 4 }, cb),
     auth: { user, pass },
     connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 20000,
-    tls: { rejectUnauthorized: false }
+    greetingTimeout:   15000,
+    socketTimeout:     20000,
+    tls: { rejectUnauthorized: false },
   });
 }
+
 const from = () => `"${process.env.EMAIL_FROM_NAME || 'ZenMind'}" <${process.env.EMAIL_USER}>`;
 
-// Verify SMTP connection at startup — logs exact error to Render logs
-(async () => {
-  const user = process.env.EMAIL_USER;
-  const pass = (process.env.EMAIL_PASS || '').replace(/\s/g, '');
-  if (!user || !pass) {
-    console.warn('[Mailer] ⚠️  EMAIL_USER or EMAIL_PASS not set — emails will fail');
-    return;
-  }
-  try {
-    await createTransport().verify();
-    console.log(`[Mailer] ✅ SMTP ready — sending as ${user}`);
-  } catch (err) {
-    console.error('[Mailer] ❌ SMTP verify failed:', err.message);
-  }
-})();
+// No startup verify() — avoids misleading timeout logs; errors caught per-send
+const _u = process.env.EMAIL_USER;
+if (!_u || !process.env.EMAIL_PASS) {
+  console.warn('[Mailer] ⚠️  EMAIL_USER or EMAIL_PASS not set — emails will be skipped');
+} else {
+  console.log(`[Mailer] ✅ Gmail SMTP configured — sending as ${_u}`);
+}
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function fmtDate(d) {
