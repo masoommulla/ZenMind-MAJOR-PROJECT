@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Mic, MicOff, Send, Volume2, VolumeX, RotateCcw, ExternalLink } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import ZenTalkingHead from './ZenTalkingHead';
+import ZenChatSidebar from './ZenChatSidebar';
+import MoodCheckIn from './MoodCheckIn';
 
 type MessageAction = 'STORY_BUTTONS' | 'POST_STORY' | 'THERAPY_BUTTON' | 'CRISIS' | null;
 type Message = { role: 'user' | 'assistant'; content: string; id: string; action?: MessageAction };
@@ -159,11 +161,47 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
   const [lastBotText, setLastBotText] = useState('');
   const [error, setError]             = useState<string | null>(null);
 
+  // Session persistence
+  const [sessionId, setSessionId]     = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarRefresh, setSidebarRefresh] = useState(0);
+
+  // Mood check-in
+  const [showMood, setShowMood]       = useState(false);
+  const moodShownRef                  = useRef(false);
+
   const recognitionRef = useRef<any>(null);
   const transcriptRef  = useRef('');
   const chatEndRef     = useRef<HTMLDivElement>(null);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  // Check if mood already logged today — show prompt after first message if not
+  const checkMoodAndPrompt = useCallback(async () => {
+    if (moodShownRef.current) return;
+    try {
+      const { checkedIn } = await apiFetch<{ checkedIn: boolean }>('/zen-progress/mood/today');
+      if (!checkedIn) { setShowMood(true); moodShownRef.current = true; }
+    } catch { /* silent */ }
+  }, []);
+
+  // Load messages for a past session
+  const loadSession = useCallback(async (id: string) => {
+    try {
+      const data = await apiFetch<{ messages: any[]; sessionId: string; title: string }>(`/zen-sessions/${id}/messages`);
+      const restored: Message[] = data.messages.map((m: any) => ({
+        id: uid(),
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+        action: m.action || null,
+      }));
+      SS?.cancel(); setSpeaking(false); setAvatarState('idle');
+      setMessages(restored.length ? restored : [{ role: 'assistant', id: uid(), content: GREETING }]);
+      setSessionId(id);
+      setInput('');
+      setError(null);
+    } catch { /* silent */ }
+  }, []);
 
   const GREETING = "Hey, I'm Zeni 💚 I'm here for you — no judgment, just support. How are you feeling today?";
 
@@ -211,16 +249,30 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
     setLoading(true); setAvatarState('thinking');
     try {
       const history = [...messages, userMsg].slice(-14).map(({ role, content }) => ({ role, content }));
-      const { reply } = await apiFetch<{ reply: string }>('/zen-chat', {
+      const body: any = { messages: history };
+      if (sessionId) body.sessionId = sessionId;
+
+      const res = await apiFetch<{ reply: string; sessionId: string }>('/zen-chat', {
         method: 'POST',
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify(body),
         timeoutMs: 28000,
       });
+      const { reply, sessionId: newSessionId } = res;
+
+      // Store the session ID from first message onward
+      if (newSessionId && !sessionId) {
+        setSessionId(newSessionId);
+        setSidebarRefresh(r => r + 1); // refresh sidebar list
+      }
+
       const { text: cleanText, action } = parseReply(reply);
       const botMsg: Message = { role: 'assistant', content: cleanText, id: uid(), action };
       setMessages(prev => [...prev, botMsg]);
       setAvatarState('idle');
       if (voiceOn) speakText(botMsg);
+
+      // After first bot reply, check if user needs mood check-in
+      checkMoodAndPrompt();
     } catch (e: any) {
       setAvatarState('idle');
       const msg = e?.message || '';
@@ -228,22 +280,53 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
       else if (msg.includes('fetch') || msg.includes('connect') || msg.includes('Failed')) setError('Could not reach Zeni. Please check your connection.');
       else setError(msg || 'Something went wrong. Please try again.');
     } finally { setLoading(false); }
-  }, [messages, loading, voiceOn, speakText]);
+  }, [messages, loading, voiceOn, speakText, sessionId, checkMoodAndPrompt]);
 
   const handleStoryYes    = useCallback(() => handleSend("Yes, please tell me the story"), [handleSend]);
   const handleStoryNo     = useCallback(() => handleSend("Not right now, thanks"), [handleSend]);
-  const handleFeelingGood = useCallback(() => handleSend("Feeling good now, thank you 😊"), [handleSend]);
+  const handleFeelingGood = useCallback(async () => {
+    // Passive mood capture: "Feeling good" = 8/10
+    if (sessionId) {
+      apiFetch(`/zen-sessions/${sessionId}/mood`, {
+        method: 'PATCH',
+        body: JSON.stringify({ score: 8 }),
+      }).catch(() => {});
+    }
+    handleSend("Feeling good now, thank you 😊");
+  }, [handleSend, sessionId]);
   const handleConnectReal = useCallback(() => handleSend("I'd like to connect to a real person"), [handleSend]);
   const handleGoToTherapy = useCallback(() => { if (onNavigateToTherapy) onNavigateToTherapy(); }, [onNavigateToTherapy]);
 
   const clearChat = () => {
     SS?.cancel(); setSpeaking(false); setAvatarState('idle'); setInput(''); setError(null);
+    setSessionId(null); // reset session — next message starts a new one
     const g: Message = { role: 'assistant', id: uid(), content: GREETING };
     setMessages([g]); if (voiceOn) speakText(g);
+    setSidebarRefresh(r => r + 1); // refresh sidebar to show new session count
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-148px)] min-h-[560px]">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex h-[calc(100vh-148px)] min-h-[560px] relative overflow-hidden">
+
+      {/* Mood check-in modal */}
+      <AnimatePresence>
+        {showMood && <MoodCheckIn onClose={() => setShowMood(false)} />}
+      </AnimatePresence>
+
+      {/* Sidebar */}
+      <div className="relative flex-shrink-0 h-full">
+        <ZenChatSidebar
+          open={sidebarOpen}
+          onToggle={() => setSidebarOpen(o => !o)}
+          currentSessionId={sessionId}
+          onSelectSession={loadSession}
+          onNewChat={clearChat}
+          refreshTrigger={sidebarRefresh}
+        />
+      </div>
+
+      {/* Main chat area */}
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-w-0 overflow-hidden">
 
       {/* MOBILE avatar strip */}
       <div className="flex lg:hidden gap-3 flex-shrink-0">
@@ -366,6 +449,7 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
           </p>
         </div>
       </div>
+      </div> {/* end main chat area wrapper */}
     </motion.div>
   );
 }

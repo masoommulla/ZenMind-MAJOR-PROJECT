@@ -164,12 +164,40 @@ router.put('/settings/site', requireAdmin, async (req, res) => {
   return res.json({ ok: true, settings });
 });
 
-/* ── GET /admin/stories ── */
+/* ── GET /admin/stories  (all stories including pending) ── */
 router.get('/stories', requireAdmin, async (req, res) => {
-  const stories = await Story.find().sort({ createdAt: -1 }).lean();
-  return res.json({ ok: true, stories });
+  const { status } = req.query; // 'pending' | 'approved' | 'all'
+  const query = {};
+  if (status === 'pending')  query.isApproved = false;
+  if (status === 'approved') query.isApproved = true;
+
+  const stories = await Story.find(query).sort({ createdAt: -1 }).lean();
+  const pendingCount  = await Story.countDocuments({ isApproved: false });
+  const approvedCount = await Story.countDocuments({ isApproved: true });
+
+  return res.json({ ok: true, stories, pendingCount, approvedCount });
 });
 
+/* ── PATCH /admin/stories/:id/approve  (approve or reject) ── */
+router.patch('/stories/:id/approve', requireAdmin, async (req, res) => {
+  const { approved } = req.body; // true = approve, false = reject (delete)
+  if (typeof approved !== 'boolean') {
+    return res.status(400).json({ error: 'approved (boolean) is required' });
+  }
+
+  const story = await Story.findById(req.params.id);
+  if (!story) return res.status(404).json({ error: 'Story not found' });
+
+  if (approved) {
+    story.isApproved = true;
+    await story.save();
+    return res.json({ ok: true, action: 'approved', story });
+  } else {
+    // Rejected = delete
+    await Story.findByIdAndDelete(req.params.id);
+    return res.json({ ok: true, action: 'rejected' });
+  }
+});
 
 /* ── DELETE /admin/stories/:id ── */
 router.delete('/stories/:id', requireAdmin, async (req, res) => {
@@ -177,6 +205,23 @@ router.delete('/stories/:id', requireAdmin, async (req, res) => {
   if (!story) return res.status(404).json({ error: 'Story not found' });
   return res.json({ ok: true });
 });
+
+/* ── POST /admin/stories/bulk-action ── */
+router.post('/stories/bulk-action', requireAdmin, async (req, res) => {
+  const { ids, action } = req.body; // action: 'approve' | 'delete'
+  if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: 'ids required' });
+
+  if (action === 'approve') {
+    await Story.updateMany({ _id: { $in: ids } }, { $set: { isApproved: true } });
+    return res.json({ ok: true, updated: ids.length });
+  }
+  if (action === 'delete') {
+    await Story.deleteMany({ _id: { $in: ids } });
+    return res.json({ ok: true, deleted: ids.length });
+  }
+  return res.status(400).json({ error: 'action must be approve or delete' });
+});
+
 
 /* ── THERAPIST MANAGEMENT ── */
 import { Therapist } from '../models/Therapist.js';

@@ -63,6 +63,12 @@ import chatRoutes from './routes/chat.js';
 app.use('/api/chat', chatRoutes);
 import zenChatRoute from './routes/zenChat.js';
 app.use('/api/zen-chat', zenChatRoute);
+import zenSessionsRoute from './routes/zenSessions.js';
+app.use('/api/zen-sessions', zenSessionsRoute);
+import communityStoriesRoute from './routes/communityStories.js';
+app.use('/api/community-stories', communityStoriesRoute);
+import zenProgressRoute from './routes/zenProgress.js';
+app.use('/api/zen-progress', zenProgressRoute);
 
 const port = process.env.PORT || 5000;
 const mongoUri = process.env.MONGODB_URI;
@@ -87,14 +93,21 @@ if (adminCount === 0) {
 const storyCount = await Story.countDocuments();
 if (storyCount === 0) {
   await Story.insertMany([
-    { story: "I felt lost and alone until I found ZenMind. The chatbot helped me understand that my feelings were valid, and the stories inspired me to keep going.", author: "Sarah, 16", rating: 5 },
-    { story: "The therapy sessions changed my life. Having someone who truly understands what I'm going through made all the difference.", author: "Michael, 17", rating: 5 },
-    { story: "I love how the platform shares stories when I need them most. It's like having a friend who always knows what to say.", author: "Emma, 15", rating: 5 },
-    { story: "I started journaling after each chat and now I can actually notice my progress week by week. It feels empowering.", author: "Aarav, 16", rating: 5 },
-    { story: "The stories made me feel less alone. I realized so many teens are dealing with the same thoughts and emotions.", author: "Noah, 15", rating: 5 },
-    { story: "Whenever I feel overwhelmed, ZenMind gives me practical coping steps immediately. It helps me calm down fast.", author: "Mia, 17", rating: 5 }
+    { story: "I felt lost and alone until I found ZenMind. The chatbot helped me understand that my feelings were valid, and the stories inspired me to keep going.", author: "Sarah, 16", rating: 5, category: 'loneliness', isApproved: true },
+    { story: "The therapy sessions changed my life. Having someone who truly understands what I'm going through made all the difference.", author: "Michael, 17", rating: 5, category: 'depression', isApproved: true },
+    { story: "I love how the platform shares stories when I need them most. It's like having a friend who always knows what to say.", author: "Emma, 15", rating: 5, category: 'anxiety', isApproved: true },
+    { story: "I started journaling after each chat and now I can actually notice my progress week by week. It feels empowering.", author: "Aarav, 16", rating: 5, category: 'stress', isApproved: true },
+    { story: "The stories made me feel less alone. I realized so many teens are dealing with the same thoughts and emotions.", author: "Noah, 15", rating: 5, category: 'loneliness', isApproved: true },
+    { story: "Whenever I feel overwhelmed, ZenMind gives me practical coping steps immediately. It helps me calm down fast.", author: "Mia, 17", rating: 5, category: 'anxiety', isApproved: true },
+    { story: "Exam season used to break me every year. After talking to Zeni about it, I realized it was burnout, not weakness. I rested and came back stronger.", author: "Rohan, 17", rating: 5, category: 'exam_pressure', isApproved: true },
+    { story: "I was bullied for two years and never told anyone. Opening up here was the hardest thing I've done — and the most freeing.", author: "Priya, 15", rating: 5, category: 'bullying', isApproved: true },
+    { story: "My parents' fights used to keep me up at night. Talking about it helped me see that their problems aren't mine to carry.", author: "Arjun, 16", rating: 5, category: 'family_issues', isApproved: true },
+    { story: "I never felt good enough — not smart enough, not pretty enough. Slowly I'm learning that I am enough, just as I am.", author: "Divya, 14", rating: 5, category: 'self_esteem', isApproved: true }
   ]);
   console.log('Default Stories seeded');
+} else {
+  // Migrate existing stories: mark admin-seeded ones as approved if not already
+  await Story.updateMany({ userId: null, isApproved: false }, { $set: { isApproved: true } });
 }
 
 // Seed default Site Settings

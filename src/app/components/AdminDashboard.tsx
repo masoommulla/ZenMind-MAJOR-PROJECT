@@ -415,25 +415,30 @@ function UsersManagement() {
 }
 
 function ContentManagement() {
-  const [activeSubTab, setActiveSubTab] = useState<'stats' | 'stories'>('stats');
+  const [activeSubTab, setActiveSubTab] = useState<'stats' | 'stories' | 'approval'>('approval');
   const [settings, setSettings] = useState({ activeUsers: '', satisfactionRate: '', therapistsCount: '', supportAvailable: '' });
-  const [stories, setStories] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [stories, setStories]   = useState<any[]>([]);
+  const [pending, setPending]   = useState<any[]>([]);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [loading, setLoading]   = useState(true);
+  const [msg, setMsg]           = useState<{ text: string; ok: boolean } | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [busyId, setBusyId]     = useState<string | null>(null);
 
   const loadData = async () => {
     try {
-      const [setRes, stoRes] = await Promise.all([
+      const [setRes, stoRes, penRes] = await Promise.all([
         apiFetch<any>('/admin/settings/site'),
-        apiFetch<any>('/admin/stories')
+        apiFetch<any>('/admin/stories?status=approved'),
+        apiFetch<any>('/admin/stories?status=pending'),
       ]);
       setSettings(setRes.settings || { activeUsers: '', satisfactionRate: '', therapistsCount: '', supportAvailable: '' });
       setStories(stoRes.stories || []);
+      setPending(penRes.stories || []);
+      setPendingCount(penRes.stories?.length || 0);
     } catch (e: any) {
       setMsg({ text: e.message || 'Failed to load content', ok: false });
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { loadData(); }, []);
@@ -443,9 +448,7 @@ function ContentManagement() {
       setMsg(null);
       await apiFetch('/admin/settings/site', { method: 'PUT', body: JSON.stringify(settings) });
       setMsg({ text: 'Settings updated successfully.', ok: true });
-    } catch (e: any) {
-      setMsg({ text: e.message || 'Failed to update settings', ok: false });
-    }
+    } catch (e: any) { setMsg({ text: e.message || 'Failed to update settings', ok: false }); }
   };
 
   const deleteStory = async (id: string) => {
@@ -454,97 +457,231 @@ function ContentManagement() {
       await apiFetch(`/admin/stories/${id}`, { method: 'DELETE' });
       setStories(stories.filter(s => s._id !== id));
       setMsg({ text: 'Story deleted.', ok: true });
-    } catch (e: any) {
-      setMsg({ text: e.message || 'Failed to delete story', ok: false });
-    }
+    } catch (e: any) { setMsg({ text: e.message || 'Failed to delete story', ok: false }); }
+  };
+
+  const moderateStory = async (id: string, approved: boolean) => {
+    setBusyId(id);
+    try {
+      await apiFetch(`/admin/stories/${id}/approve`, { method: 'PATCH', body: JSON.stringify({ approved }) });
+      setPending(prev => prev.filter(s => s._id !== id));
+      setPendingCount(c => Math.max(0, c - 1));
+      if (approved) {
+        const story = pending.find(s => s._id === id);
+        if (story) setStories(prev => [{ ...story, isApproved: true }, ...prev]);
+      }
+      setMsg({ text: approved ? '✅ Story approved and is now live.' : '🗑️ Story rejected and removed.', ok: approved });
+    } catch (e: any) { setMsg({ text: e.message || 'Failed', ok: false }); }
+    finally { setBusyId(null); }
+  };
+
+  const bulkApprove = async () => {
+    const ids = Array.from(selectedIds);
+    if (!ids.length) return;
+    try {
+      await apiFetch('/admin/stories/bulk-action', { method: 'POST', body: JSON.stringify({ ids, action: 'approve' }) });
+      const approved = pending.filter(s => ids.includes(s._id));
+      setPending(prev => prev.filter(s => !ids.includes(s._id)));
+      setStories(prev => [...approved.map(s => ({ ...s, isApproved: true })), ...prev]);
+      setPendingCount(c => Math.max(0, c - ids.length));
+      setSelectedIds(new Set());
+      setMsg({ text: `✅ ${ids.length} stories approved.`, ok: true });
+    } catch (e: any) { setMsg({ text: e.message || 'Bulk approve failed', ok: false }); }
+  };
+
+  const bulkReject = async () => {
+    const ids = Array.from(selectedIds);
+    if (!ids.length || !confirm(`Reject and delete ${ids.length} stories?`)) return;
+    try {
+      await apiFetch('/admin/stories/bulk-action', { method: 'POST', body: JSON.stringify({ ids, action: 'delete' }) });
+      setPending(prev => prev.filter(s => !ids.includes(s._id)));
+      setPendingCount(c => Math.max(0, c - ids.length));
+      setSelectedIds(new Set());
+      setMsg({ text: `🗑️ ${ids.length} stories rejected.`, ok: true });
+    } catch (e: any) { setMsg({ text: e.message || 'Bulk reject failed', ok: false }); }
+  };
+
+  const toggleSelect = (id: string) => {
+    const s = new Set(selectedIds);
+    s.has(id) ? s.delete(id) : s.add(id);
+    setSelectedIds(s);
+  };
+
+  const CATEGORY_LABELS: Record<string, string> = {
+    anxiety: '😰 Anxiety', depression: '💙 Depression', stress: '😤 Stress',
+    exam_pressure: '📚 Exam Pressure', bullying: '🛡️ Bullying', loneliness: '🌙 Loneliness',
+    family_issues: '🏠 Family', self_esteem: '💪 Self-Esteem', trauma: '🌿 Trauma', other: '💬 Other',
   };
 
   if (loading) return <div className="text-[#4a7c5d] font-bold">Loading content...</div>;
+
 
   return (
     <div className="flex flex-col gap-6">
       {msg && (
         <div className={`p-4 rounded-xl font-semibold flex items-center gap-2 ${msg.ok ? 'bg-green-50 dark:bg-[#10b981]/10 text-green-700 dark:text-[#10b981]' : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'}`}>
           {msg.ok ? <CheckCircle size={18} /> : <AlertTriangle size={18} />} {msg.text}
+          <button onClick={() => setMsg(null)} className="ml-auto text-current opacity-60 hover:opacity-100"><X size={14}/></button>
         </div>
       )}
 
-      {/* Sub-header Navigation */}
-      <div className="sticky top-0 z-20 flex gap-2 p-1 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-md border border-[#0d5d3a]/10 dark:border-white/10 rounded-2xl w-fit shadow-sm">
-        <button
-          onClick={() => setActiveSubTab('stats')}
-          className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeSubTab === 'stats' ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:bg-[#0d5d3a]/5 dark:hover:bg-white/5 hover:text-[#0d5d3a] dark:hover:text-gray-200'}`}
-        >
-          <div className="flex items-center gap-2"><Activity size={16} /> Global Statistics</div>
+      {/* Sub-tab nav */}
+      <div className="sticky top-0 z-20 flex flex-wrap gap-2 p-1 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-md border border-[#0d5d3a]/10 dark:border-white/10 rounded-2xl shadow-sm w-fit">
+        {/* Approval Queue with badge */}
+        <button onClick={() => setActiveSubTab('approval')}
+          className={`relative px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${activeSubTab === 'approval' ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:bg-[#0d5d3a]/5 dark:hover:bg-white/5'}`}>
+          <Shield size={16}/> Approval Queue
+          {pendingCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center">
+              {pendingCount > 9 ? '9+' : pendingCount}
+            </span>
+          )}
         </button>
-        <button
-          onClick={() => setActiveSubTab('stories')}
-          className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeSubTab === 'stories' ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:bg-[#0d5d3a]/5 dark:hover:bg-white/5 hover:text-[#0d5d3a] dark:hover:text-gray-200'}`}
-        >
-          <div className="flex items-center gap-2"><FileText size={16} /> Stories of Hope</div>
+        <button onClick={() => setActiveSubTab('stories')}
+          className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${activeSubTab === 'stories' ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:bg-[#0d5d3a]/5 dark:hover:bg-white/5'}`}>
+          <FileText size={16}/> Live Stories
+        </button>
+        <button onClick={() => setActiveSubTab('stats')}
+          className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${activeSubTab === 'stats' ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:bg-[#0d5d3a]/5 dark:hover:bg-white/5'}`}>
+          <Activity size={16}/> Site Stats
         </button>
       </div>
 
-      {activeSubTab === 'stats' && (
-        <section className="bg-white dark:bg-[#111111] rounded-3xl p-6 border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm animate-in fade-in zoom-in-95 duration-200">
-          <h2 className="text-xl font-bold text-[#0a2617] dark:text-gray-100 mb-4 flex items-center gap-2">
-            <Activity size={20} className="text-[#0d5d3a] dark:text-[#10b981]" /> Global Statistics (Trusted by Thousands)
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <label className="block">
-              <span className="text-sm font-semibold text-[#4a7c5d] dark:text-gray-400 mb-1 block">Active Users</span>
-              <input type="text" value={settings.activeUsers} onChange={e => setSettings({ ...settings, activeUsers: e.target.value })} className="w-full bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/20 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#0d5d3a] dark:focus:border-[#1a8a5a] text-[#0a2617] dark:text-white" placeholder="50000" />
-            </label>
-            <label className="block">
-              <span className="text-sm font-semibold text-[#4a7c5d] dark:text-gray-400 mb-1 block">Satisfaction Rate</span>
-              <input type="text" value={settings.satisfactionRate} onChange={e => setSettings({ ...settings, satisfactionRate: e.target.value })} className="w-full bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/20 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#0d5d3a] dark:focus:border-[#1a8a5a] text-[#0a2617] dark:text-white" placeholder="98" />
-            </label>
-            <label className="block">
-              <span className="text-sm font-semibold text-[#4a7c5d] dark:text-gray-400 mb-1 block">Therapists Count</span>
-              <input type="text" value={settings.therapistsCount} onChange={e => setSettings({ ...settings, therapistsCount: e.target.value })} className="w-full bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/20 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#0d5d3a] dark:focus:border-[#1a8a5a] text-[#0a2617] dark:text-white" placeholder="1000" />
-            </label>
-            <label className="block">
-              <span className="text-sm font-semibold text-[#4a7c5d] dark:text-gray-400 mb-1 block">Support Available</span>
-              <input type="text" value={settings.supportAvailable} onChange={e => setSettings({ ...settings, supportAvailable: e.target.value })} className="w-full bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/20 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#0d5d3a] dark:focus:border-[#1a8a5a] text-[#0a2617] dark:text-white" placeholder="24" />
-            </label>
+      {/* ── APPROVAL QUEUE ── */}
+      {activeSubTab === 'approval' && (
+        <section className="flex flex-col gap-4">
+          {/* Toolbar */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="text-sm font-bold text-[#0a2617] dark:text-gray-100">
+              {pending.length === 0 ? '🎉 All clear — no stories pending review' : `${pending.length} stor${pending.length !== 1 ? 'ies' : 'y'} awaiting review`}
+            </div>
+            {selectedIds.size > 0 && (
+              <div className="flex items-center gap-2 ml-auto flex-wrap">
+                <span className="text-xs font-bold text-[#4a7c5d] dark:text-gray-400">{selectedIds.size} selected</span>
+                <button onClick={bulkApprove} className="px-4 py-2 rounded-xl bg-[#0d5d3a] text-white text-xs font-bold hover:bg-[#0a4a2e] transition flex items-center gap-1.5">
+                  <CheckCircle size={14}/> Approve All Selected
+                </button>
+                <button onClick={bulkReject} className="px-4 py-2 rounded-xl bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-200 transition flex items-center gap-1.5">
+                  <Trash2 size={14}/> Reject All Selected
+                </button>
+              </div>
+            )}
+            {pending.length > 0 && selectedIds.size === 0 && (
+              <button onClick={() => setSelectedIds(new Set(pending.map((s: any) => s._id)))}
+                className="ml-auto text-xs font-bold text-[#0d5d3a] dark:text-[#10b981] hover:underline">
+                Select all
+              </button>
+            )}
           </div>
-          <button onClick={saveSettings} className="mt-5 px-6 py-2.5 bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white rounded-xl font-bold hover:bg-[#0a4a2e] dark:hover:bg-[#10b981] transition flex items-center gap-2">
-            <Save size={18} /> Save Statistics
-          </button>
+
+          {pending.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
+              <div className="text-5xl mb-4">🌿</div>
+              <div className="text-lg font-bold text-[#0a2617] dark:text-white mb-1">No pending stories</div>
+              <div className="text-sm text-[#4a7c5d] dark:text-gray-400">New user submissions will appear here for your review.</div>
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto pr-1">
+              {pending.map((s: any) => (
+                <div key={s._id}
+                  className={`rounded-2xl border-2 p-5 transition-all ${selectedIds.has(s._id) ? 'border-[#0d5d3a] bg-[#f0fbf4] dark:bg-[#0d5d3a]/10' : 'border-[#0d5d3a]/08 dark:border-white/08 bg-white dark:bg-[#111111]'}`}>
+                  <div className="flex items-start gap-3">
+                    {/* Checkbox */}
+                    <input type="checkbox" checked={selectedIds.has(s._id)} onChange={() => toggleSelect(s._id)}
+                      className="mt-1 w-4 h-4 rounded accent-[#0d5d3a] flex-shrink-0 cursor-pointer" />
+                    <div className="flex-1 min-w-0">
+                      {/* Category badge */}
+                      {s.category && (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] text-xs font-bold mb-2">
+                          {CATEGORY_LABELS[s.category] || s.category}
+                        </span>
+                      )}
+                      {/* Story text */}
+                      <p className="text-sm text-[#0a2617] dark:text-gray-200 leading-relaxed italic mb-3">"{s.story}"</p>
+                      {/* Meta */}
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-[#4a7c5d] dark:text-gray-500">
+                        <span className="font-bold">— {s.isAnonymous ? 'Anonymous' : s.author}</span>
+                        <span className="flex items-center gap-1"><Clock size={11}/>{new Date(s.createdAt).toLocaleString()}</span>
+                        {s.isAnonymous && <span className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 font-semibold">Anonymous</span>}
+                      </div>
+                    </div>
+                    {/* Action buttons */}
+                    <div className="flex flex-col gap-2 flex-shrink-0 ml-2">
+                      <button onClick={() => moderateStory(s._id, true)} disabled={busyId === s._id}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0d5d3a] text-white text-xs font-bold hover:bg-[#0a4a2e] disabled:opacity-50 transition whitespace-nowrap">
+                        <CheckCircle size={13}/> {busyId === s._id ? '...' : 'Approve'}
+                      </button>
+                      <button onClick={() => moderateStory(s._id, false)} disabled={busyId === s._id}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-200 disabled:opacity-50 transition whitespace-nowrap">
+                        <Trash2 size={13}/> Reject
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
+      {/* ── LIVE STORIES ── */}
       {activeSubTab === 'stories' && (
-        <section className="bg-white dark:bg-[#111111] rounded-3xl p-6 border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm animate-in fade-in zoom-in-95 duration-200 flex flex-col h-[calc(100vh-220px)]">
-          <h2 className="text-xl font-bold text-[#0a2617] dark:text-gray-100 mb-6 flex items-center gap-2 shrink-0">
-            <FileText size={20} className="text-[#0d5d3a] dark:text-[#10b981]" /> User Stories Management
+        <section className="bg-white dark:bg-[#111111] rounded-3xl p-6 border border-[#0d5d3a]/08 dark:border-white/08 shadow-sm flex flex-col" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+          <h2 className="text-xl font-bold text-[#0a2617] dark:text-gray-100 mb-4 flex items-center gap-2 shrink-0">
+            <FileText size={20} className="text-[#0d5d3a] dark:text-[#10b981]" /> Live Stories ({stories.length})
           </h2>
-          
-          <div className="space-y-3 overflow-y-auto pr-2 flex-1">
-            {stories.map(s => (
-              <div key={s._id} className="p-4 border border-[#0d5d3a]/10 dark:border-white/10 rounded-2xl flex justify-between gap-4 bg-[#fbfdfb] dark:bg-[#1a1a1a]">
-                <div>
-                  <p className="text-sm text-[#0a2617] dark:text-gray-300 italic mb-2">"{s.story}"</p>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-xs font-bold text-[#4a7c5d] dark:text-gray-400">— {s.author}</span>
-                    <span className="text-xs font-bold px-2 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-md">Rating: {s.rating}/5</span>
-                    <span className="text-xs font-bold text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                      <Clock size={12} /> {s.createdAt ? new Date(s.createdAt).toLocaleString() : 'Unknown date'}
+          <div className="space-y-3 overflow-y-auto flex-1 pr-1">
+            {stories.map((s: any) => (
+              <div key={s._id} className="p-4 border border-[#0d5d3a]/08 dark:border-white/08 rounded-2xl flex gap-4 bg-[#fbfdfb] dark:bg-[#1a1a1a] items-start">
+                <div className="flex-1 min-w-0">
+                  {s.category && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] text-[10px] font-bold mb-2">
+                      {CATEGORY_LABELS[s.category] || s.category}
                     </span>
+                  )}
+                  <p className="text-sm text-[#0a2617] dark:text-gray-300 italic mb-2">"{s.story}"</p>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-[#4a7c5d] dark:text-gray-500">
+                    <span className="font-bold">— {s.author}</span>
+                    <span className="flex items-center gap-1"><Clock size={11}/>{new Date(s.createdAt).toLocaleString()}</span>
+                    <span className="text-[#10b981] font-bold">❤️ {s.likes || 0}</span>
                   </div>
                 </div>
-                <button onClick={() => deleteStory(s._id)} className="shrink-0 p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg h-fit transition" title="Delete">
-                  <Trash2 size={18} />
+                <button onClick={() => deleteStory(s._id)} className="shrink-0 p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition" title="Delete">
+                  <Trash2 size={16}/>
                 </button>
               </div>
             ))}
-            {stories.length === 0 && <p className="text-sm text-[#4a7c5d] dark:text-gray-400">No stories found.</p>}
+            {stories.length === 0 && <p className="text-sm text-[#4a7c5d] dark:text-gray-400">No live stories yet.</p>}
           </div>
+        </section>
+      )}
+
+      {/* ── SITE STATS ── */}
+      {activeSubTab === 'stats' && (
+        <section className="bg-white dark:bg-[#111111] rounded-3xl p-6 border border-[#0d5d3a]/08 dark:border-white/08 shadow-sm">
+          <h2 className="text-xl font-bold text-[#0a2617] dark:text-gray-100 mb-4 flex items-center gap-2">
+            <Activity size={20} className="text-[#0d5d3a] dark:text-[#10b981]"/> Global Statistics
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {(['activeUsers','satisfactionRate','therapistsCount','supportAvailable'] as const).map(k => (
+              <label key={k} className="block">
+                <span className="text-sm font-semibold text-[#4a7c5d] dark:text-gray-400 mb-1 block capitalize">
+                  {k.replace(/([A-Z])/g, ' $1')}
+                </span>
+                <input type="text" value={settings[k]} onChange={e => setSettings({...settings,[k]:e.target.value})}
+                  className="w-full bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/20 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#0d5d3a] text-[#0a2617] dark:text-white"/>
+              </label>
+            ))}
+          </div>
+          <button onClick={saveSettings} className="mt-5 px-6 py-2.5 bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white rounded-xl font-bold hover:bg-[#0a4a2e] transition flex items-center gap-2">
+            <Save size={18}/> Save Statistics
+          </button>
         </section>
       )}
     </div>
   );
 }
+
 
 type SupportTicketData = {
   _id: string;

@@ -1,20 +1,24 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
+import ZenSession from '../models/ZenSession.js';
+import ZenMessage from '../models/ZenMessage.js';
 
 const router = Router();
 
 /**
  * POST /api/zen-chat
- * Generic OpenAI-compatible endpoint — works with any provider:
- *   OpenAI, Groq, Together AI, Mistral, OpenRouter, etc.
+ * Handles a Zeni AI reply and persists messages to MongoDB.
  *
- * .env:
- *   AI_API_KEY    — your API key from any provider
- *   AI_API_URL    — base URL (default: https://api.openai.com/v1)
- *   AI_MODEL      — model name (default: llama-3.1-8b-instant)
+ * Body: { messages: [{role, content}], sessionId?: string }
+ * Returns: { reply, sessionId }
+ *
+ * Session lifecycle:
+ *   - No sessionId → creates a new ZenSession automatically
+ *   - sessionId provided → appends to existing session
+ *   - DB writes are fire-and-forget (never delay the AI response)
  */
 router.post('/', requireAuth, async (req, res) => {
-  const { messages } = req.body;
+  const { messages, sessionId: incomingSessionId } = req.body;
 
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'messages array required' });
@@ -26,6 +30,39 @@ router.post('/', requireAuth, async (req, res) => {
 
   if (!apiKey) {
     return res.status(503).json({ error: 'AI service not configured. Please set AI_API_KEY.' });
+  }
+
+  // ── Resolve / create session ────────────────────────────────────────────
+  let sessionId = incomingSessionId || null;
+  let session = null;
+
+  try {
+    if (sessionId) {
+      session = await ZenSession.findOne({ _id: sessionId, userId: req.user.id });
+    }
+
+    // If no valid session yet, create one now using the first user message as title
+    if (!session) {
+      const firstUserMsg = messages.find(m => m.role === 'user');
+      const title = firstUserMsg
+        ? firstUserMsg.content.slice(0, 70).replace(/\n/g, ' ')
+        : 'New Conversation';
+      session = await ZenSession.create({ userId: req.user.id, title });
+      sessionId = session._id.toString();
+    }
+  } catch (dbErr) {
+    // DB error must NOT block the AI response — log and continue
+    console.error('[ZenChat] Session resolve error:', dbErr.message);
+  }
+
+  // ── Persist user's latest message (fire-and-forget) ─────────────────────
+  const latestUserMsg = [...messages].reverse().find(m => m.role === 'user');
+  if (session && latestUserMsg) {
+    ZenMessage.create({
+      sessionId: session._id,
+      role: 'user',
+      content: latestUserMsg.content,
+    }).catch(e => console.error('[ZenChat] Save user msg error:', e.message));
   }
 
   // ── ZenMind Mental Wellness System Prompt ─────────────────────────────────
@@ -151,7 +188,27 @@ When asked to share a story, tell a brief, realistic, first-person style story o
       return res.status(502).json({ error: 'Empty response from AI service.' });
     }
 
-    return res.json({ reply });
+    // ── Detect action tag to persist alongside assistant message ─────────
+    const ACTION_RE = /\[ACTION:(STORY_BUTTONS|POST_STORY|THERAPY_BUTTON|CRISIS)\]/g;
+    const actionMatch = new RegExp(ACTION_RE.source, 'g').exec(reply);
+    const detectedAction = actionMatch ? actionMatch[1] : null;
+
+    // ── Persist assistant reply (fire-and-forget) ─────────────────────────
+    if (session) {
+      Promise.all([
+        ZenMessage.create({
+          sessionId: session._id,
+          role: 'assistant',
+          content: reply,
+          action: detectedAction,
+        }),
+        ZenSession.findByIdAndUpdate(session._id, {
+          $inc: { messageCount: 2 }, // user + assistant
+        }),
+      ]).catch(e => console.error('[ZenChat] Save assistant msg error:', e.message));
+    }
+
+    return res.json({ reply, sessionId });
   } catch (err) {
     clearTimeout(aiTimeout);
     console.error('[ZenChat] Error:', err.message);

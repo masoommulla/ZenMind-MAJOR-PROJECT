@@ -12,6 +12,8 @@ import VideoRoom from './VideoRoom';
 import CancellationPolicy from './CancellationPolicy';
 import UserChat from './UserChat';
 import ZenAvatarChat from './ZenAvatarChat';
+import ZenProgressDashboard from './ZenProgressDashboard';
+import CommunityWall from './CommunityWall';
 
 type DashboardProps = {
   onLogout: () => void;
@@ -28,13 +30,15 @@ type Me = {
   avatar: { mime: string; data: string } | null;
 };
 
-type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat';
+type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community';
 
 const NAV_ITEMS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
-  { key: 'aichat',   label: 'AI Chat',  icon: <MessageCircle className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'therapy',  label: 'Therapy Hub', icon: <Stethoscope className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'sessions', label: 'My Sessions', icon: <Save className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'settings', label: 'Settings', icon: <Settings      className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'aichat',    label: 'AI Chat',      icon: <MessageCircle className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'therapy',   label: 'Therapy Hub',  icon: <Stethoscope   className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'progress',  label: 'My Progress',  icon: <Save          className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'community', label: 'Community',    icon: <Upload        className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'sessions',  label: 'My Sessions',  icon: <Calendar      className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'settings',  label: 'Settings',     icon: <Settings      className="w-5 h-5 flex-shrink-0" /> },
 ];
 
 export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
@@ -212,6 +216,8 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
                    tab === 'therapy' ? 'Therapy Hub' : 
                    tab === 'chat' ? 'Chat' :
                    tab === 'aichat' ? 'AI Chat' : 
+                   tab === 'progress' ? 'My Progress' :
+                   tab === 'community' ? 'Community Stories' :
                    tab === 'settings' ? 'Settings' :
                    loading ? 'Loading...' : `Welcome, ${me?.name?.split(' ')[0] || 'there'}!`}
                 </div>
@@ -220,6 +226,8 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
                    tab === 'therapy' ? 'Connect with verified professionals for your mental wellness journey.' : 
                    tab === 'chat' ? 'Secure, real-time messaging with your therapist.' :
                    tab === 'aichat' ? 'Your intelligent companion for mental wellness.' : 
+                   tab === 'progress' ? 'Track your mood, sessions and mental wellness journey over time.' :
+                   tab === 'community' ? 'Read and share stories — you are never alone. 💚' :
                    tab === 'settings' ? 'Manage your account settings and preferences.' :
                    'Your personal wellness dashboard'}
                 </div>
@@ -252,6 +260,14 @@ export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
           ) : tab === 'aichat' ? (
             <div className="flex-1 overflow-hidden flex flex-col min-h-0 px-4 sm:px-6 py-4">
               <AiChatPanel onNavigateToTherapy={() => setTab('therapy')} />
+            </div>
+          ) : tab === 'progress' ? (
+            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+              <ZenProgressDashboard />
+            </div>
+          ) : tab === 'community' ? (
+            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+              <CommunityWall />
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto">
