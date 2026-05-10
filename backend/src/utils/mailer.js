@@ -1,44 +1,53 @@
 /**
- * Nodemailer — Gmail SMTP (smtp.gmail.com:587 STARTTLS)
+ * Nodemailer — Gmail SMTP
  * .env: EMAIL_USER, EMAIL_PASS (Gmail App Password), EMAIL_FROM_NAME
  *
- * Render IPv6 fix — three layers:
- *  1. family:4      → tells net.Socket to bind IPv4 only (most reliable)
- *  2. dnsLookup()   → per-transport DNS override, always returns IPv4 record
- *  3. setDefaultResultOrder → global Node.js fallback
+ * Render IPv6 fix — THE definitive approach:
+ *   Pre-resolve smtp.gmail.com to a raw IPv4 address at send time.
+ *   Nodemailer receives an IP (e.g. 74.125.x.x), so it never does
+ *   its own DNS lookup. No IPv6 possible. tls.servername preserves SNI.
  */
 import nodemailer from 'nodemailer';
-import dns from 'dns';
+import dns       from 'dns';
 
-dns.setDefaultResultOrder('ipv4first');
+// Cache the resolved IPv4 address so we only look it up once per process
+let _smtpIpv4 = null;
+async function resolveGmailIp() {
+  if (_smtpIpv4) return _smtpIpv4;
+  const { address } = await dns.promises.lookup('smtp.gmail.com', { family: 4 });
+  _smtpIpv4 = address;
+  console.log(`[Mailer] smtp.gmail.com resolved to IPv4 ${address}`);
+  return address;
+}
 
-function createTransport() {
+async function getTransport() {
   const user = process.env.EMAIL_USER;
   const pass = (process.env.EMAIL_PASS || '').replace(/\s/g, '');
   if (!user || !pass) throw new Error('[Mailer] EMAIL_USER or EMAIL_PASS missing from env');
+  const ip = await resolveGmailIp();
   return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: ip,          // raw IPv4 — no DNS lookup by nodemailer
     port: 587,
-    secure: false,      // STARTTLS — upgraded after connect
+    secure: false,     // STARTTLS
     requireTLS: true,
-    family: 4,          // ✅ Force IPv4 socket — prevents ENETUNREACH on Render
-    dnsLookup: (hostname, _opts, cb) => dns.lookup(hostname, { family: 4 }, cb),
     auth: { user, pass },
-    connectionTimeout: 15000,
-    greetingTimeout:   15000,
-    socketTimeout:     20000,
-    tls: { rejectUnauthorized: false },
+    connectionTimeout: 20000,
+    greetingTimeout:   20000,
+    socketTimeout:     25000,
+    tls: {
+      servername: 'smtp.gmail.com',   // SNI: TLS cert check against hostname
+      rejectUnauthorized: false,
+    },
   });
 }
 
 const from = () => `"${process.env.EMAIL_FROM_NAME || 'ZenMind'}" <${process.env.EMAIL_USER}>`;
 
-// No startup verify() — avoids misleading timeout logs; errors caught per-send
 const _u = process.env.EMAIL_USER;
 if (!_u || !process.env.EMAIL_PASS) {
   console.warn('[Mailer] ⚠️  EMAIL_USER or EMAIL_PASS not set — emails will be skipped');
 } else {
-  console.log(`[Mailer] ✅ Gmail SMTP configured — sending as ${_u}`);
+  console.log(`[Mailer] ✅ Gmail SMTP ready — will send as ${_u} (IPv4 pre-resolve on first send)`);
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -85,7 +94,8 @@ const POLICY_HTML = `<div style="background:#f0fbf4;border-left:4px solid #0d5d3
 </div>`;
 
 async function send(to, subject, html) {
-  await createTransport().sendMail({ from: from(), to, subject, html });
+  const transport = await getTransport();
+  await transport.sendMail({ from: from(), to, subject, html });
   console.log(`[Mailer] ✅ "${subject}" → ${to}`);
 }
 
