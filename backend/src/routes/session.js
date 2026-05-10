@@ -189,10 +189,15 @@ router.delete('/past', requireAuth, async (req, res) => {
     const { sessionIds } = req.body;
     if (!Array.isArray(sessionIds)) return res.status(400).json({ error: 'Invalid input' });
     const now = new Date();
+    // Allow deletion if date is in the past OR status is cancelled/completed
+    // (a cancelled session can have a future date — user cancelled before it happened)
     const result = await Session.deleteMany({
       _id: { $in: sessionIds },
       user: req.user.id,
-      date: { $lt: now }
+      $or: [
+        { date: { $lt: now } },
+        { status: { $in: ['cancelled', 'completed'] } },
+      ],
     });
     return res.json({ ok: true, deletedCount: result.deletedCount });
   } catch (err) {
