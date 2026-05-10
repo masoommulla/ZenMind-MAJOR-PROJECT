@@ -59,10 +59,11 @@ export default defineConfig({
   },
 
   optimizeDeps: {
-    include: ['@met4citizen/talkinghead'],
-    exclude: [],
+    // TalkingHead uses dynamic imports (lipsync-en.mjs, audio worklets) internally.
+    // Pre-bundling it breaks those sub-module imports — must be excluded.
+    exclude: ['@met4citizen/talkinghead'],
   },
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
-  assetsInclude: ['**/*.svg', '**/*.csv', '**/*.glb'],
+  assetsInclude: ['**/*.svg', '**/*.csv'],
 })
