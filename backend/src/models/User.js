@@ -14,7 +14,8 @@ const userSchema = new mongoose.Schema(
       data: { type: String } // base64 (no local storage)
     },
     isOnline: { type: Boolean, default: false },
-    lastSeen: { type: Date, default: Date.now }
+    lastSeen: { type: Date, default: Date.now },
+    favouriteResources: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Resource' }]
   },
   { timestamps: true }
 );

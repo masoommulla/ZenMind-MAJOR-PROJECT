@@ -19,6 +19,7 @@ import Admin from './models/Admin.js';
 import Story from './models/Story.js';
 import SiteSettings from './models/SiteSettings.js';
 import { Therapist } from './models/Therapist.js';
+import Resource from './models/Resource.js';
 import bcrypt from 'bcryptjs';
 
 const app = express();
@@ -69,6 +70,8 @@ import communityStoriesRoute from './routes/communityStories.js';
 app.use('/api/community-stories', communityStoriesRoute);
 import zenProgressRoute from './routes/zenProgress.js';
 app.use('/api/zen-progress', zenProgressRoute);
+import resourcesRoute from './routes/resources.js';
+app.use('/api/resources', resourcesRoute);
 
 const port = process.env.PORT || 5000;
 const mongoUri = process.env.MONGODB_URI;
@@ -120,6 +123,90 @@ if (settingsCount === 0) {
     supportAvailable: '24'
   });
   console.log('Default Site Settings seeded');
+}
+
+// Seed Wellness Resources
+const resourceCount = await Resource.countDocuments();
+if (resourceCount === 0) {
+  await Resource.insertMany([
+    {
+      title: 'Box Breathing for Instant Calm',
+      description: 'A simple 4-4-4-4 box breathing technique to quickly reduce anxiety and reset your nervous system.',
+      type: 'video', sourceType: 'youtube',
+      url: 'https://www.youtube.com/watch?v=tEmt1Znux58',
+      youtubeVideoId: 'tEmt1Znux58',
+      tags: ['Anxiety', 'Breathing', 'Stress'],
+    },
+    {
+      title: '10-Minute Body Scan Meditation',
+      description: 'A guided body scan meditation to release tension and bring deep relaxation before sleep.',
+      type: 'audio', sourceType: 'youtube',
+      url: 'https://www.youtube.com/watch?v=u4gZgnmkskw',
+      youtubeVideoId: 'u4gZgnmkskw',
+      tags: ['Mindfulness', 'Sleep', 'Relaxation'],
+    },
+    {
+      title: 'The Surprising Science of Happiness — TED Talk',
+      description: 'Dan Gilbert challenges the idea that we'll be miserable if we don't get what we want.',
+      type: 'link', sourceType: 'url',
+      url: 'https://www.ted.com/talks/dan_gilbert_the_surprising_science_of_happiness',
+      tags: ['Motivation', 'Happiness'],
+    },
+    {
+      title: 'Sleep Hygiene: A Complete Guide',
+      description: 'Evidence-based tips from the Sleep Foundation to help you get better, deeper sleep every night.',
+      type: 'link', sourceType: 'url',
+      url: 'https://www.sleepfoundation.org/sleep-hygiene',
+      tags: ['Sleep', 'Wellness'],
+    },
+    {
+      title: 'Progressive Muscle Relaxation — Full Session',
+      description: 'Systematically tense and relax muscle groups to melt away physical stress and anxiety.',
+      type: 'audio', sourceType: 'youtube',
+      url: 'https://www.youtube.com/watch?v=1nZEdqcGvsE',
+      youtubeVideoId: '1nZEdqcGvsE',
+      tags: ['Anxiety', 'Relaxation', 'Stress'],
+    },
+    {
+      title: 'Why Gratitude Is So Powerful',
+      description: 'Science-backed reasons why keeping a gratitude journal can rewire your brain for positivity.',
+      type: 'video', sourceType: 'youtube',
+      url: 'https://www.youtube.com/watch?v=WPPPFqsECz0',
+      youtubeVideoId: 'WPPPFqsECz0',
+      tags: ['Motivation', 'Mindfulness', 'Happiness'],
+    },
+    {
+      title: 'Understanding Panic Attacks',
+      description: 'Clear, compassionate explanation of what panic attacks are, why they happen, and how to cope.',
+      type: 'link', sourceType: 'url',
+      url: 'https://www.mind.org.uk/information-support/types-of-mental-health-problems/anxiety-and-panic-attacks/panic-attacks/',
+      tags: ['Anxiety', 'Education'],
+    },
+    {
+      title: 'Lo-fi Beats to Calm Your Mind',
+      description: 'Gentle lo-fi music to help you focus, study, or simply decompress after a long day.',
+      type: 'audio', sourceType: 'youtube',
+      url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk',
+      youtubeVideoId: 'jfKfPfyJRdk',
+      tags: ['Focus', 'Relaxation', 'Sleep'],
+    },
+    {
+      title: 'Daily Affirmations for Self-Worth',
+      description: 'Start your morning with these powerful affirmations to build confidence and silence your inner critic.',
+      type: 'video', sourceType: 'youtube',
+      url: 'https://www.youtube.com/watch?v=iRoI2vxOoqU',
+      youtubeVideoId: 'iRoI2vxOoqU',
+      tags: ['Self-Esteem', 'Motivation'],
+    },
+    {
+      title: 'How to Stop Overthinking',
+      description: 'Practical strategies from therapists to break the cycle of rumination and quiet a racing mind.',
+      type: 'link', sourceType: 'url',
+      url: 'https://www.verywellmind.com/how-to-stop-overthinking-6742852',
+      tags: ['Anxiety', 'Stress', 'Education'],
+    },
+  ]);
+  console.log('Default Wellness Resources seeded (10 items)');
 }
 
 // Seed exactly 12 Therapists (7 online, 5 offline)

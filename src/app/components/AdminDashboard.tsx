@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye } from 'lucide-react';
+import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye, Video, Music, Image as ImageIcon, Link2, Upload as UploadIcon, BookOpen } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import logo from '../../../asset/logo.png';
 import ThemeToggle from './ThemeToggle';
@@ -415,7 +415,7 @@ function UsersManagement() {
 }
 
 function ContentManagement() {
-  const [activeSubTab, setActiveSubTab] = useState<'stats' | 'stories' | 'approval'>('approval');
+  const [activeSubTab, setActiveSubTab] = useState<'stats' | 'stories' | 'approval' | 'resources'>('approval');
   const [settings, setSettings] = useState({ activeUsers: '', satisfactionRate: '', therapistsCount: '', supportAvailable: '' });
   const [stories, setStories]   = useState<any[]>([]);
   const [pending, setPending]   = useState<any[]>([]);
@@ -544,6 +544,10 @@ function ContentManagement() {
         <button onClick={() => setActiveSubTab('stats')}
           className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${activeSubTab === 'stats' ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:bg-[#0d5d3a]/5 dark:hover:bg-white/5'}`}>
           <Activity size={16}/> Site Stats
+        </button>
+        <button onClick={() => setActiveSubTab('resources')}
+          className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${activeSubTab === 'resources' ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:bg-[#0d5d3a]/5 dark:hover:bg-white/5'}`}>
+          <BookOpen size={16}/> Resources
         </button>
       </div>
 
@@ -677,6 +681,326 @@ function ContentManagement() {
             <Save size={18}/> Save Statistics
           </button>
         </section>
+      )}
+
+      {/* ── RESOURCES ── */}
+      {activeSubTab === 'resources' && <AdminResourcesPanel />}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   ADMIN RESOURCES PANEL
+════════════════════════════════════════════════════════════ */
+type ResType = 'video' | 'audio' | 'image' | 'link';
+type SrcType = 'upload' | 'youtube' | 'url';
+
+const RES_TAGS = ['Anxiety','Breathing','Stress','Sleep','Relaxation','Mindfulness',
+  'Focus','Motivation','Happiness','Self-Esteem','Education','Wellness'];
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload  = () => resolve(String(r.result));
+    r.onerror = () => reject(new Error('Read failed'));
+    r.readAsDataURL(file);
+  });
+}
+
+function AdminResourcesPanel() {
+  const [resources, setResources] = useState<any[]>([]);
+  const [loading, setLoading]     = useState(true);
+  const [showForm, setShowForm]   = useState(false);
+  const [saving, setSaving]       = useState(false);
+  const [msg, setMsg]             = useState<{ text: string; ok: boolean } | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Form state
+  const [title, setTitle]           = useState('');
+  const [description, setDesc]      = useState('');
+  const [type, setType]             = useState<ResType>('video');
+  const [sourceType, setSourceType] = useState<SrcType>('youtube');
+  const [url, setUrl]               = useState('');
+  const [selectedTags, setTags]     = useState<string[]>([]);
+  const [fileData, setFileData]     = useState('');
+  const [fileMime, setFileMime]     = useState('');
+  const [thumbData, setThumbData]   = useState('');
+  const [thumbMime, setThumbMime]   = useState('');
+  const fileRef  = useRef<HTMLInputElement>(null);
+  const thumbRef = useRef<HTMLInputElement>(null);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await apiFetch<any>('/resources/admin/list');
+      setResources(res.resources || []);
+    } catch (e: any) { setMsg({ text: e.message, ok: false }); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { load(); }, []);
+
+  const resetForm = () => {
+    setTitle(''); setDesc(''); setType('video'); setSourceType('youtube');
+    setUrl(''); setTags([]); setFileData(''); setFileMime('');
+    setThumbData(''); setThumbMime('');
+    if (fileRef.current)  fileRef.current.value  = '';
+    if (thumbRef.current) thumbRef.current.value = '';
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; if (!f) return;
+    const b64 = await fileToBase64(f);
+    setFileData(b64.split(',')[1]);
+    setFileMime(f.type);
+  };
+
+  const handleThumbChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; if (!f) return;
+    const b64 = await fileToBase64(f);
+    setThumbData(b64.split(',')[1]);
+    setThumbMime(f.type);
+  };
+
+  const toggleTag = (t: string) =>
+    setTags(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) { setMsg({ text: 'Title is required', ok: false }); return; }
+    setSaving(true); setMsg(null);
+    try {
+      await apiFetch('/resources/admin', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: title.trim(), description: description.trim(),
+          type, sourceType, url,
+          fileData, fileMime,
+          thumbnailData: thumbData, thumbnailMime: thumbMime,
+          tags: selectedTags,
+        }),
+      });
+      setMsg({ text: '✅ Resource added successfully!', ok: true });
+      resetForm(); setShowForm(false); load();
+    } catch (e: any) { setMsg({ text: e.message || 'Failed to add resource', ok: false }); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this resource?')) return;
+    setDeletingId(id);
+    try {
+      await apiFetch(`/resources/admin/${id}`, { method: 'DELETE' });
+      setResources(prev => prev.filter(r => r._id !== id));
+      setMsg({ text: 'Resource deleted.', ok: true });
+    } catch (e: any) { setMsg({ text: e.message, ok: false }); }
+    finally { setDeletingId(null); }
+  };
+
+  const typeIcon = (t: string) => {
+    if (t === 'video') return <Video size={14} />;
+    if (t === 'audio') return <Music size={14} />;
+    if (t === 'image') return <ImageIcon size={14} />;
+    return <Link2 size={14} />;
+  };
+  const typePill = (t: string) => {
+    const map: Record<string,string> = {
+      video: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300',
+      audio: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
+      image: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
+      link:  'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300',
+    };
+    return map[t] || '';
+  };
+
+  return (
+    <div className="flex flex-col gap-5">
+      {msg && (
+        <div className={`p-3 rounded-xl font-semibold flex items-center gap-2 text-sm ${
+          msg.ok ? 'bg-green-50 dark:bg-[#10b981]/10 text-green-700 dark:text-[#10b981]'
+                 : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'}`}>
+          {msg.ok ? <CheckCircle size={16}/> : <AlertTriangle size={16}/>} {msg.text}
+          <button onClick={() => setMsg(null)} className="ml-auto opacity-60 hover:opacity-100"><X size={13}/></button>
+        </div>
+      )}
+
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-[#0a2617] dark:text-gray-100" style={{ fontFamily:'Syne,sans-serif' }}>Wellness Resources</h2>
+          <p className="text-sm text-[#4a7c5d] dark:text-gray-400">Add curated videos, audio, images and links for users.</p>
+        </div>
+        <button onClick={() => { setShowForm(v => !v); resetForm(); setMsg(null); }}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white font-bold text-sm hover:bg-[#0a4a2e] transition shadow-lg shadow-[#0d5d3a]/20">
+          {showForm ? <X size={16}/> : <Plus size={16}/>} {showForm ? 'Cancel' : 'Add Resource'}
+        </button>
+      </div>
+
+      {/* ── ADD FORM ── */}
+      <AnimatePresence>
+        {showForm && (
+          <motion.form onSubmit={handleSubmit}
+            initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-10 }}
+            className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 p-6 flex flex-col gap-4 shadow-sm"
+          >
+            <h3 className="font-bold text-[#0a2617] dark:text-gray-100 text-base">New Resource</h3>
+
+            {/* Title + Description */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <label className="block sm:col-span-2">
+                <span className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 block mb-1">Title *</span>
+                <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="e.g. 5-Minute Box Breathing"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 dark:focus:ring-[#1a8a5a]/50" />
+              </label>
+              <label className="block sm:col-span-2">
+                <span className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 block mb-1">Description</span>
+                <textarea value={description} onChange={e=>setDesc(e.target.value)} rows={2} placeholder="Short description shown on the card…"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 dark:focus:ring-[#1a8a5a]/50 resize-none" />
+              </label>
+            </div>
+
+            {/* Type + Source selectors */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <label className="block">
+                <span className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 block mb-1">Resource Type</span>
+                <select value={type} onChange={e=>{ setType(e.target.value as ResType); setSourceType(e.target.value === 'image' ? 'upload' : 'youtube'); setFileData(''); setFileMime(''); }}
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 dark:focus:ring-[#1a8a5a]/50">
+                  <option value="video">🎬 Video</option>
+                  <option value="audio">🎵 Audio</option>
+                  <option value="image">🖼️ Image</option>
+                  <option value="link">🔗 Link / Article</option>
+                </select>
+              </label>
+              {type !== 'image' && type !== 'link' && (
+                <label className="block">
+                  <span className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 block mb-1">Source</span>
+                  <select value={sourceType} onChange={e=>{ setSourceType(e.target.value as SrcType); setUrl(''); setFileData(''); setFileMime(''); }}
+                    className="w-full px-4 py-2.5 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 dark:focus:ring-[#1a8a5a]/50">
+                    <option value="youtube">YouTube URL</option>
+                    <option value="upload">Upload File</option>
+                    <option value="url">External URL</option>
+                  </select>
+                </label>
+              )}
+            </div>
+
+            {/* URL / File input */}
+            {(sourceType === 'youtube' || sourceType === 'url' || type === 'link') && (
+              <label className="block">
+                <span className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 block mb-1">
+                  {sourceType === 'youtube' ? 'YouTube URL' : 'URL'}
+                </span>
+                <input value={url} onChange={e=>setUrl(e.target.value)}
+                  placeholder={sourceType === 'youtube' ? 'https://www.youtube.com/watch?v=...' : 'https://...'}
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 dark:focus:ring-[#1a8a5a]/50" />
+              </label>
+            )}
+            {sourceType === 'upload' && type !== 'link' && (
+              <label className="block">
+                <span className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 block mb-1">Upload File</span>
+                <input ref={fileRef} type="file"
+                  accept={type === 'video' ? 'video/*' : type === 'audio' ? 'audio/*' : 'image/*'}
+                  onChange={handleFileChange}
+                  className="w-full text-sm text-[#0a2617] dark:text-white file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#0d5d3a] file:text-white file:font-bold file:cursor-pointer" />
+                {fileData && <p className="text-[10px] text-[#0d5d3a] dark:text-[#10b981] mt-1 font-semibold">✓ File loaded ({fileMime})</p>}
+              </label>
+            )}
+
+            {/* Thumbnail (for link/url only) */}
+            {(type === 'link' || sourceType === 'url') && (
+              <label className="block">
+                <span className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 block mb-1">Thumbnail Image (optional)</span>
+                <input ref={thumbRef} type="file" accept="image/*" onChange={handleThumbChange}
+                  className="w-full text-sm text-[#0a2617] dark:text-white file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#f0fbf4] dark:file:bg-[#0d5d3a]/20 file:text-[#0d5d3a] dark:file:text-[#10b981] file:font-bold file:cursor-pointer" />
+                {thumbData && <p className="text-[10px] text-[#0d5d3a] dark:text-[#10b981] mt-1 font-semibold">✓ Thumbnail loaded</p>}
+              </label>
+            )}
+
+            {/* Tags */}
+            <div>
+              <span className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 block mb-2">Tags</span>
+              <div className="flex flex-wrap gap-2">
+                {RES_TAGS.map(tag => (
+                  <button key={tag} type="button" onClick={() => toggleTag(tag)}
+                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                      selectedTags.includes(tag)
+                        ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-sm'
+                        : 'bg-[#f0fbf4] dark:bg-[#0d5d3a]/10 text-[#0d5d3a] dark:text-[#10b981] hover:bg-[#0d5d3a]/20'}`}>
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button type="button" onClick={() => { setShowForm(false); resetForm(); }}
+                className="px-5 py-2.5 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 text-[#4a7c5d] dark:text-gray-400 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition">
+                Cancel
+              </button>
+              <button type="submit" disabled={saving}
+                className="px-6 py-2.5 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white font-bold text-sm hover:bg-[#0a4a2e] dark:hover:bg-[#10b981] disabled:opacity-60 transition flex items-center gap-2 shadow-lg shadow-[#0d5d3a]/20">
+                {saving ? <><span className="animate-spin">⟳</span> Saving…</> : <><Save size={15}/> Add Resource</>}
+              </button>
+            </div>
+          </motion.form>
+        )}
+      </AnimatePresence>
+
+      {/* ── RESOURCE LIST ── */}
+      {loading ? (
+        <div className="text-center py-12 text-[#4a7c5d] font-bold">Loading resources…</div>
+      ) : resources.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
+          <div className="text-5xl mb-4">📚</div>
+          <div className="text-lg font-bold text-[#0a2617] dark:text-white mb-1">No resources yet</div>
+          <div className="text-sm text-[#4a7c5d] dark:text-gray-400">Click "Add Resource" to upload your first item.</div>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 overflow-hidden shadow-sm">
+          <div className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-[#0d5d3a]/10 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-[10px] font-bold text-[#4a7c5d] dark:text-gray-400 uppercase tracking-wider">
+            <div className="col-span-5">Resource</div>
+            <div className="col-span-2 hidden sm:block">Type</div>
+            <div className="col-span-2 hidden sm:block">Tags</div>
+            <div className="col-span-2 hidden sm:block text-center">Views</div>
+            <div className="col-span-7 sm:col-span-1 text-right">Del</div>
+          </div>
+          <div className="divide-y divide-[#0d5d3a]/05 dark:divide-white/05 max-h-[520px] overflow-y-auto">
+            {resources.map(r => (
+              <div key={r._id} className="grid grid-cols-12 gap-2 px-5 py-3.5 items-center hover:bg-[#fbfdfb] dark:hover:bg-[#1a1a1a] transition-colors">
+                <div className="col-span-5 flex items-center gap-3 min-w-0">
+                  {/* Mini thumbnail */}
+                  <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-[#0d5d3a]/20 to-[#1a8a5a]/20 flex items-center justify-center">
+                    {r.youtubeVideoId ? (
+                      <img src={`https://img.youtube.com/vi/${r.youtubeVideoId}/default.jpg`} alt="" className="w-full h-full object-cover" />
+                    ) : typeIcon(r.type)}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-sm text-[#0a2617] dark:text-gray-100 truncate">{r.title}</div>
+                    <div className="text-[10px] text-[#4a7c5d] dark:text-gray-400 truncate">{r.sourceType === 'youtube' ? 'YouTube' : r.sourceType === 'upload' ? 'Uploaded file' : r.url}</div>
+                  </div>
+                </div>
+                <div className="col-span-2 hidden sm:flex items-center">
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${typePill(r.type)}`}>
+                    {typeIcon(r.type)} {r.type}
+                  </span>
+                </div>
+                <div className="col-span-2 hidden sm:flex flex-wrap gap-1">
+                  {(r.tags || []).slice(0,2).map((t:string) => (
+                    <span key={t} className="px-1.5 py-0.5 rounded-full bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] text-[9px] font-semibold">{t}</span>
+                  ))}
+                </div>
+                <div className="col-span-2 hidden sm:flex justify-center">
+                  <span className="text-xs font-bold text-[#4a7c5d] dark:text-gray-400">{r.views ?? 0}</span>
+                </div>
+                <div className="col-span-7 sm:col-span-1 flex justify-end">
+                  <button onClick={() => handleDelete(r._id)} disabled={deletingId === r._id}
+                    className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition disabled:opacity-40">
+                    <Trash2 size={14}/>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
