@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Star, Clock, MapPin, X, Calendar, GraduationCap, Filter, ChevronDown, IndianRupee, BookOpen, Award, MessageCircle } from 'lucide-react';
+import { Search, Star, Clock, MapPin, X, Calendar, GraduationCap, Filter, ChevronDown, IndianRupee, BookOpen, Award, MessageCircle, Brain } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { apiFetch } from '../api/client';
 import { getImgSrc } from '../utils/image';
+import TherapistMatchQuiz from './TherapistMatchQuiz';
 
 const SPECIALIZATIONS = [
   'All Specializations',
@@ -27,6 +28,7 @@ export default function TherapyHub({ onSessionBooked, onStartChat }: { onSession
   const [cityFilter, setCityFilter] = useState('All Cities');
   const [costSort, setCostSort] = useState<'asc' | 'desc'>('asc');
   const [selectedTherapist, setSelectedTherapist] = useState<any | null>(null);
+  const [showQuiz, setShowQuiz] = useState(false);
   
   // Booking flow state
   const [isBookingMode, setIsBookingMode] = useState(false);
@@ -451,10 +453,39 @@ export default function TherapyHub({ onSessionBooked, onStartChat }: { onSession
   return (
     <div className="flex flex-col h-full bg-[#fbfdfb] dark:bg-[#050505]">
 
+      {/* ── QUIZ OVERLAY ── */}
+      <AnimatePresence>
+        {showQuiz && (
+          <TherapistMatchQuiz
+            therapists={therapists}
+            onClose={() => setShowQuiz(false)}
+            onSelectTherapist={(t) => {
+              setSelectedTherapist(t);
+              setShowQuiz(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* ── STICKY HEADER ── */}
       <div className="sticky top-0 z-20 bg-[#f7fbf8] dark:bg-[#050505] border-b border-[#0d5d3a]/8 dark:border-white/5 px-4 sm:px-6 pt-6 pb-4">
         <div className="max-w-5xl mx-auto">
-          {/* Header removed as it is now in the main Dashboard nav */}
+          {/* Find My Therapist button */}
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-xs text-[#4a7c5d] dark:text-gray-500 font-medium hidden sm:block">
+              {loading ? 'Loading...' : `${therapists.length} verified therapist${therapists.length !== 1 ? 's' : ''} available`}
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setShowQuiz(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] text-white font-bold text-sm shadow-lg shadow-[#0d5d3a]/25 hover:shadow-[#0d5d3a]/40 transition-all ml-auto"
+            >
+              <Brain size={16} />
+              Find My Therapist
+              <span className="text-[10px] bg-white/20 rounded-full px-1.5 py-0.5 font-bold">AI</span>
+            </motion.button>
+          </div>
 
           {/* Search + Filters row */}
           <div className="flex flex-col gap-3">
