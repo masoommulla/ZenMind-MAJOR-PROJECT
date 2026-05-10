@@ -12,12 +12,22 @@ const uid = () => `m_${Date.now()}_${_id++}`;
 const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 const SS = window.speechSynthesis;
 
-const ACTION_RE = /\[ACTION:(STORY_BUTTONS|POST_STORY|THERAPY_BUTTON|CRISIS)\]/;
+const ACTION_RE = /\[ACTION:(STORY_BUTTONS|POST_STORY|THERAPY_BUTTON|CRISIS)\]/g;
+
+function stripActionTags(text: string): string {
+  return text.replace(ACTION_RE, '').replace(/^\s+|\s+$/g, '').replace(/\n{3,}/g, '\n\n');
+}
+
+function detectAction(raw: string): MessageAction {
+  const reset = new RegExp(ACTION_RE.source, 'g');
+  const m = reset.exec(raw);
+  return m ? (m[1] as MessageAction) : null;
+}
 
 function parseReply(raw: string): { text: string; action: MessageAction } {
-  const m = raw.match(ACTION_RE);
-  if (!m) return { text: raw.trim(), action: null };
-  return { text: raw.replace(m[0], '').trim(), action: m[1] as MessageAction };
+  const action = detectAction(raw);
+  const text = stripActionTags(raw);
+  return { text, action };
 }
 
 const CRISIS_NUMBERS = [
@@ -89,7 +99,7 @@ function MessageBubble({ msg, onStoryYes, onStoryNo, onFeelingGood, onConnectRea
         <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${isBot
           ? 'bg-[#f7fbf8] dark:bg-[#1a1a1a] text-[#0a2617] dark:text-gray-100 border border-[#0d5d3a]/08 dark:border-white/08 rounded-tl-sm'
           : 'bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] text-white rounded-tr-sm shadow-lg shadow-[#0d5d3a]/15'}`}>
-          {msg.content}
+          {stripActionTags(msg.content)}
         </div>
 
         {/* Story Yes/No buttons — offer phase only */}
