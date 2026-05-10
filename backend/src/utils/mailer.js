@@ -1,38 +1,19 @@
 /**
- * Nodemailer — Brevo (formerly Sendinblue) SMTP
- * smtp-relay.brevo.com:587 — IPv4, works reliably on Render
+ * Mailer — Brevo HTTP REST API
+ * https://api.brevo.com/v3/smtp/email  (HTTPS port 443 — never blocked by Render)
  *
- * .env: BREVO_SMTP_USER  (your Brevo account email)
- *       BREVO_SMTP_KEY   (SMTP key from Brevo → Settings → SMTP & API)
- *       EMAIL_FROM       (verified sender address in Brevo)
- *       EMAIL_FROM_NAME  (display name)
+ * .env: BREVO_API_KEY    — API key from Brevo → Settings → API Keys
+ *       EMAIL_FROM       — verified sender email (verify in Brevo Senders tab)
+ *       EMAIL_FROM_NAME  — display name (default: ZenMind)
+ *
+ * No SMTP, no nodemailer, no IPv6 issues. Uses Node built-in fetch (Node 18+).
  */
-import nodemailer from 'nodemailer';
 
-function createTransport() {
-  const user = process.env.BREVO_SMTP_USER;
-  const pass = process.env.BREVO_SMTP_KEY;
-  if (!user || !pass) throw new Error('[Mailer] BREVO_SMTP_USER or BREVO_SMTP_KEY missing from env');
-  return nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false,
-    requireTLS: true,
-    auth: { user, pass },
-    connectionTimeout: 20000,
-    greetingTimeout:   20000,
-    socketTimeout:     25000,
-  });
-}
-
-const from = () =>
-  `"${process.env.EMAIL_FROM_NAME || 'ZenMind'}" <${process.env.EMAIL_FROM || process.env.BREVO_SMTP_USER}>`;
-
-const _u = process.env.BREVO_SMTP_USER;
-if (!_u || !process.env.BREVO_SMTP_KEY) {
-  console.warn('[Mailer] ⚠️  BREVO_SMTP_USER or BREVO_SMTP_KEY not set — emails will be skipped');
+const _apiKey = process.env.BREVO_API_KEY;
+if (!_apiKey) {
+  console.warn('[Mailer] ⚠️  BREVO_API_KEY not set — emails will be skipped');
 } else {
-  console.log(`[Mailer] ✅ Brevo SMTP ready — sending as ${process.env.EMAIL_FROM || _u}`);
+  console.log(`[Mailer] ✅ Brevo HTTP API ready — sending as ${process.env.EMAIL_FROM}`);
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -78,8 +59,26 @@ const POLICY_HTML = `<div style="background:#f0fbf4;border-left:4px solid #0d5d3
   <p style="margin:0;font-size:13px;color:#92400e;">&#9203; <strong>10-Minute Rule:</strong> If you don't join within 10 minutes of the session start, it will be auto-cancelled (70% refund). If the therapist doesn't join within 10 minutes, you receive a <strong>100% refund</strong>.</p>
 </div>`;
 
+// ─── Core send — Brevo HTTP API (HTTPS 443, never blocked) ───────────────────
 async function send(to, subject, html) {
-  await createTransport().sendMail({ from: from(), to, subject, html });
+  const apiKey    = process.env.BREVO_API_KEY;
+  const fromEmail = process.env.EMAIL_FROM;
+  const fromName  = process.env.EMAIL_FROM_NAME || 'ZenMind';
+  if (!apiKey) { console.warn(`[Mailer] ⚠️  BREVO_API_KEY not set — skipping "${subject}" → ${to}`); return; }
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'api-key': apiKey },
+    body: JSON.stringify({
+      sender:      { name: fromName, email: fromEmail },
+      to:          [{ email: to }],
+      subject,
+      htmlContent: html,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Brevo API ${res.status}: ${err}`);
+  }
   console.log(`[Mailer] ✅ "${subject}" → ${to}`);
 }
 
