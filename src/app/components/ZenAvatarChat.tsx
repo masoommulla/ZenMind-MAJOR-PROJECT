@@ -171,8 +171,12 @@ export default function ZenAvatarChat() {
       {/* ── DESKTOP: left panel ────────────────────────────────────────── */}
       <div className="hidden lg:flex flex-col flex-shrink-0 w-72 xl:w-80 gap-3">
 
-        {/* Avatar card — fills entire card edge-to-edge, avatar uses slice to show head+shoulders */}
-        <div className="relative flex-[3] rounded-3xl overflow-hidden shadow-2xl min-h-[280px]">
+        {/* Avatar card — SAME 9:11 aspect ratio as mobile (w-36 h-44 = 144:176 = 9:11)
+             xMidYMin slice fills the card and shows ONLY head+shoulders, same as mobile */}
+        <div
+          className="relative w-full rounded-3xl overflow-hidden shadow-2xl flex-shrink-0"
+          style={{ aspectRatio: '9 / 11' }}
+        >
           <ZenTalkingHead speaking={speaking} text={lastBotText} />
 
           {/* Pulse rings when active */}
@@ -187,7 +191,7 @@ export default function ZenAvatarChat() {
             ))}
           </AnimatePresence>
 
-          {/* Name + status badge — pinned to bottom of card */}
+          {/* Name + status badge — pinned to bottom */}
           <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/70 to-transparent pointer-events-none">
             <div className="text-white text-base font-bold tracking-wide" style={{ fontFamily: 'Syne,sans-serif' }}>Zen</div>
             <div className="flex items-center gap-1.5 mt-0.5">
