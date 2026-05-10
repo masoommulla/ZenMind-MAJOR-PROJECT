@@ -1,7 +1,46 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, Play, CheckCircle, Clock, ChevronRight, X, Star, Zap, Moon, Brain, Heart, TrendingUp, Filter, Search, ArrowLeft, Check } from 'lucide-react';
+import { BookOpen, Play, CheckCircle, Clock, ChevronRight, X, Star, Zap, TrendingUp, Search, ArrowLeft, Check, Lock, Moon } from 'lucide-react';
 import { apiFetch } from '../api/client';
+
+/** Returns today's date string in IST as YYYY-MM-DD */
+const todayIST = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+
+/** Given a Date (when day was completed), returns whether the NEXT calendar day (IST midnight) has passed */
+const nextDayUnlocked = (completedAt: Date | string | undefined): boolean => {
+  if (!completedAt) return false;
+  const completed = new Date(completedAt);
+  // Get the IST date string of when day was completed
+  const completedDateIST = completed.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+  // Compare with today's IST date
+  return todayIST() > completedDateIST;
+};
+
+/** Countdown to next midnight IST */
+function useCountdown() {
+  const [timeLeft, setTimeLeft] = useState('');
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      // Next midnight IST: get current IST time, find next midnight
+      const istOffset = 5.5 * 60 * 60 * 1000;
+      const istNow = new Date(now.getTime() + istOffset);
+      const istMidnight = new Date(Date.UTC(
+        istNow.getUTCFullYear(), istNow.getUTCMonth(), istNow.getUTCDate() + 1, 0, 0, 0
+      ) - istOffset);
+      const diff = istMidnight.getTime() - now.getTime();
+      if (diff <= 0) { setTimeLeft('00:00:00'); return; }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setTimeLeft(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return timeLeft;
+}
 
 const CATEGORY_META: Record<string, { label: string; icon: string; color: string }> = {
   anxiety:     { label: 'Anxiety',     icon: '🧘', color: '#7c3aed' },
@@ -23,6 +62,7 @@ export default function WellnessProgramsUser() {
   const [myEnrollments, setMyEnrollments] = useState<any[]>([]);
   const [loading, setLoading]           = useState(true);
   const [tab, setTab]                   = useState<'browse' | 'my'>('browse');
+  const countdown = useCountdown();
   const [search, setSearch]             = useState('');
   const [catFilter, setCatFilter]       = useState('all');
   const [diffFilter, setDiffFilter]     = useState('all');
@@ -46,7 +86,14 @@ export default function WellnessProgramsUser() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
+
+  // Default to 'my' tab if user has active enrollments
+  useEffect(() => {
+    if (myEnrollments.some((e: any) => !e.isCompleted)) setTab('my');
+  }, [myEnrollments]);
 
   const filtered = useMemo(() => {
     return programs.filter(p => {
@@ -193,26 +240,51 @@ export default function WellnessProgramsUser() {
             const done = completedSet.has(step.dayNumber);
             const isCurrent = enr && !enr.isCompleted && step.dayNumber === enr.currentDay;
             const locked = !enr || (step.dayNumber > enr.currentDay && !done);
+
+            // Day-gating: has prev day been completed today? If so, this day is waiting for midnight
+            const prevDayCompletedDate = enr?.dayCompletedDates?.[String(step.dayNumber - 1)];
+            const waitingForMidnight = isCurrent && step.dayNumber > 1 && prevDayCompletedDate && !nextDayUnlocked(prevDayCompletedDate);
+
             return (
               <motion.div key={step.dayNumber} layout
-                className={`rounded-2xl border-2 p-5 transition-all ${done ? 'border-green-200 dark:border-green-500/30 bg-green-50 dark:bg-green-500/5' : isCurrent ? `border-2 bg-white dark:bg-[#111111]` : 'border-gray-100 dark:border-white/5 bg-white dark:bg-[#111111] opacity-60'}`}
-                style={isCurrent ? { borderColor: selected.coverGradientFrom } : {}}>
+                className={`rounded-2xl border-2 p-5 transition-all ${
+                  done ? 'border-green-200 dark:border-green-500/30 bg-green-50 dark:bg-green-500/5'
+                  : isCurrent && !waitingForMidnight ? 'bg-white dark:bg-[#111111]'
+                  : 'border-gray-100 dark:border-white/5 bg-white dark:bg-[#111111] opacity-50'
+                }`}
+                style={isCurrent && !waitingForMidnight ? { borderColor: selected.coverGradientFrom } : {}}>
                 <div className="flex items-start gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 font-black ${done ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300'}`}>
-                    {done ? <Check size={18} /> : step.dayNumber}
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-black text-sm ${
+                    done ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400'
+                    : waitingForMidnight ? 'bg-gray-100 dark:bg-white/10 text-gray-400'
+                    : isCurrent ? 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300'
+                    : 'bg-gray-100 dark:bg-white/10 text-gray-400'
+                  }`}>
+                    {done ? <Check size={18} /> : waitingForMidnight || locked ? <Lock size={14} /> : step.dayNumber}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="font-black text-[#0a2617] dark:text-white text-sm">{step.title}</span>
                       <span className="text-xs">{EXERCISE_ICONS[step.exerciseType] || '⚡'}</span>
-                      {isCurrent && <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full text-white" style={{ background: selected.coverGradientFrom }}>Today</span>}
+                      {isCurrent && !waitingForMidnight && (
+                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full text-white" style={{ background: selected.coverGradientFrom }}>Today</span>
+                      )}
                     </div>
-                    {(isCurrent || done) && (
+                    {(isCurrent || done) && !waitingForMidnight && (
                       <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed mt-1">{step.content}</p>
+                    )}
+                    {waitingForMidnight && (
+                      <div className="mt-2 flex items-center gap-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-3 py-2">
+                        <Moon size={13} className="text-amber-500 shrink-0" />
+                        <div>
+                          <p className="text-xs font-bold text-amber-700 dark:text-amber-400">Come back tomorrow 🌙</p>
+                          <p className="text-[10px] text-amber-600 dark:text-amber-500">Unlocks in {countdown} (at midnight)</p>
+                        </div>
+                      </div>
                     )}
                     <div className="flex items-center gap-3 mt-2">
                       <span className="text-xs text-gray-400 flex items-center gap-1"><Clock size={10} /> {step.durationMinutes} min</span>
-                      {isCurrent && !done && (
+                      {isCurrent && !done && !waitingForMidnight && (
                         <button onClick={() => handleCompleteDay(selected._id, step.dayNumber)} disabled={completingDay === step.dayNumber}
                           className="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition disabled:opacity-50"
                           style={{ background: selected.coverGradientFrom }}>

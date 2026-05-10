@@ -33,6 +33,97 @@ async function callAI(prompt) {
   return data.choices?.[0]?.message?.content?.trim() || null;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   STATIC NAMED ROUTES — must come BEFORE /:id wildcard
+───────────────────────────────────────────────────────────────────────── */
+
+/* ── GET /api/journal/heatmap ──────────────────────────────────────────── */
+router.get('/heatmap', async (req, res) => {
+  try {
+    const now   = new Date();
+    const start = new Date(now);
+    start.setDate(start.getDate() - 29);
+    start.setHours(0, 0, 0, 0);
+
+    const entries = await JournalEntry.find({
+      userId:    req.user.id,
+      createdAt: { $gte: start },
+    }).select('day moodScore').lean();
+
+    // For each day keep the latest mood score
+    const map = {};
+    entries.forEach(e => { map[e.day] = e.moodScore; });
+
+    // Build a full 30-day array
+    const days = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+      days.push({ date: key, moodScore: map[key] || null });
+    }
+
+    res.json({ ok: true, days });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load heatmap.' });
+  }
+});
+
+/* ── GET /api/journal/insights ─────────────────────────────────────────── */
+router.get('/insights', async (req, res) => {
+  try {
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    const entries = await JournalEntry.find({
+      userId:    req.user.id,
+      createdAt: { $gte: weekAgo },
+    }).select('content moodScore aiTags aiTone day').lean();
+
+    if (entries.length === 0) {
+      return res.json({ ok: true, insight: null, entriesThisWeek: 0, avgMood: null });
+    }
+
+    const avgMood = entries.length
+      ? Math.round((entries.reduce((s, e) => s + e.moodScore, 0) / entries.length) * 10) / 10
+      : null;
+
+    // Build summary text for AI
+    const summary = entries.map(e =>
+      `[Day: ${e.day}, Mood: ${e.moodScore}/5, Tags: ${(e.aiTags||[]).join(', ')}]\n"${e.content.slice(0, 200)}"`
+    ).join('\n\n');
+
+    const prompt = `You are a warm, empathetic mental wellness assistant for teenagers. 
+Analyze these journal entries from the past 7 days and write a SHORT, personal weekly insight (3–4 sentences max).
+
+Focus on:
+1. Emotional patterns you noticed (e.g. "You mentioned exam stress 3 times this week")
+2. One practical, gentle suggestion based on their entries
+3. An encouraging closing line
+
+Write in second person ("You..."), warm and non-clinical tone. Do NOT use bullet points.
+
+Journal entries:
+${summary}`;
+
+    const insight = await callAI(prompt);
+
+    res.json({
+      ok:              true,
+      insight:         insight || null,
+      entriesThisWeek: entries.length,
+      avgMood,
+    });
+  } catch (err) {
+    console.error('[Journal] insights error:', err.message);
+    res.status(500).json({ error: 'Failed to generate insights.' });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────────────────
+   WILDCARD / PARAMETERISED ROUTES — must come AFTER named routes
+───────────────────────────────────────────────────────────────────────── */
+
 /* ── POST /api/journal ─────────────────────────────────────────────────── */
 router.post('/', async (req, res) => {
   try {
@@ -71,7 +162,6 @@ Journal entry: "${content.trim().slice(0, 500)}"`;
         const raw = await callAI(aiPrompt);
         if (!raw) return;
 
-        // Extract JSON safely
         const match = raw.match(/\{[\s\S]*\}/);
         if (!match) return;
         const parsed = JSON.parse(match[0]);
@@ -124,89 +214,6 @@ router.delete('/:id', async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete entry.' });
-  }
-});
-
-/* ── GET /api/journal/heatmap ──────────────────────────────────────────── */
-// Returns last 30 days of mood data for the calendar heatmap
-router.get('/heatmap', async (req, res) => {
-  try {
-    const now   = new Date();
-    const start = new Date(now);
-    start.setDate(start.getDate() - 29);
-    start.setHours(0, 0, 0, 0);
-
-    const entries = await JournalEntry.find({
-      userId:    req.user.id,
-      createdAt: { $gte: start },
-    }).select('day moodScore').lean();
-
-    // For each day keep the latest mood score (overwrite duplicates)
-    const map = {};
-    entries.forEach(e => { map[e.day] = e.moodScore; });
-
-    // Build a full 30-day array
-    const days = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      const key = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
-      days.push({ date: key, moodScore: map[key] || null });
-    }
-
-    res.json({ ok: true, days });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to load heatmap.' });
-  }
-});
-
-/* ── GET /api/journal/insights ─────────────────────────────────────────── */
-// AI-generated weekly insight summary
-router.get('/insights', async (req, res) => {
-  try {
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-
-    const entries = await JournalEntry.find({
-      userId:    req.user.id,
-      createdAt: { $gte: weekAgo },
-    }).select('content moodScore aiTags aiTone day').lean();
-
-    if (entries.length === 0) {
-      return res.json({ ok: true, insight: null, entriesThisWeek: 0 });
-    }
-
-    // Build summary text for AI
-    const summary = entries.map(e =>
-      `[Day: ${e.day}, Mood: ${e.moodScore}/5, Tags: ${(e.aiTags||[]).join(', ')}]\n"${e.content.slice(0, 200)}"`
-    ).join('\n\n');
-
-    const prompt = `You are a warm, empathetic mental wellness assistant for teenagers. 
-Analyze these journal entries from the past 7 days and write a SHORT, personal weekly insight (3–4 sentences max).
-
-Focus on:
-1. Emotional patterns you noticed (e.g. "You mentioned exam stress 3 times this week")
-2. One practical, gentle suggestion based on their entries
-3. An encouraging closing line
-
-Write in second person ("You..."), warm and non-clinical tone. Do NOT use bullet points.
-
-Journal entries:
-${summary}`;
-
-    const insight = await callAI(prompt);
-
-    res.json({
-      ok:              true,
-      insight:         insight || null,
-      entriesThisWeek: entries.length,
-      avgMood:         entries.length
-        ? Math.round((entries.reduce((s, e) => s + e.moodScore, 0) / entries.length) * 10) / 10
-        : null,
-    });
-  } catch (err) {
-    console.error('[Journal] insights error:', err.message);
-    res.status(500).json({ error: 'Failed to generate insights.' });
   }
 });
 

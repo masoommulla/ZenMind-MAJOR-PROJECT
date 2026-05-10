@@ -44,12 +44,13 @@ export const WellnessProgram = mongoose.model('WellnessProgram', wellnessProgram
 /* ── Enrollment ─────────────────────────────────────────────── */
 const programEnrollmentSchema = new mongoose.Schema(
   {
-    userId:        { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    programId:     { type: mongoose.Schema.Types.ObjectId, ref: 'WellnessProgram', required: true },
-    currentDay:    { type: Number, default: 1 },
-    completedDays: [{ type: Number }],   // array of completed day numbers
-    isCompleted:   { type: Boolean, default: false },
-    completedAt:   { type: Date, default: null },
+    userId:            { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    programId:         { type: mongoose.Schema.Types.ObjectId, ref: 'WellnessProgram', required: true },
+    currentDay:        { type: Number, default: 1 },
+    completedDays:     [{ type: Number }],   // array of completed day numbers
+    dayCompletedDates: { type: Map, of: Date, default: {} }, // dayNumber -> completedAt date
+    isCompleted:       { type: Boolean, default: false },
+    completedAt:       { type: Date, default: null },
   },
   { timestamps: true }
 );

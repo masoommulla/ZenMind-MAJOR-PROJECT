@@ -183,21 +183,34 @@ router.patch('/:id/progress', requireAuth, async (req, res) => {
     if (!enrollment) return res.status(404).json({ error: 'Not enrolled.' });
     if (enrollment.isCompleted) return res.json({ ok: true, enrollment });
 
+    // Add day if not already completed
     if (!enrollment.completedDays.includes(dayNumber)) {
       enrollment.completedDays.push(dayNumber);
     }
+
+    // Store the IST date string when this day was completed (for midnight gating)
+    const nowIST = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }); // 'YYYY-MM-DD'
+    enrollment.dayCompletedDates.set(String(dayNumber), new Date());
+
+    // Advance current day
     if (dayNumber >= enrollment.currentDay) {
       enrollment.currentDay = dayNumber + 1;
     }
 
+    // Check program completion
     const program = await WellnessProgram.findById(req.params.id).lean();
     if (program && enrollment.completedDays.length >= program.durationDays) {
       enrollment.isCompleted = true;
       enrollment.completedAt = new Date();
     }
 
+    enrollment.markModified('dayCompletedDates');
     await enrollment.save();
-    res.json({ ok: true, enrollment });
+
+    // Return enrollment with dayCompletedDates as plain object
+    const plain = enrollment.toObject();
+    plain.dayCompletedDates = Object.fromEntries(enrollment.dayCompletedDates);
+    res.json({ ok: true, enrollment: plain });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
