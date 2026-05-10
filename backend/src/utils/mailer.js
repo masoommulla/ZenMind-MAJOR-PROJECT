@@ -1,8 +1,12 @@
 /**
- * Nodemailer — Gmail SMTP (smtp.gmail.com:587 STARTTLS)
+ * Nodemailer — Gmail SMTP (smtp.gmail.com:465 SSL)
  * .env: EMAIL_USER, EMAIL_PASS (Gmail App Password), EMAIL_FROM_NAME
+ *
+ * Render fix: nodemailer's dnsLookup is overridden to always request
+ * IPv4 (family:4) — prevents ENETUNREACH on Render's IPv6-first DNS.
  */
 import nodemailer from 'nodemailer';
+import { lookup as dnsLookup } from 'dns';
 
 function createTransport() {
   const user = process.env.EMAIL_USER;
@@ -11,13 +15,16 @@ function createTransport() {
   if (!user || !pass) throw new Error('[Mailer] EMAIL_USER or EMAIL_PASS missing from env');
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,           // SSL — Render blocks 587 (STARTTLS)
-    secure: true,        // true = SSL/TLS on connect
-    family: 4,           // Force IPv4 — avoids ENETUNREACH on Render
+    port: 465,
+    secure: true,
+    family: 4,
+    // ✅ Force IPv4 at socket level — overrides Render's IPv6-first DNS
+    dnsLookup: (hostname, options, callback) =>
+      dnsLookup(hostname, { ...options, family: 4 }, callback),
     auth: { user, pass },
-    connectionTimeout: 10000,  // 10s
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
     tls: { rejectUnauthorized: false }
   });
 }
