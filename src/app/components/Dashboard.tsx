@@ -364,16 +364,6 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
   );
 }
 
-/* ── File → base64 helper ── */
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload  = () => resolve(reader.result as string);
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
-
 /* AI CHAT */
 function AiChatPanel({ onNavigateToTherapy }: { onNavigateToTherapy?: () => void }) {
   return (
