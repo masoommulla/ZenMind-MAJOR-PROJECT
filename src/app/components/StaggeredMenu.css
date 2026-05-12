@@ -1,0 +1,423 @@
+/* StaggeredMenu.css — ZenMind branded variant */
+
+.staggered-menu-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.staggered-menu-wrapper.fixed-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 40;
+  overflow: hidden;
+}
+
+.staggered-menu-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1em 1.25em;
+  background: transparent;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.staggered-menu-header > * {
+  pointer-events: auto;
+}
+
+.sm-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  user-select: none;
+  text-decoration: none;
+}
+
+.sm-logo-wordmark {
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-family: 'Syne', sans-serif;
+  color: #0a2617;
+  letter-spacing: -0.5px;
+  transition: color 0.3s ease;
+}
+
+.staggered-menu-wrapper[data-open] .sm-logo-wordmark {
+  color: #ffffff;
+}
+
+.sm-logo-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #0d5d3a;
+  margin-left: 1px;
+  vertical-align: middle;
+  transition: background 0.3s ease;
+}
+
+.staggered-menu-wrapper[data-open] .sm-logo-dot {
+  background: #10b981;
+}
+
+/* Toggle button */
+.sm-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 1;
+  overflow: visible;
+  color: #0a2617;
+  letter-spacing: 0.02em;
+  font-family: 'Syne', sans-serif;
+  padding: 0;
+}
+
+.staggered-menu-wrapper[data-open] .sm-toggle {
+  color: #ffffff;
+}
+
+.sm-toggle:focus-visible {
+  outline: 2px solid #0d5d3a;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.sm-toggle-textWrap {
+  position: relative;
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sm-toggle-textInner {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.sm-toggle-line {
+  display: block;
+  height: 1em;
+  line-height: 1;
+}
+
+/* Plus / X icon */
+.sm-icon {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+}
+
+.sm-icon-line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+.sm-icon-line-v {
+  /* handled by GSAP rotate */
+}
+
+/* Pre-layers (animated color strips) */
+.sm-prelayers {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+[data-position='left'] .sm-prelayers {
+  right: auto;
+  left: 0;
+}
+
+.sm-prelayer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* Main slide-in panel */
+.staggered-menu-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: #0a1f12;
+  display: flex;
+  flex-direction: column;
+  padding: 5rem 1.75rem 2rem 1.75rem;
+  overflow-y: auto;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+[data-position='left'] .staggered-menu-panel {
+  right: auto;
+  left: 0;
+}
+
+.sm-panel-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Nav list */
+.sm-panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sm-panel-itemWrap {
+  position: relative;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.sm-panel-item {
+  position: relative;
+  color: #e8f5ee;
+  font-weight: 800;
+  font-size: clamp(2.4rem, 9vw, 3.2rem);
+  cursor: pointer;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  text-transform: uppercase;
+  font-family: 'Syne', sans-serif;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+  text-decoration: none;
+  padding-right: 1.6em;
+  background: none;
+  border: none;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.sm-panel-item:hover {
+  color: #10b981;
+}
+
+.sm-panel-item:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.sm-panel-itemLabel {
+  display: inline-block;
+  will-change: transform;
+  transform-origin: 50% 100%;
+}
+
+/* Numbered items */
+.sm-panel-list[data-numbering] {
+  counter-reset: smItem;
+}
+
+.sm-panel-list[data-numbering] .sm-panel-item::after {
+  counter-increment: smItem;
+  content: counter(smItem, decimal-leading-zero);
+  position: absolute;
+  top: 0.1em;
+  right: 0.3em;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: 'Syne', sans-serif;
+  color: #10b981;
+  letter-spacing: 0;
+  pointer-events: none;
+  user-select: none;
+  opacity: var(--sm-num-opacity, 0);
+}
+
+/* Active item indicator */
+.sm-panel-item[data-active='true'] {
+  color: #10b981;
+}
+
+/* Divider between nav and socials */
+.sm-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 1.5rem 0;
+}
+
+/* User section (avatar + name) */
+.sm-user-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+}
+
+.sm-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(16,185,129,0.4);
+  flex-shrink: 0;
+}
+
+.sm-user-initials {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0d5d3a, #1a8a5a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  flex-shrink: 0;
+}
+
+.sm-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sm-user-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e8f5ee;
+  font-family: 'Syne', sans-serif;
+  truncate: clip;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sm-user-email {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Socials */
+.sm-socials {
+  margin-top: auto;
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sm-socials-title {
+  margin: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #10b981;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-family: 'Syne', sans-serif;
+}
+
+.sm-socials-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.sm-socials-link {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  text-decoration: none;
+  transition: color 0.25s ease, opacity 0.25s ease;
+  font-family: 'Syne', sans-serif;
+}
+
+.sm-socials-link:hover {
+  color: #10b981;
+}
+
+.sm-socials-link:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 3px;
+}
+
+/* Logout button */
+.sm-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f87171;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  padding: 0.5rem 0;
+  transition: opacity 0.2s;
+}
+
+.sm-logout-btn:hover {
+  opacity: 0.75;
+}
+
+/* Dark backdrop when open */
+.sm-backdrop {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .staggered-menu-wrapper {
+    display: none !important;
+  }
+}
