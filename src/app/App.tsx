@@ -8,8 +8,6 @@ import HowItWorks from './components/HowItWorks';
 import StorySection from './components/StorySection';
 import TherapySection from './components/TherapySection';
 import Statistics from './components/Statistics';
-import Testimonials from './components/Testimonials';
-import FAQSection from './components/FAQSection';
 import CTASection from './components/CTASection';
 import Footer from './components/Footer';
 import AuthPage from './components/AuthPage';
@@ -179,9 +177,7 @@ export default function App() {
           <HowItWorks />
           <StorySection />
           <Statistics />
-          <Testimonials onGetStarted={() => { setLoginIntent('progress'); setShowAuth(true); }} />
           <TherapySection onBookSession={() => { setLoginIntent('therapy'); setShowAuth(true); }} />
-          <FAQSection onGetStarted={() => { setLoginIntent('progress'); setShowAuth(true); }} />
           <CTASection
             onGetStarted={() => { setLoginIntent('progress'); setShowAuth(true); }}
             onScheduleDemo={() => { setLoginIntent('therapy'); setShowAuth(true); }}
