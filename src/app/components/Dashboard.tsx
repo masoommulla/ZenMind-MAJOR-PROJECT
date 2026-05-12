@@ -190,58 +190,57 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <header className="flex-shrink-0 bg-white/80 dark:bg-[#050505]/80 backdrop-blur border-b border-[#0d5d3a]/10 dark:border-white/10 z-10">
-          <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
-            <div className="flex-1 flex flex-col md:flex-row md:items-center gap-1 md:gap-4">
-              {/* Desktop Welcome */}
-              <div className="hidden md:block">
-                <div className="text-[#0a2617] dark:text-gray-100 text-xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
-                  {loading ? 'Loading...' : `Welcome, ${me?.name?.split(' ')[0] || 'there'}!`}
+          <div className="px-3 sm:px-5 py-2 flex items-center justify-between gap-2">
+            <div className="flex-1 flex flex-row items-center gap-2 sm:gap-4 min-w-0">
+              {/* Desktop Welcome (hidden on mobile) */}
+              <div className="hidden md:block flex-shrink-0">
+                <div className="text-[#0a2617] dark:text-gray-100 text-sm font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
+                  {loading ? 'Loading…' : `Hi, ${me?.name?.split(' ')[0] || 'there'}!`}
                 </div>
-                <div className="text-xs text-[#4a7c5d] dark:text-gray-400">Your personal wellness dashboard</div>
               </div>
 
-              {/* Divider for desktop */}
+              {/* Divider — desktop only, select tabs */}
               {(tab === 'sessions' || tab === 'therapy' || tab === 'aichat') && (
-                <div className="hidden md:block w-px h-10 bg-gray-200 dark:bg-gray-800 mx-2"></div>
+                <div className="hidden md:block w-px h-7 bg-gray-200 dark:bg-gray-800" />
               )}
 
-              {/* Dynamic Header */}
-              <div>
-                <div className="text-[#0a2617] dark:text-gray-100 text-lg sm:text-xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
-                  {tab === 'sessions' ? 'My Sessions' : 
-                   tab === 'therapy' ? 'Therapy Hub' : 
-                   tab === 'chat' ? 'Chat' :
-                   tab === 'aichat' ? 'AI Chat' : 
-                   tab === 'progress' ? 'My Progress' :
-                   tab === 'community' ? 'Community Stories' :
-                   tab === 'resources' ? 'Wellness Resources' :
-                   tab === 'reading' ? 'Therapist Reading Lists' :
-                   tab === 'journal' ? 'Mood Journal' :
-                   tab === 'circles' ? 'Peer Support Circles' :
-                   tab === 'goals' ? 'Wellness Goals' :
-                   tab === 'programs' ? 'Guided Wellness Programs' :
-                   tab === 'settings' ? 'Settings' :
-                   loading ? 'Loading...' : `Welcome, ${me?.name?.split(' ')[0] || 'there'}!`}
+              {/* Current tab title */}
+              <div className="min-w-0">
+                <div className="text-[#0a2617] dark:text-gray-100 text-sm sm:text-base font-bold truncate" style={{ fontFamily: 'Syne, sans-serif' }}>
+                  {tab === 'sessions'  ? 'My Sessions' :
+                   tab === 'therapy'   ? 'Therapy Hub' :
+                   tab === 'chat'      ? 'Chat' :
+                   tab === 'aichat'    ? 'AI Chat' :
+                   tab === 'progress'  ? 'My Progress' :
+                   tab === 'community' ? 'Community' :
+                   tab === 'resources' ? 'Resources' :
+                   tab === 'reading'   ? 'Reading Lists' :
+                   tab === 'journal'   ? 'Mood Journal' :
+                   tab === 'circles'   ? 'Peer Circles' :
+                   tab === 'goals'     ? 'My Goals' :
+                   tab === 'programs'  ? 'Wellness Programs' :
+                   tab === 'settings'  ? 'Settings' :
+                   loading ? 'Loading…' : `Welcome, ${me?.name?.split(' ')[0] || 'there'}!`}
                 </div>
-                <div className="text-sm text-[#4a7c5d] dark:text-gray-400">
-                  {tab === 'sessions' ? 'Manage your upcoming therapy appointments and view history.' : 
-                   tab === 'therapy' ? 'Connect with verified professionals for your mental wellness journey.' : 
-                   tab === 'chat' ? 'Secure, real-time messaging with your therapist.' :
-                   tab === 'aichat' ? 'Your intelligent companion for mental wellness.' : 
-                   tab === 'progress' ? 'Track your mood, sessions and mental wellness journey over time.' :
-                   tab === 'community' ? 'Read and share stories — you are never alone. 💚' :
-                   tab === 'resources' ? 'Curated videos, audio, articles & more for your wellness journey. 📚' :
-                   tab === 'reading' ? 'Books, articles & resources hand-picked by our therapists.' :
-                   tab === 'journal' ? 'Your private wellness diary with AI-powered weekly insights.' :
-                   tab === 'circles' ? 'Real-time group spaces where you can share, support and feel less alone.' :
-                   tab === 'goals' ? 'Build daily habits, track streaks and get nudged to never miss a day.' :
-                   tab === 'programs' ? 'Structured day-by-day programs designed by mental health experts — free and science-backed.' :
-                   tab === 'settings' ? 'Manage your account settings and preferences.' :
+                <div className="text-[10px] text-[#4a7c5d] dark:text-gray-400 hidden sm:block truncate">
+                  {tab === 'sessions'  ? 'Manage your therapy appointments' :
+                   tab === 'therapy'   ? 'Connect with verified professionals' :
+                   tab === 'chat'      ? 'Real-time messaging with your therapist' :
+                   tab === 'aichat'    ? 'Your AI wellness companion' :
+                   tab === 'progress'  ? 'Track your mood & wellness journey' :
+                   tab === 'community' ? 'Real stories from real people' :
+                   tab === 'resources' ? 'Curated wellness resources' :
+                   tab === 'reading'   ? 'Therapist-curated books & articles' :
+                   tab === 'journal'   ? 'Your private AI-powered diary' :
+                   tab === 'circles'   ? 'Safe group spaces to share & support' :
+                   tab === 'goals'     ? 'Build daily habits & streaks' :
+                   tab === 'programs'  ? 'Science-backed day-by-day programs' :
+                   tab === 'settings'  ? 'Manage your account & preferences' :
                    'Your personal wellness dashboard'}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <ThemeToggle />
             </div>
           </div>
@@ -290,24 +289,26 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
               <WellnessGoalTracker />
             </div>
           ) : tab === 'reading' ? (
-            <div className="flex-1 overflow-y-auto">
-              <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-                <ReadingListsUser />
-              </div>
+            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+              <ReadingListsUser />
             </div>
           ) : tab === 'programs' ? (
+            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+              <WellnessProgramsUser />
+            </div>
+          ) : tab === 'settings' ? (
             <div className="flex-1 overflow-y-auto">
-              <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
-                <WellnessProgramsUser />
+              <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
+                {error && (
+                  <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">{error}</div>
+                )}
+                <SettingsPanel me={me} setMe={setMe} onLogout={onLogout} />
               </div>
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto">
-              <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
-                {error && (
-                  <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">{error}</div>
-                )}
-                {tab === 'settings' && <SettingsPanel me={me} setMe={setMe} onLogout={onLogout} />}
+              <div className="flex items-center justify-center h-full text-[#4a7c5d] dark:text-gray-400 text-sm">
+                Page not found
               </div>
             </div>
           )}
