@@ -128,7 +128,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
         </button>
 
         {/* Sidebar inner */}
-        <div className="h-full overflow-hidden overflow-y-auto bg-white dark:bg-[#111111] border-r border-[#0d5d3a]/10 dark:border-white/10 flex flex-col">
+        <div className="zen-sidebar h-full overflow-hidden overflow-y-auto bg-white dark:bg-[#111111] border-r border-[#0d5d3a]/10 dark:border-white/10 flex flex-col">
 
           {/* Header */}
           <div className="flex items-center p-3 border-b border-[#0d5d3a]/10 dark:border-white/10 min-h-[64px]">
@@ -154,8 +154,10 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
           <nav className="flex-1 p-2 space-y-1">
             {NAV_ITEMS.map(({ key, label, icon }) => (
               <button key={key} type="button" onClick={() => setTab(key)} title={collapsed ? label : undefined}
-                className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl border transition-all ${
-                  tab === key ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white border-[#0d5d3a] dark:border-[#1a8a5a]' : 'bg-white dark:bg-transparent text-[#0a2617] dark:text-gray-300 border-transparent hover:bg-[#f3fbf6] dark:hover:bg-white/5 dark:hover:border-white/10'
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl border transition-all ${
+                  tab === key
+                    ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white border-[#0d5d3a] dark:border-[#1a8a5a] zen-nav-active'
+                    : 'bg-white dark:bg-transparent text-[#0a2617] dark:text-gray-300 border-transparent hover:bg-[#f3fbf6] dark:hover:bg-white/5 dark:hover:border-white/10'
                 } ${collapsed ? 'justify-center' : ''}`}
               >
                 <span className={tab === key ? 'text-white' : 'text-[#0d5d3a] dark:text-[#10b981]'}>{icon}</span>
@@ -168,9 +170,9 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
           <div className="mt-auto border-t border-[#0d5d3a]/08">
             {!collapsed && (
               <div className="px-3 pt-3 pb-1">
-                <div className="rounded-2xl border border-[#0d5d3a]/12 bg-gradient-to-br from-white to-[#f4fbf6] px-3 py-2.5">
-                  <div className="text-xs text-[#4a7c5d]">Signed in as</div>
-                  <div className="text-sm text-[#0a2617] font-semibold truncate">{me?.email || '-'}</div>
+                <div className="rounded-2xl border border-[#0d5d3a]/10 dark:border-white/8 bg-[#f0fbf4] dark:bg-[#0d1f14] px-3 py-2.5 zen-shadow-sm">
+                  <div className="text-xs text-[#4a7c5d] dark:text-[#6aad8a]">Signed in as</div>
+                  <div className="text-sm text-[#0a2617] dark:text-gray-200 font-semibold truncate">{me?.email || '-'}</div>
                 </div>
               </div>
             )}
@@ -189,7 +191,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
 
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <header className="flex-shrink-0 bg-white/80 dark:bg-[#050505]/80 backdrop-blur border-b border-[#0d5d3a]/10 dark:border-white/10 z-10">
+        <header className="zen-header flex-shrink-0 bg-white/80 dark:bg-[#050505]/80 backdrop-blur border-b border-[#0d5d3a]/10 dark:border-white/10 z-10">
           <div className="px-3 sm:px-5 py-2 flex items-center justify-between gap-2">
             <div className="flex-1 flex flex-row items-center gap-2 sm:gap-4 min-w-0">
               {/* Desktop Welcome (hidden on mobile) */}
@@ -246,7 +248,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
           </div>
         </header>
 
-        <main className="flex-1 overflow-hidden flex flex-col min-h-0">
+        <main className="zen-panel flex-1 overflow-hidden flex flex-col min-h-0">
           {tab === 'therapy' ? (
             <TherapyHub 
               onSessionBooked={() => setTab('sessions')} 
