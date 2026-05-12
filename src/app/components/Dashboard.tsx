@@ -21,7 +21,6 @@ import PeerCircles from './PeerCircles';
 import WellnessGoalTracker from './WellnessGoalTracker';
 import ReadingListsUser from './ReadingListsUser';
 import WellnessProgramsUser from './WellnessProgramsUser';
-import StaggeredMenu from './StaggeredMenu';
 
 type DashboardProps = {
   onLogout: () => void;
@@ -62,6 +61,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
   const [loading, setLoading] = useState(!prefetchedMe);
   const [error, setError]     = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [chatTherapist, setChatTherapist] = useState<any | null>(null);
 
   useEffect(() => {
@@ -95,24 +95,60 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
   return (
     <div className="h-screen overflow-hidden bg-[#f7fbf8] dark:bg-[#050505] flex transition-colors duration-300">
 
-      {/* ── STAGGERED MOBILE MENU (md:hidden via CSS) ── */}
-      <StaggeredMenu
-        items={NAV_ITEMS.map(({ key, label }) => ({
-          key,
-          label,
-          onClick: () => setTab(key),
-          active: tab === key,
-        }))}
-        colors={['#0d5d3a', '#1a8a5a']}
-        accentColor="#10b981"
-        displayItemNumbering={true}
-        displaySocials={false}
-        userName={me?.name}
-        userEmail={me?.email}
-        avatarUrl={avatarUrl}
-        initials={initials}
-        onLogout={onLogout}
-      />
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 bg-black/40 z-30 md:hidden" onClick={() => setMobileOpen(false)} />
+      )}
+
+      {/* Mobile sidebar drawer */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed left-0 top-0 h-full w-64 bg-white dark:bg-[#111111] border-r border-[#0d5d3a]/10 dark:border-white/10 z-40 md:hidden shadow-xl flex flex-col"
+          >
+            <div className="flex items-center p-3 border-b border-[#0d5d3a]/10 dark:border-white/10 min-h-[56px]">
+              {avatarUrl
+                ? <img src={avatarUrl} alt="P" className="w-8 h-8 rounded-full object-cover ring-2 ring-[#0d5d3a]/20 dark:ring-white/20 flex-shrink-0" />
+                : <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">{initials}</div>
+              }
+              <div className="ml-2 flex-1 min-w-0">
+                <div className="text-[#0a2617] dark:text-gray-100 font-bold text-sm truncate" style={{fontFamily:'Syne,sans-serif'}}>Dashboard</div>
+                <div className="text-xs text-[#4a7c5d] dark:text-gray-400 truncate">{me?.name}</div>
+              </div>
+              <button type="button" onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 ml-1 text-[#0a2617] dark:text-gray-300">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
+              {NAV_ITEMS.map(({ key, label, icon }) => (
+                <button key={key} type="button" onClick={() => { setTab(key); setMobileOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl border transition-all ${
+                    tab === key
+                      ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white border-[#0d5d3a] dark:border-[#1a8a5a] zen-nav-active'
+                      : 'bg-white dark:bg-transparent text-[#0a2617] dark:text-gray-300 border-transparent hover:bg-[#f3fbf6] dark:hover:bg-white/5'
+                  }`}>
+                  <span className={tab === key ? 'text-white' : 'text-[#0d5d3a] dark:text-[#10b981]'}>{icon}</span>
+                  <span className="text-sm font-semibold">{label}</span>
+                </button>
+              ))}
+            </nav>
+            <div className="mt-auto border-t border-[#0d5d3a]/10 dark:border-white/10 p-2">
+              <div className="px-3 py-2 mb-1">
+                <div className="text-xs text-[#4a7c5d] dark:text-[#6aad8a]">Signed in as</div>
+                <div className="text-xs font-semibold text-[#0a2617] dark:text-gray-200 truncate">{me?.email || '-'}</div>
+              </div>
+              <button type="button" onClick={onLogout}
+                className="w-full flex items-center gap-2.5 text-sm font-semibold text-[#e05555] hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl px-3 py-2.5 transition">
+                <LogOut className="w-4 h-4 flex-shrink-0" /><span>Sign out</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Desktop sidebar */}
       <div className="hidden md:block flex-shrink-0 relative" style={{ width: collapsed ? 64 : 256, transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1)' }}>
@@ -244,6 +280,14 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <ThemeToggle />
+              {/* Mobile hamburger */}
+              <button
+                type="button"
+                onClick={() => setMobileOpen(true)}
+                className="md:hidden p-2 rounded-xl border border-[#0d5d3a]/15 text-[#0d5d3a] dark:border-white/10 dark:text-gray-300 hover:bg-[#f0fbf4] dark:hover:bg-white/10 transition"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </header>
