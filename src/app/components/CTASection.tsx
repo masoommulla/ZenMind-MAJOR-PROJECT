@@ -6,9 +6,10 @@ import okVideo from '../../../asset/ok/ok.mp4';
 
 type CTASectionProps = {
   onGetStarted: () => void;
+  onScheduleDemo?: () => void;
 };
 
-export default function CTASection({ onGetStarted }: CTASectionProps) {
+export default function CTASection({ onGetStarted, onScheduleDemo }: CTASectionProps) {
   const containerRef = useRef<HTMLElement>(null);
   const circlesRef = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -118,6 +119,7 @@ export default function CTASection({ onGetStarted }: CTASectionProps) {
                 <motion.button
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={onScheduleDemo}
                   className="px-8 sm:px-10 py-3 sm:py-4 bg-transparent text-white rounded-full font-medium border-2 border-white text-base sm:text-lg"
                 >
                   Schedule a Demo

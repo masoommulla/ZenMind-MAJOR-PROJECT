@@ -24,6 +24,7 @@ import WellnessProgramsUser from './WellnessProgramsUser';
 type DashboardProps = {
   onLogout: () => void;
   prefetchedMe?: any; // already fetched by App.tsx during startup verification
+  initialTab?: TabKey;  // which tab to open right after login (default: 'progress')
 };
 
 type Me = {
@@ -53,8 +54,8 @@ const NAV_ITEMS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'settings',   label: 'Settings',     icon: <Settings      className="w-5 h-5 flex-shrink-0" /> },
 ];
 
-export default function Dashboard({ onLogout, prefetchedMe }: DashboardProps) {
-  const [tab, setTab]         = useState<TabKey>('aichat');
+export default function Dashboard({ onLogout, prefetchedMe, initialTab }: DashboardProps) {
+  const [tab, setTab]         = useState<TabKey>(initialTab ?? 'progress');
   const [me, setMe]           = useState<Me | null>(prefetchedMe ?? null);
   const [loading, setLoading] = useState(!prefetchedMe); // no loading if we have data
   const [error, setError]     = useState<string | null>(null);

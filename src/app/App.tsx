@@ -39,7 +39,9 @@ export default function App() {
   const [showAuth, setShowAuth]       = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showTherapistLogin, setShowTherapistLogin] = useState(false);
-  
+  // Track which dashboard tab to open immediately after login
+  const [loginIntent, setLoginIntent] = useState<'progress' | 'aichat' | 'therapy'>('progress');
+
   const [activeFooterPage, setActiveFooterPage] = useState<string | null>(null);
 
   /* Loading screen state — only for very first render */
@@ -157,7 +159,7 @@ export default function App() {
           }}
         />
       ) : authed ? (
-        <Dashboard onLogout={logoutUser} prefetchedMe={meData} />
+        <Dashboard onLogout={logoutUser} prefetchedMe={meData} initialTab={loginIntent} />
       ) : showAuth ? (
         <AuthPage
           onBackHome={() => setShowAuth(false)}
@@ -165,14 +167,21 @@ export default function App() {
         />
       ) : (
         <>
-          <Navigation onGetStarted={() => setShowAuth(true)} onAdminLoginTrigger={() => setShowAdminLogin(true)} onTherapistLoginTrigger={() => setShowTherapistLogin(true)} />
-          <Hero onGetStarted={() => setShowAuth(true)} />
+          <Navigation
+            onGetStarted={() => { setLoginIntent('progress'); setShowAuth(true); }}
+            onAdminLoginTrigger={() => setShowAdminLogin(true)}
+            onTherapistLoginTrigger={() => setShowTherapistLogin(true)}
+          />
+          <Hero onGetStarted={() => { setLoginIntent('progress'); setShowAuth(true); }} />
           <Features />
           <HowItWorks />
           <StorySection />
           <Statistics />
-          <TherapySection />
-          <CTASection onGetStarted={() => setShowAuth(true)} />
+          <TherapySection onBookSession={() => { setLoginIntent('therapy'); setShowAuth(true); }} />
+          <CTASection
+            onGetStarted={() => { setLoginIntent('progress'); setShowAuth(true); }}
+            onScheduleDemo={() => { setLoginIntent('therapy'); setShowAuth(true); }}
+          />
           <Footer 
             onTherapistLoginTrigger={() => setShowTherapistLogin(true)} 
             onProductLinkClick={setActiveFooterPage} 
@@ -188,7 +197,8 @@ export default function App() {
           {activeFooterPage && <ProductPage page={activeFooterPage} onClose={() => setActiveFooterPage(null)} />}
 
           {/* ── 3D Robot Widget (fixed bottom-right, lazy-loaded) ── */}
-          <RobotWidget onOpen={() => setShowAuth(true)} />
+          {/* Robot widget opens AI chat section directly after login */}
+          <RobotWidget onOpen={() => { setLoginIntent('aichat'); setShowAuth(true); }} />
         </>
       )}
     </div>

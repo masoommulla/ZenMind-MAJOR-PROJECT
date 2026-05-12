@@ -26,7 +26,7 @@ const benefits = [
   },
 ];
 
-export default function TherapySection() {
+export default function TherapySection({ onBookSession }: { onBookSession?: () => void }) {
   const sectionRef = useRef<HTMLElement>(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0, active: false });
   const { scrollYProgress } = useScroll({
@@ -108,6 +108,7 @@ export default function TherapySection() {
               </p>
               <button
                 type="button"
+                onClick={onBookSession}
                 className="mt-6 inline-flex items-center gap-2 rounded-full bg-white dark:bg-[#10b981] px-6 py-3 font-medium text-[#0d5d3a] dark:text-[#050505] transition hover:bg-[#e8f5e9] dark:hover:bg-[#34d399]"
               >
                 Book a Session
