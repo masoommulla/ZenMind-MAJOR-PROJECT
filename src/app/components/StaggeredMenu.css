@@ -78,20 +78,25 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  background: transparent;
-  border: none;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.25);
   cursor: pointer;
-  font-weight: 600;
-  font-size: 0.85rem;
+  font-weight: 700;
+  font-size: 0.8rem;
   line-height: 1;
   overflow: visible;
   color: #0a2617;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
   font-family: 'Syne', sans-serif;
-  padding: 0;
+  padding: 0.45rem 0.85rem;
+  border-radius: 100px;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  backdrop-filter: blur(6px);
 }
 
 .staggered-menu-wrapper[data-open] .sm-toggle {
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.35);
   color: #ffffff;
 }
 
@@ -208,7 +213,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.6rem;
 }
 
 .sm-panel-itemWrap {
@@ -221,21 +226,24 @@
   position: relative;
   color: #e8f5ee;
   font-weight: 800;
-  font-size: clamp(2.4rem, 9vw, 3.2rem);
+  font-size: clamp(1.6rem, 6.5vw, 2.2rem);
   cursor: pointer;
-  line-height: 1.05;
-  letter-spacing: -2px;
+  line-height: 1.1;
+  letter-spacing: -1px;
   text-transform: uppercase;
   font-family: 'Syne', sans-serif;
   display: inline-flex;
   align-items: baseline;
   gap: 0;
   text-decoration: none;
-  padding-right: 1.6em;
+  padding-right: 2.8rem;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
   background: none;
   border: none;
   text-align: left;
   transition: color 0.2s ease;
+  width: 100%;
 }
 
 .sm-panel-item:hover {
@@ -263,10 +271,10 @@
   counter-increment: smItem;
   content: counter(smItem, decimal-leading-zero);
   position: absolute;
-  top: 0.1em;
-  right: 0.3em;
-  font-size: 0.85rem;
-  font-weight: 500;
+  top: 0.5em;
+  right: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
   font-family: 'Syne', sans-serif;
   color: #10b981;
   letter-spacing: 0;

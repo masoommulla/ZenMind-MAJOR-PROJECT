@@ -4,7 +4,7 @@ import {
   MessageCircle, Settings, BookMarked, BarChart2,
   PanelLeftOpen, PanelLeftClose, Eye, EyeOff, LogOut, Menu, X, Stethoscope,
   Calendar, Clock, Trash2, CheckSquare, IndianRupee, Star,
-  Library, BookHeart, Users2, Target, Globe2, Dumbbell, Info
+  Library, BookHeart, Users2, Target, Globe2, Dumbbell, Info, Upload
 } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import ThemeToggle from './ThemeToggle';
@@ -362,6 +362,16 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
       </div>
     </div>
   );
+}
+
+/* ── File → base64 helper ── */
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
 }
 
 /* AI CHAT */
