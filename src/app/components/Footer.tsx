@@ -61,34 +61,34 @@ export default function Footer({
             </div>
           </div>
 
-          <div className="lg:col-span-8 grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-5 sm:gap-y-6">
+          <div className="lg:col-span-8 grid grid-cols-2 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-5 sm:gap-y-6">
             {Object.entries(footerLinks).map(([category, links]) => (
-              <div key={category}>
-                <h4 className="font-semibold mb-2.5 text-sm sm:text-base" style={{ fontFamily: 'Syne, sans-serif' }}>
+              <div key={category} className="min-w-0">
+                <h4 className="font-semibold mb-2.5 text-xs sm:text-sm" style={{ fontFamily: 'Syne, sans-serif' }}>
                   {category}
                 </h4>
-                <ul className="space-y-1.5 sm:space-y-2.5">
+                <ul className="space-y-1.5 sm:space-y-2">
                   {links.map((link) => (
-                    <li key={link}>
+                    <li key={link} className="min-w-0">
                       {category === 'Product' && onProductLinkClick ? (
                         <button
                           onClick={() => onProductLinkClick(link)}
-                          className="text-white/70 hover:text-white transition-colors text-xs sm:text-sm block text-left"
+                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block text-left break-words w-full leading-snug"
                         >
                           {link}
                         </button>
                       ) : category === 'Support' && onSupportLinkClick ? (
                         <button
                           onClick={() => onSupportLinkClick(link)}
-                          className="text-white/70 hover:text-white transition-colors text-xs sm:text-sm block text-left"
+                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block text-left break-words w-full leading-snug"
                         >
                           {link}
                         </button>
                       ) : (
                         <motion.a
                           href="#"
-                          whileHover={{ x: 4 }}
-                          className="text-white/70 hover:text-white transition-colors text-xs sm:text-sm block"
+                          whileHover={{ x: 3 }}
+                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block break-words leading-snug"
                         >
                           {link}
                         </motion.a>
