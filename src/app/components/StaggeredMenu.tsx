@@ -28,6 +28,7 @@ export interface StaggeredMenuProps {
   onMenuClose?: () => void;
   onLogout?: () => void;
   onLogoDoubleClick?: () => void;
+  logoUrl?: string;
   userName?: string;
   userEmail?: string;
   avatarUrl?: string | null;
@@ -45,6 +46,7 @@ const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   onMenuClose,
   onLogout,
   onLogoDoubleClick,
+  logoUrl,
   userName,
   userEmail,
   avatarUrl,
@@ -310,11 +312,19 @@ const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
           title="Double-click for admin access"
           style={{ cursor: onLogoDoubleClick ? 'pointer' : 'default' }}
         >
-          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
-            <circle cx="16" cy="16" r="15" stroke={open ? '#10b981' : '#0d5d3a'} strokeWidth="2" />
-            <path d="M10 20C10 14 14 10 16 10C18 10 22 14 22 20" stroke={open ? '#10b981' : '#0d5d3a'} strokeWidth="2" strokeLinecap="round" />
-            <circle cx="16" cy="10" r="2.5" fill={open ? '#10b981' : '#0d5d3a'} />
-          </svg>
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt="ZenMind Logo"
+              style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+            />
+          ) : (
+            <svg width="22" height="22" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
+              <circle cx="16" cy="16" r="15" stroke={open ? '#10b981' : '#0d5d3a'} strokeWidth="2" />
+              <path d="M10 20C10 14 14 10 16 10C18 10 22 14 22 20" stroke={open ? '#10b981' : '#0d5d3a'} strokeWidth="2" strokeLinecap="round" />
+              <circle cx="16" cy="10" r="2.5" fill={open ? '#10b981' : '#0d5d3a'} />
+            </svg>
+          )}
           <span className="sm-logo-wordmark">
             Zen<span style={{ color: open ? '#10b981' : '#0d5d3a' }}>Mind</span>
             <span className="sm-logo-dot" />
