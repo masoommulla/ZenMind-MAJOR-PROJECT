@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  MessageCircle, Settings, Upload, Save,
-  ChevronLeft, ChevronRight, PanelLeftOpen, PanelLeftClose, Eye, EyeOff, LogOut, Menu, X, Stethoscope,
-  Calendar, Clock, Trash2, CheckSquare, IndianRupee, Star, Info
+  MessageCircle, Settings, BookMarked, BarChart2,
+  PanelLeftOpen, PanelLeftClose, Eye, EyeOff, LogOut, Menu, X, Stethoscope,
+  Calendar, Clock, Trash2, CheckSquare, IndianRupee, Star,
+  Library, BookHeart, Users2, Target, Globe2, Dumbbell, Info
 } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import ThemeToggle from './ThemeToggle';
@@ -40,18 +41,18 @@ type Me = {
 type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources' | 'journal' | 'circles' | 'goals' | 'reading' | 'programs';
 
 const NAV_ITEMS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
-  { key: 'aichat',     label: 'AI Chat',      icon: <MessageCircle className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'therapy',    label: 'Therapy Hub',  icon: <Stethoscope   className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'resources',  label: 'Resources',    icon: <Info          className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'reading',    label: 'Reading Lists', icon: <Info          className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'programs',   label: 'Wellness Programs', icon: <Star       className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'journal',    label: 'Mood Journal', icon: <Star          className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'circles',    label: 'Peer Circles', icon: <Upload        className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'goals',      label: 'My Goals',     icon: <Star          className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'progress',   label: 'My Progress',  icon: <Save          className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'community',  label: 'Community',    icon: <MessageCircle className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'sessions',   label: 'My Sessions',  icon: <Calendar      className="w-5 h-5 flex-shrink-0" /> },
-  { key: 'settings',   label: 'Settings',     icon: <Settings      className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'aichat',     label: 'AI Chat',           icon: <MessageCircle className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'therapy',    label: 'Therapy Hub',        icon: <Stethoscope   className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'resources',  label: 'Resources',          icon: <Library       className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'reading',    label: 'Reading Lists',      icon: <BookMarked    className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'programs',   label: 'Wellness Programs',  icon: <Dumbbell      className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'journal',    label: 'Mood Journal',       icon: <BookHeart     className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'circles',    label: 'Peer Circles',       icon: <Users2        className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'goals',      label: 'My Goals',           icon: <Target        className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'progress',   label: 'My Progress',        icon: <BarChart2     className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'community',  label: 'Community',          icon: <Globe2        className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'sessions',   label: 'My Sessions',        icon: <Calendar      className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'settings',   label: 'Settings',           icon: <Settings      className="w-5 h-5 flex-shrink-0" /> },
 ];
 
 export default function Dashboard({ onLogout, prefetchedMe, initialTab }: DashboardProps) {

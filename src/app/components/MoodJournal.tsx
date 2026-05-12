@@ -401,33 +401,23 @@ export default function MoodJournal() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-5">
-
-      {/* Page title */}
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] flex items-center justify-center shadow-lg shadow-[#0d5d3a]/20">
-          <BookOpen className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <h2 className="text-lg font-bold text-[#0a2617] dark:text-gray-100 leading-none" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Mood Journal
-          </h2>
-          <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-0.5">Your private wellness diary — powered by AI insights</p>
-        </div>
+    <div className="flex flex-col h-full">
+      {/* ── STICKY HEATMAP ── */}
+      <div className="flex-shrink-0 sticky top-0 z-10 bg-[#f7fbf8] dark:bg-[#050505] border-b border-[#0d5d3a]/8 dark:border-white/5 px-4 sm:px-6 pt-4 pb-4">
+        {heatmap.length > 0 && (
+          <div className="bg-white dark:bg-[#111111] rounded-2xl border border-[#0d5d3a]/10 dark:border-white/10 p-4 shadow-sm">
+            <HeatmapCalendar days={heatmap} />
+          </div>
+        )}
       </div>
 
-      {/* AI Insights */}
-      <InsightsCard insights={insights} loading={insightsLoading} />
+      {/* ── SCROLLABLE CONTENT ── */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
+        {/* AI Insights */}
+        <InsightsCard insights={insights} loading={insightsLoading} />
 
-      {/* Heatmap */}
-      {heatmap.length > 0 && (
-        <div className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 p-5 shadow-sm">
-          <HeatmapCalendar days={heatmap} />
-        </div>
-      )}
-
-      {/* Composer */}
-      <Composer onSaved={handleSaved} />
+        {/* Composer */}
+        <Composer onSaved={handleSaved} />
 
       {/* Entries List */}
       <div>
@@ -445,7 +435,7 @@ export default function MoodJournal() {
             <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-1">Click "Write today's entry" above to get started.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             <AnimatePresence>
               {entries.map(entry => (
                 <EntryCard
@@ -480,6 +470,7 @@ export default function MoodJournal() {
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

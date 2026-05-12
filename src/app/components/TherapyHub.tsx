@@ -468,86 +468,81 @@ export default function TherapyHub({ onSessionBooked, onStartChat }: { onSession
       </AnimatePresence>
 
       {/* ── STICKY HEADER ── */}
-      <div className="sticky top-0 z-20 bg-[#f7fbf8] dark:bg-[#050505] border-b border-[#0d5d3a]/8 dark:border-white/5 px-4 sm:px-6 pt-6 pb-4">
-        <div className="max-w-5xl mx-auto">
-          {/* Search + Filters row */}
-          <div className="flex flex-col gap-3">
-            {/* Search (Full Width Top) */}
-            <div className="relative w-full">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a7c5d] dark:text-gray-400" />
+      <div className="sticky top-0 z-20 bg-[#f7fbf8] dark:bg-[#050505] border-b border-[#0d5d3a]/8 dark:border-white/5 px-4 sm:px-6 pt-4 pb-3">
+        <div className="max-w-6xl mx-auto">
+          {/* Single row: Search + Filters + AI Button */}
+          <div className="flex flex-wrap lg:flex-nowrap items-center gap-2">
+            {/* Search */}
+            <div className="relative w-full lg:flex-1 min-w-[140px]">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4a7c5d] dark:text-gray-400" />
               <input
                 type="text"
                 placeholder="Search by name or specialization..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 dark:focus:ring-[#1a8a5a]/40 shadow-sm font-medium text-sm text-[#0a2617] dark:text-white"
+                className="w-full pl-9 pr-8 py-2.5 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 shadow-sm font-medium text-sm text-[#0a2617] dark:text-white"
               />
               {search && (
-                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  <X size={14} />
+                <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  <X size={13} />
                 </button>
               )}
             </div>
 
-            {/* Filters Row — 2-col grid on mobile, flex row on desktop.
-                Mobile: [Spec] [Cost] / [Sessions] [🧠 AI Button]
-                Desktop: [Spec] [Cost] [Sessions] [City?] [🧠 AI Button] */}
-            <div className="grid grid-cols-2 md:flex md:flex-row gap-2 md:gap-3 items-center">
-              {/* Specialization */}
-              <div className="relative">
-                <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4a7c5d] dark:text-gray-400 pointer-events-none hidden sm:block" />
-                <select value={specFilter} onChange={e => setSpecFilter(e.target.value)}
-                  className="w-full sm:pl-8 pr-8 py-2.5 px-3 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl text-[11px] sm:text-sm font-semibold text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 shadow-sm cursor-pointer appearance-none md:min-w-[190px]">
-                  {specs.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4a7c5d] pointer-events-none" />
-              </div>
-
-              {/* Cost Sort */}
-              <div className="relative">
-                <IndianRupee size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4a7c5d] dark:text-gray-400 pointer-events-none hidden sm:block" />
-                <select value={costSort} onChange={e => setCostSort(e.target.value as 'asc' | 'desc')}
-                  className="w-full sm:pl-8 pr-8 py-2.5 px-3 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl text-[11px] sm:text-sm font-semibold text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 shadow-sm cursor-pointer appearance-none md:min-w-[160px]">
-                  <option value="asc">Low to High</option>
-                  <option value="desc">High to Low</option>
-                </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4a7c5d] pointer-events-none" />
-              </div>
-
-              {/* Session Type */}
-              <div className="relative col-span-1">
-                <select value={sessionFilter} onChange={e => setSessionFilter(e.target.value)}
-                  className="w-full pr-8 py-2.5 px-3 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl text-[11px] sm:text-sm font-semibold text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 shadow-sm cursor-pointer appearance-none">
-                  <option value="All Sessions">All Sessions</option>
-                  <option value="Online">Online</option>
-                  <option value="Offline">Offline</option>
-                </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4a7c5d] pointer-events-none" />
-              </div>
-
-              {/* City (Only if Offline) */}
-              {sessionFilter === 'Offline' && (
-                <div className="relative col-span-1">
-                  <select value={cityFilter} onChange={e => setCityFilter(e.target.value)}
-                    className="w-full pr-8 py-2.5 px-3 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl text-[11px] sm:text-sm font-semibold text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 shadow-sm cursor-pointer appearance-none">
-                    {cities.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4a7c5d] pointer-events-none" />
-                </div>
-              )}
-
-              {/* 🧠 Find My Therapist — 4th grid cell on mobile, last in flex row on desktop */}
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => setShowQuiz(true)}
-                className="col-span-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] text-white font-bold text-[11px] sm:text-sm shadow-md shadow-[#0d5d3a]/25 hover:shadow-[#0d5d3a]/40 transition-all whitespace-nowrap md:ml-auto"
-              >
-                <Brain size={14} className="shrink-0" />
-                <span className="hidden xs:inline sm:inline">Find My</span> Therapist
-                <span className="hidden sm:inline text-[9px] bg-white/20 rounded-full px-1.5 py-0.5 font-black">AI</span>
-              </motion.button>
+            {/* Specialization */}
+            <div className="relative flex-shrink-0">
+              <Filter size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#4a7c5d] pointer-events-none hidden sm:block" />
+              <select value={specFilter} onChange={e => setSpecFilter(e.target.value)}
+                className="sm:pl-7 pr-7 py-2.5 px-3 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl text-xs font-semibold text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 shadow-sm cursor-pointer appearance-none max-w-[170px]">
+                {specs.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#4a7c5d] pointer-events-none" />
             </div>
+
+            {/* Cost Sort */}
+            <div className="relative flex-shrink-0">
+              <IndianRupee size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#4a7c5d] pointer-events-none hidden sm:block" />
+              <select value={costSort} onChange={e => setCostSort(e.target.value as 'asc' | 'desc')}
+                className="sm:pl-7 pr-7 py-2.5 px-3 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl text-xs font-semibold text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 shadow-sm cursor-pointer appearance-none">
+                <option value="asc">Low to High</option>
+                <option value="desc">High to Low</option>
+              </select>
+              <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#4a7c5d] pointer-events-none" />
+            </div>
+
+            {/* Session Type */}
+            <div className="relative flex-shrink-0">
+              <select value={sessionFilter} onChange={e => setSessionFilter(e.target.value)}
+                className="pr-7 py-2.5 px-3 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl text-xs font-semibold text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 shadow-sm cursor-pointer appearance-none">
+                <option value="All Sessions">All Sessions</option>
+                <option value="Online">Online</option>
+                <option value="Offline">Offline</option>
+              </select>
+              <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#4a7c5d] pointer-events-none" />
+            </div>
+
+            {/* City (Only if Offline) */}
+            {sessionFilter === 'Offline' && (
+              <div className="relative flex-shrink-0">
+                <select value={cityFilter} onChange={e => setCityFilter(e.target.value)}
+                  className="pr-7 py-2.5 px-3 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl text-xs font-semibold text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 shadow-sm cursor-pointer appearance-none">
+                  {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#4a7c5d] pointer-events-none" />
+              </div>
+            )}
+
+            {/* Find My Therapist AI */}
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setShowQuiz(true)}
+              className="flex-shrink-0 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] text-white font-bold text-xs shadow-md shadow-[#0d5d3a]/25 hover:shadow-[#0d5d3a]/40 transition-all whitespace-nowrap"
+            >
+              <Brain size={13} className="shrink-0" />
+              Find My Therapist
+              <span className="text-[9px] bg-white/20 rounded-full px-1.5 py-0.5 font-black">AI</span>
+            </motion.button>
           </div>
 
           {/* Active filter chips */}
@@ -587,8 +582,8 @@ export default function TherapyHub({ onSessionBooked, onStartChat }: { onSession
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
         <div className="max-w-5xl mx-auto">
           {loading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-              {[1, 2, 3].map(i => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+              {[1, 2, 3, 4].map(i => (
                 <div key={i} className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 p-6 animate-pulse h-64" />
               ))}
             </div>
@@ -597,7 +592,7 @@ export default function TherapyHub({ onSessionBooked, onStartChat }: { onSession
           {error && <div className="p-4 bg-red-50 text-red-600 rounded-xl font-bold">{error}</div>}
 
           {!loading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
               {filtered.map(t => (
                 <motion.div key={t._id} whileHover={{ y: -3, boxShadow: '0 12px 32px rgba(13,93,58,0.12)' }}
                   className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm cursor-pointer flex flex-col p-6 transition-all relative overflow-hidden h-full"

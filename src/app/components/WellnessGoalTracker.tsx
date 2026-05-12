@@ -311,115 +311,101 @@ export default function WellnessGoalTracker() {
   const todayTotal = goals.length;
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] flex items-center justify-center shadow-lg shadow-[#0d5d3a]/20">
-            <Target className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-[#0a2617] dark:text-gray-100 leading-none" style={{ fontFamily: 'Syne, sans-serif' }}>
-              Wellness Goals
-            </h2>
-            <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-0.5">Track daily habits — build streaks</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {push.vapidKey && (
-            <button onClick={push.toggle} disabled={push.loading}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                push.enabled
-                  ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white'
-                  : 'bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] border border-[#0d5d3a]/15'
-              } disabled:opacity-50`}>
-              {push.loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : push.enabled ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
-              {push.enabled ? 'Nudges on' : 'Enable nudges'}
-            </button>
-          )}
-          <button onClick={() => setShowForm(v => !v)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white text-xs font-bold hover:bg-[#0a4a2e] transition shadow-md shadow-[#0d5d3a]/20">
-            {showForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-            {showForm ? 'Cancel' : 'Add Goal'}
-          </button>
-        </div>
-      </div>
-
-      {/* Stats row */}
-      {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: "Today's progress", value: `${todayDone}/${todayTotal}`, icon: <Check className="w-4 h-4" />, color: '#0d5d3a' },
-            { label: 'Longest streak',   value: `${stats.longestStreak}d`,    icon: <Flame className="w-4 h-4" />, color: '#f97316' },
-            { label: 'Total completions',value: stats.totalCompletions,       icon: <Trophy className="w-4 h-4" />, color: '#7c3aed' },
-            { label: 'Active goals',     value: stats.totalGoals,             icon: <Target className="w-4 h-4" />, color: '#0369a1' },
+    <div className="flex flex-col h-full">
+      {/* ── STICKY CONTROLS BAR ── */}
+      <div className="flex-shrink-0 sticky top-0 z-10 bg-[#f7fbf8] dark:bg-[#050505] border-b border-[#0d5d3a]/8 dark:border-white/5 px-4 sm:px-6 pt-3 pb-3 space-y-3">
+        {/* Stats + Actions single line */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Stat badges */}
+          {stats && [
+            { label: "Today's progress", value: `${todayDone}/${todayTotal}`, icon: <Check className="w-3.5 h-3.5" />, color: '#0d5d3a' },
+            { label: 'Longest streak',   value: `${stats.longestStreak}d`,    icon: <Flame className="w-3.5 h-3.5" />, color: '#f97316' },
+            { label: 'Total completions',value: stats.totalCompletions,       icon: <Trophy className="w-3.5 h-3.5" />, color: '#7c3aed' },
+            { label: 'Active goals',     value: stats.totalGoals,             icon: <Target className="w-3.5 h-3.5" />, color: '#0369a1' },
           ].map(s => (
-            <div key={s.label} className="bg-white dark:bg-[#111111] rounded-2xl border border-[#0d5d3a]/10 dark:border-white/10 p-3 flex items-center gap-3 shadow-sm">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: s.color }}>
-                {s.icon}
-              </div>
+            <div key={s.label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm">
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: s.color }}>{s.icon}</div>
               <div>
-                <div className="text-base font-bold text-[#0a2617] dark:text-gray-100">{s.value}</div>
-                <div className="text-[10px] text-[#4a7c5d] dark:text-gray-400">{s.label}</div>
+                <div className="text-xs font-black text-[#0a2617] dark:text-gray-100 leading-none">{s.value}</div>
+                <div className="text-[9px] text-[#4a7c5d] dark:text-gray-400 leading-none mt-0.5">{s.label}</div>
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Today progress bar */}
-      {todayTotal > 0 && (
-        <div className="bg-white dark:bg-[#111111] rounded-2xl border border-[#0d5d3a]/10 dark:border-white/10 p-4 shadow-sm">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-[#0a2617] dark:text-gray-100">Today — {todayDone} of {todayTotal} complete</span>
-            <span className="text-xs font-bold text-[#0d5d3a] dark:text-[#10b981]">{Math.round((todayDone/todayTotal)*100)}%</span>
+          {/* Actions */}
+          <div className="flex items-center gap-2 ml-auto">
+            {push.vapidKey && (
+              <button onClick={push.toggle} disabled={push.loading}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                  push.enabled ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white' : 'bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] border border-[#0d5d3a]/15'
+                } disabled:opacity-50`}>
+                {push.loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : push.enabled ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
+                {push.enabled ? 'Nudges on' : 'Enable nudges'}
+              </button>
+            )}
+            <button onClick={() => setShowForm(v => !v)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white text-xs font-bold hover:bg-[#0a4a2e] transition shadow-md shadow-[#0d5d3a]/20">
+              {showForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+              {showForm ? 'Cancel' : 'Add Goal'}
+            </button>
           </div>
-          <div className="h-2 rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden">
-            <motion.div className="h-full rounded-full bg-gradient-to-r from-[#0d5d3a] to-[#10b981]"
-              initial={{ width: 0 }} animate={{ width: `${Math.round((todayDone/todayTotal)*100)}%` }}
-              transition={{ duration: 0.6, ease: 'easeOut' }} />
+        </div>
+        {/* Today progress bar */}
+        {todayTotal > 0 && (
+          <div className="bg-white dark:bg-[#111111] rounded-xl border border-[#0d5d3a]/10 dark:border-white/10 px-4 py-2.5 shadow-sm">
+            <div className="flex justify-between items-center mb-1.5">
+              <span className="text-[10px] font-bold text-[#0a2617] dark:text-gray-100">Today — {todayDone} of {todayTotal} complete</span>
+              <span className="text-[10px] font-bold text-[#0d5d3a] dark:text-[#10b981]">{Math.round((todayDone/todayTotal)*100)}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden">
+              <motion.div className="h-full rounded-full bg-gradient-to-r from-[#0d5d3a] to-[#10b981]"
+                initial={{ width: 0 }} animate={{ width: `${Math.round((todayDone/todayTotal)*100)}%` }}
+                transition={{ duration: 0.6, ease: 'easeOut' }} />
+            </div>
+            {todayDone === todayTotal && todayTotal > 0 && (
+              <p className="text-[10px] text-[#0d5d3a] dark:text-[#10b981] font-bold mt-1 text-center">All goals done today! Amazing work!</p>
+            )}
           </div>
-          {todayDone === todayTotal && todayTotal > 0 && (
-            <p className="text-xs text-[#0d5d3a] dark:text-[#10b981] font-bold mt-2 text-center">🎉 All goals done today! Amazing work!</p>
-          )}
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Add form */}
-      <AnimatePresence>
-        {showForm && <AddGoalForm onSaved={() => { setShowForm(false); load(); }} onCancel={() => setShowForm(false)} />}
-      </AnimatePresence>
+      {/* ── SCROLLABLE CONTENT ── */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
+        {/* Add form */}
+        <AnimatePresence>
+          {showForm && <AddGoalForm onSaved={() => { setShowForm(false); load(); }} onCancel={() => setShowForm(false)} />}
+        </AnimatePresence>
 
-      {/* Goals grid */}
-      {loading ? (
-        <div className="flex items-center justify-center h-32">
-          <Loader2 className="w-5 h-5 text-[#0d5d3a] animate-spin" />
-        </div>
-      ) : goals.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Target className="w-10 h-10 text-[#0d5d3a]/30 dark:text-white/20 mb-3" />
-          <p className="text-sm font-semibold text-[#0a2617] dark:text-gray-100">No goals yet</p>
-          <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-1">Add your first wellness goal to start building streaks.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          <AnimatePresence>
-            {goals.map(g => (
-              <GoalCard key={g._id} goal={g} onToggle={handleToggle} onDelete={handleDelete} toggling={toggling} />
-            ))}
-          </AnimatePresence>
-        </div>
-      )}
+        {/* Goals grid */}
+        {loading ? (
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="w-5 h-5 text-[#0d5d3a] animate-spin" />
+          </div>
+        ) : goals.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <Target className="w-10 h-10 text-[#0d5d3a]/30 dark:text-white/20 mb-3" />
+            <p className="text-sm font-semibold text-[#0a2617] dark:text-gray-100">No goals yet</p>
+            <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-1">Add your first wellness goal to start building streaks.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <AnimatePresence>
+              {goals.map(g => (
+                <GoalCard key={g._id} goal={g} onToggle={handleToggle} onDelete={handleDelete} toggling={toggling} />
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
 
-      {/* Send nudge (only if push enabled) */}
-      {push.enabled && (
-        <div className="flex justify-center pt-2">
-          <button onClick={push.sendNudge} disabled={push.loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 text-[#0d5d3a] dark:text-[#10b981] text-xs font-semibold hover:bg-[#f0fbf4] dark:hover:bg-[#0d5d3a]/10 transition disabled:opacity-50">
-            <Bell className="w-3.5 h-3.5" /> Send streak nudge now
-          </button>
-        </div>
-      )}
+        {/* Send nudge */}
+        {push.enabled && (
+          <div className="flex justify-center pt-2">
+            <button onClick={push.sendNudge} disabled={push.loading}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 text-[#0d5d3a] dark:text-[#10b981] text-xs font-semibold hover:bg-[#f0fbf4] dark:hover:bg-[#0d5d3a]/10 transition disabled:opacity-50">
+              <Bell className="w-3.5 h-3.5" /> Send streak nudge now
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

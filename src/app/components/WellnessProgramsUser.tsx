@@ -307,41 +307,45 @@ export default function WellnessProgramsUser() {
   const doneEnrollments = myEnrollments.filter(e => e.isCompleted);
 
   return (
-    <div className="pb-20">
+    <div className="flex flex-col h-full">
       {msg && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className={`mb-4 p-4 rounded-2xl font-semibold flex items-center gap-2 ${msg.ok ? 'bg-green-50 dark:bg-[#10b981]/10 text-green-700 dark:text-[#10b981] border border-green-200 dark:border-[#10b981]/20' : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'}`}>
-          {msg.ok ? <CheckCircle size={16} /> : null} {msg.text}
-          <button onClick={() => setMsg(null)} className="ml-auto opacity-60 hover:opacity-100"><X size={14} /></button>
+          className={`mx-4 sm:mx-6 mt-4 p-3 rounded-2xl font-semibold flex items-center gap-2 text-sm ${msg.ok ? 'bg-green-50 dark:bg-[#10b981]/10 text-green-700 dark:text-[#10b981] border border-green-200 dark:border-[#10b981]/20' : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'}`}>
+          {msg.ok ? <CheckCircle size={15} /> : null} {msg.text}
+          <button onClick={() => setMsg(null)} className="ml-auto opacity-60 hover:opacity-100"><X size={13} /></button>
         </motion.div>
       )}
 
-      {/* Hero */}
-      <div className="bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] rounded-3xl p-6 sm:p-8 text-white mb-8 relative overflow-hidden">
-        <div className="absolute -right-6 -top-6 opacity-10 text-[140px]">🧘</div>
-        <div className="relative z-10">
-          <div className="text-xs font-black uppercase tracking-widest text-green-200 mb-2">Guided Wellness Programs</div>
-          <h1 className="text-2xl sm:text-3xl font-black mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Your Personal Growth Journey
-          </h1>
-          <p className="text-white/80 text-sm max-w-lg">Structured day-by-day programs designed by mental health experts — free, science-backed, and built for real results.</p>
-          <div className="flex flex-wrap gap-4 mt-4 text-sm font-bold text-white/90">
-            <span className="flex items-center gap-1.5"><Zap size={14} />{programs.length} Programs Available</span>
-            <span className="flex items-center gap-1.5"><TrendingUp size={14} />{myEnrollments.length} Enrolled</span>
+      {/* ── STICKY CONTROLS ── */}
+      <div className="flex-shrink-0 sticky top-0 z-10 bg-[#f7fbf8] dark:bg-[#050505] border-b border-[#0d5d3a]/8 dark:border-white/5 px-4 sm:px-6 pt-4 pb-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Tabs */}
+          <div className="flex gap-1 p-1 bg-white dark:bg-[#111111] rounded-xl border border-[#0d5d3a]/10 dark:border-white/10">
+            {(['browse', 'my'] as const).map(t => (
+              <button key={t} onClick={() => setTab(t)}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${tab === t ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:text-[#0a2617] dark:hover:text-white'}`}>
+                {t === 'browse' ? <><Search size={12}/> Browse All</> : <><BookOpen size={12}/> My Programs ({myEnrollments.length})</>}
+              </button>
+            ))}
+          </div>
+          {/* Stats badges */}
+          <div className="flex items-center gap-2 ml-auto">
+            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm">
+              <Zap size={13} className="text-[#0d5d3a] dark:text-[#10b981]" />
+              <span className="text-xs font-bold text-[#0a2617] dark:text-white">{programs.length}</span>
+              <span className="text-[10px] text-[#4a7c5d] dark:text-gray-400">Available</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm">
+              <TrendingUp size={13} className="text-[#10b981]" />
+              <span className="text-xs font-bold text-[#0a2617] dark:text-white">{myEnrollments.length}</span>
+              <span className="text-[10px] text-[#4a7c5d] dark:text-gray-400">Enrolled</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6 p-1 bg-white dark:bg-[#111111] rounded-2xl border border-[#0d5d3a]/10 dark:border-white/10 w-fit">
-        {(['browse', 'my'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${tab === t ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:text-[#0a2617] dark:hover:text-white'}`}>
-            {t === 'browse' ? '🔍 Browse All' : `📚 My Programs (${myEnrollments.length})`}
-          </button>
-        ))}
-      </div>
-
+      {/* ── SCROLLABLE CONTENT ── */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 pb-20">
       {tab === 'browse' && (
         <>
           {/* Filters */}
@@ -484,6 +488,7 @@ export default function WellnessProgramsUser() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

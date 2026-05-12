@@ -40,45 +40,55 @@ const CATEGORY_GRADIENT: Record<string, string> = {
   other:         'from-[#0d5d3a]/10 to-[#10b981]/05',
 };
 
-function StoryCard({ story, onLike }: { story: Story; onLike: (id: string) => void }) {
+function StoryCard({ story, onLike, onOpen }: { story: Story; onLike: (id: string) => void; onOpen: (s: Story) => void }) {
   const cat = CATEGORIES.find(c => c.key === story.category);
   const grad = CATEGORY_GRADIENT[story.category] || CATEGORY_GRADIENT.other;
+  const MAX_CHARS = 200;
+  const truncated = story.story.length > MAX_CHARS;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`relative rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08 bg-gradient-to-br ${grad} bg-white dark:bg-[#111111] p-5 shadow-sm hover:shadow-md transition-shadow`}
+      className={`relative rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08 bg-gradient-to-br ${grad} bg-white dark:bg-[#111111] p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full`}
     >
       {/* Category badge */}
       {cat && cat.key !== 'all' && (
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 dark:bg-white/10 border border-[#0d5d3a]/08 dark:border-white/10 text-xs font-semibold text-[#0d5d3a] dark:text-[#10b981] mb-3">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 dark:bg-white/10 border border-[#0d5d3a]/08 dark:border-white/10 text-xs font-semibold text-[#0d5d3a] dark:text-[#10b981] mb-3 w-fit">
           <span>{cat.emoji}</span>
           <span>{cat.label}</span>
         </div>
       )}
 
       {/* Story text */}
-      <p className="text-sm text-[#0a2617] dark:text-gray-200 leading-relaxed mb-4">
-        "{story.story}"
+      <p className="text-sm text-[#0a2617] dark:text-gray-200 leading-relaxed mb-3 flex-1">
+        "{truncated ? story.story.slice(0, MAX_CHARS) + '…' : story.story}"
       </p>
 
       {/* Footer */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-auto">
         <div className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-500">
           — {story.isAnonymous ? 'Anonymous' : story.author}
         </div>
-        <button
-          onClick={() => onLike(story._id)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-            story.liked
-              ? 'bg-red-500 text-white shadow-md shadow-red-500/30'
-              : 'bg-white dark:bg-white/10 text-[#4a7c5d] dark:text-gray-400 border border-[#0d5d3a]/08 dark:border-white/10 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20'
-          }`}
-        >
-          <Heart className={`w-3.5 h-3.5 ${story.liked ? 'fill-white' : ''}`} />
-          {story.likes}
-        </button>
+        <div className="flex items-center gap-2">
+          {truncated && (
+            <button onClick={() => onOpen(story)}
+              className="text-[10px] font-bold text-[#0d5d3a] dark:text-[#10b981] hover:underline">
+              Read more
+            </button>
+          )}
+          <button
+            onClick={() => onLike(story._id)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+              story.liked
+                ? 'bg-red-500 text-white shadow-md shadow-red-500/30'
+                : 'bg-white dark:bg-white/10 text-[#4a7c5d] dark:text-gray-400 border border-[#0d5d3a]/08 dark:border-white/10 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20'
+            }`}
+          >
+            <Heart className={`w-3.5 h-3.5 ${story.liked ? 'fill-white' : ''}`} />
+            {story.likes}
+          </button>
+        </div>
       </div>
     </motion.div>
   );
@@ -209,6 +219,7 @@ export default function CommunityWall() {
   const [page, setPage]         = useState(1);
   const [hasMore, setHasMore]   = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
+  const [openStory, setOpenStory] = useState<Story | null>(null);
 
   const fetchStories = useCallback(async (cat: string, p: number, replace = false) => {
     setLoading(true);
@@ -230,81 +241,99 @@ export default function CommunityWall() {
       setStories(prev => prev.map(s =>
         s._id === id ? { ...s, likes: res.likes, liked: res.liked } : s
       ));
+      if (openStory?._id === id) setOpenStory(prev => prev ? { ...prev, likes: res.likes, liked: res.liked } : prev);
     } catch { /* silent */ }
   };
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6 flex-wrap gap-3">
-        <div>
-          <h2 className="text-2xl font-black text-[#0a2617] dark:text-white flex items-center gap-2" style={{ fontFamily: 'Syne,sans-serif' }}>
-            <Sparkles className="w-6 h-6 text-[#10b981]" /> Community Stories
-          </h2>
-          <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-0.5">
-            Real stories from real teens — you are not alone 💚
-          </p>
-        </div>
-        <button
-          onClick={() => setShowSubmit(true)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] text-white text-sm font-bold shadow-lg hover:from-[#0a4a2e] transition"
-        >
-          <Share2 className="w-4 h-4" /> Share My Story
-        </button>
-      </div>
-
-      {/* Category filter chips */}
-      <div className="flex gap-2 flex-wrap mb-6">
-        {CATEGORIES.map(c => (
-          <button
-            key={c.key}
-            onClick={() => setCategory(c.key)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-2xl text-sm font-semibold border transition-all ${
-              category === c.key
-                ? 'bg-[#0d5d3a] text-white border-[#0d5d3a] shadow-md'
-                : 'bg-white dark:bg-[#111111] text-[#4a7c5d] dark:text-gray-400 border-[#0d5d3a]/10 dark:border-white/08 hover:border-[#0d5d3a]/40 hover:bg-[#f0fbf4] dark:hover:bg-white/5'
-            }`}
-          >
-            {c.emoji} {c.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Stories grid */}
-      {loading && stories.length === 0 ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="w-6 h-6 text-[#0d5d3a] animate-spin" />
-        </div>
-      ) : stories.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-          className="text-center py-20"
-        >
-          <div className="text-5xl mb-4">🌿</div>
-          <div className="text-lg font-bold text-[#0a2617] dark:text-white mb-1">No stories yet in this category</div>
-          <div className="text-sm text-[#4a7c5d] dark:text-gray-400">Be the first to share yours!</div>
-        </motion.div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {stories.map(s => (
-            <StoryCard key={s._id} story={s} onLike={handleLike} />
-          ))}
-        </div>
-      )}
-
-      {/* Load more */}
-      {hasMore && (
-        <div className="text-center">
-          <button
-            onClick={() => fetchStories(category, page + 1)}
-            disabled={loading}
-            className="flex items-center gap-2 mx-auto px-6 py-2.5 rounded-2xl border border-[#0d5d3a]/15 dark:border-white/10 text-[#0d5d3a] dark:text-[#10b981] text-sm font-semibold hover:bg-[#f0fbf4] dark:hover:bg-white/5 transition disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronDown className="w-4 h-4" />}
-            Load more stories
+    <div className="flex flex-col h-full">
+      {/* ── STICKY CONTROLS ── */}
+      <div className="flex-shrink-0 sticky top-0 z-10 bg-[#f7fbf8] dark:bg-[#050505] border-b border-[#0d5d3a]/8 dark:border-white/5 px-4 sm:px-6 pt-3 pb-3 space-y-2">
+        {/* Category pills + Share button */}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-0.5 flex-1 scrollbar-none">
+            {CATEGORIES.map(c => (
+              <button key={c.key} onClick={() => setCategory(c.key)}
+                className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs font-semibold border transition-all ${
+                  category === c.key
+                    ? 'bg-[#0d5d3a] text-white border-[#0d5d3a] shadow-md'
+                    : 'bg-white dark:bg-[#111111] text-[#4a7c5d] dark:text-gray-400 border-[#0d5d3a]/10 dark:border-white/08 hover:border-[#0d5d3a]/40 hover:bg-[#f0fbf4] dark:hover:bg-white/5'
+                }`}>
+                {c.emoji} {c.label}
+              </button>
+            ))}
+          </div>
+          <button onClick={() => setShowSubmit(true)}
+            className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] text-white text-xs font-bold shadow-lg hover:from-[#0a4a2e] transition">
+            <Share2 className="w-3.5 h-3.5" /> Share Story
           </button>
         </div>
-      )}
+      </div>
+
+      {/* ── SCROLLABLE CARDS ── */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+        {/* Stories grid */}
+        {loading && stories.length === 0 ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-6 h-6 text-[#0d5d3a] animate-spin" />
+          </div>
+        ) : stories.length === 0 ? (
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20">
+            <div className="text-5xl mb-4">🌿</div>
+            <div className="text-lg font-bold text-[#0a2617] dark:text-white mb-1">No stories yet in this category</div>
+            <div className="text-sm text-[#4a7c5d] dark:text-gray-400">Be the first to share yours!</div>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            {stories.map(s => (
+              <StoryCard key={s._id} story={s} onLike={handleLike} onOpen={setOpenStory} />
+            ))}
+          </div>
+        )}
+
+        {/* Load more */}
+        {hasMore && (
+          <div className="text-center">
+            <button onClick={() => fetchStories(category, page + 1)} disabled={loading}
+              className="flex items-center gap-2 mx-auto px-6 py-2.5 rounded-2xl border border-[#0d5d3a]/15 dark:border-white/10 text-[#0d5d3a] dark:text-[#10b981] text-sm font-semibold hover:bg-[#f0fbf4] dark:hover:bg-white/5 transition disabled:opacity-50">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronDown className="w-4 h-4" />}
+              Load more stories
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Story detail popup */}
+      <AnimatePresence>
+        {openStory && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+            onClick={() => setOpenStory(null)}>
+            <motion.div initial={{ opacity: 0, scale: 0.94, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94 }}
+              onClick={e => e.stopPropagation()}
+              className="w-full max-w-lg bg-white dark:bg-[#111111] rounded-3xl shadow-2xl overflow-hidden border border-[#0d5d3a]/10 dark:border-white/10">
+              <div className="bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] px-6 py-4 flex items-center justify-between">
+                <div>
+                  {(() => { const cat = CATEGORIES.find(c => c.key === openStory.category); return cat ? <span className="text-sm font-bold text-white/90">{cat.emoji} {cat.label}</span> : null; })()}
+                  <div className="text-xs text-white/60 mt-0.5">— {openStory.isAnonymous ? 'Anonymous' : openStory.author}</div>
+                </div>
+                <button onClick={() => setOpenStory(null)} className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition">
+                  <X className="w-4 h-4 text-white" />
+                </button>
+              </div>
+              <div className="p-6">
+                <p className="text-sm text-[#0a2617] dark:text-gray-200 leading-relaxed">"{openStory.story}"</p>
+                <button onClick={() => handleLike(openStory._id)}
+                  className={`mt-4 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition ${
+                    openStory.liked ? 'bg-red-500 text-white' : 'border border-[#0d5d3a]/15 text-[#4a7c5d] hover:bg-red-50 hover:text-red-500'
+                  }`}>
+                  <Heart className={`w-4 h-4 ${openStory.liked ? 'fill-white' : ''}`} /> {openStory.likes} likes
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showSubmit && (

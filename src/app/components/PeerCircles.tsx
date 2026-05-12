@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Users, Send, ArrowLeft, UserCheck, UserPlus,
-  Loader2, Shield, Eye, EyeOff, MessageSquare
+  Loader2, Shield, Eye, EyeOff, MessageSquare, Search
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { apiFetch } from '../api/client';
@@ -358,6 +358,8 @@ export default function PeerCircles({ userId }: { userId?: string }) {
   const [loading, setLoading]       = useState(true);
   const [joining, setJoining]       = useState<string | null>(null);
   const [activeCircle, setActiveCircle] = useState<Circle | null>(null);
+  const [circleTab, setCircleTab]   = useState<'browse'|'joined'>('joined');
+  const [circleSearch, setCircleSearch] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -412,51 +414,83 @@ export default function PeerCircles({ userId }: { userId?: string }) {
   }
 
   /* ── Circles listing ── */
+  const joinedCircles = circles.filter(c => c.isJoined);
+  const displayCircles = circleTab === 'joined'
+    ? circles.filter(c => c.isJoined).filter(c => !circleSearch || c.name.toLowerCase().includes(circleSearch.toLowerCase()))
+    : circles.filter(c => !circleSearch || c.name.toLowerCase().includes(circleSearch.toLowerCase()));
+
   return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] flex items-center justify-center shadow-lg shadow-[#0d5d3a]/20">
-          <Users className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <h2 className="text-lg font-bold text-[#0a2617] dark:text-gray-100 leading-none" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Peer Support Circles
-          </h2>
-          <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-0.5">
-            Real-time group spaces — join, share, and feel less alone
+    <div className="flex flex-col h-full">
+      {/* ── STICKY CONTROLS ── */}
+      <div className="flex-shrink-0 sticky top-0 z-10 bg-[#f7fbf8] dark:bg-[#050505] border-b border-[#0d5d3a]/8 dark:border-white/5 px-4 sm:px-6 pt-3 pb-3 space-y-2">
+        {/* Safety banner */}
+        <div className="rounded-xl bg-[#f0fbf4] dark:bg-[#0d5d3a]/10 border border-[#0d5d3a]/15 dark:border-[#10b981]/20 px-3 py-2 flex items-start gap-2">
+          <Shield className="w-3.5 h-3.5 text-[#0d5d3a] dark:text-[#10b981] flex-shrink-0 mt-0.5" />
+          <p className="text-[10px] text-[#0d5d3a] dark:text-[#10b981] leading-relaxed font-medium">
+            These are safe, moderated spaces. Be kind, be supportive, and never share personal contact details.
+            You can post anonymously anytime. Messages are visible only to members.
           </p>
         </div>
-      </div>
-
-      {/* Guideline banner */}
-      <div className="mb-5 rounded-2xl bg-[#f0fbf4] dark:bg-[#0d5d3a]/10 border border-[#0d5d3a]/15 dark:border-[#10b981]/20 px-4 py-3 flex items-start gap-3">
-        <Shield className="w-4 h-4 text-[#0d5d3a] dark:text-[#10b981] flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-[#0d5d3a] dark:text-[#10b981] leading-relaxed font-medium">
-          These are safe, moderated spaces. Be kind, be supportive, and never share personal contact details.
-          You can post anonymously anytime. Messages are visible only to members.
-        </p>
-      </div>
-
-      {loading ? (
-        <div className="flex items-center justify-center h-32">
-          <Loader2 className="w-5 h-5 text-[#0d5d3a] animate-spin" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          <AnimatePresence>
-            {circles.map(c => (
-              <CircleCard
-                key={c._id}
-                circle={c}
-                onJoin={handleJoin}
-                onOpen={setActiveCircle}
-                joining={joining}
-              />
+        {/* Search + Tabs row */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input value={circleSearch} onChange={e => setCircleSearch(e.target.value)}
+              placeholder="Search circles by name…"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/15 dark:border-white/10 text-xs outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 text-[#0a2617] dark:text-white" />
+          </div>
+          <div className="flex gap-1 p-1 bg-white dark:bg-[#111111] rounded-xl border border-[#0d5d3a]/10 dark:border-white/10 flex-shrink-0">
+            {(['joined','browse'] as const).map(t => (
+              <button key={t} onClick={() => setCircleTab(t)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition ${circleTab===t ? 'bg-[#0d5d3a] text-white shadow' : 'text-[#0d5d3a] dark:text-[#10b981] hover:bg-[#0d5d3a]/8'}`}>
+                {t === 'browse' ? <><Users className="w-3 h-3"/>Browse</> : <><UserCheck className="w-3 h-3"/>Joined ({joinedCircles.length})</>}
+              </button>
             ))}
-          </AnimatePresence>
+          </div>
         </div>
-      )}
+      </div>
+
+      {/* ── SCROLLABLE CARDS ── */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+        {loading ? (
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="w-5 h-5 text-[#0d5d3a] animate-spin" />
+          </div>
+        ) : circleTab === 'joined' && displayCircles.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <Users className="w-12 h-12 text-[#0d5d3a]/20 mb-4" />
+            <p className="font-bold text-[#0a2617] dark:text-white mb-2">You haven't joined any circles yet</p>
+            <button onClick={() => setCircleTab('browse')}
+              className="mt-2 px-5 py-2.5 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white text-sm font-bold hover:bg-[#0a4a2e] transition shadow-md">
+              Explore Circles
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <AnimatePresence>
+                {displayCircles.map(c => (
+                  <CircleCard
+                    key={c._id}
+                    circle={c}
+                    onJoin={handleJoin}
+                    onOpen={setActiveCircle}
+                    joining={joining}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
+            {circleTab === 'joined' && joinedCircles.length > 0 && (
+              <div className="flex justify-center mt-6">
+                <button onClick={() => setCircleTab('browse')}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 text-[#0d5d3a] dark:text-[#10b981] text-sm font-semibold hover:bg-[#f0fbf4] dark:hover:bg-white/5 transition">
+                  <Users className="w-4 h-4" /> Explore More Circles
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

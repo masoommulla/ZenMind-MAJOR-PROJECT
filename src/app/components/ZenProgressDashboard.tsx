@@ -67,17 +67,17 @@ function StatCard({ label, value, sub, icon, color }: {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08 p-5 shadow-sm flex items-start gap-4"
+      className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08 p-4 shadow-sm flex items-start gap-3"
     >
-      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg flex-shrink-0 ${color}`}>
+      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg flex-shrink-0 ${color}`}>
         {icon}
       </div>
-      <div className="min-w-0">
-        <div className="text-2xl font-black text-[#0a2617] dark:text-white" style={{ fontFamily: 'Syne,sans-serif' }}>
+      <div className="min-w-0 flex-1">
+        <div className="text-xl font-black text-[#0a2617] dark:text-white truncate" style={{ fontFamily: 'Syne,sans-serif' }}>
           {value}
         </div>
-        <div className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 mt-0.5">{label}</div>
-        {sub && <div className="text-[10px] text-[#4a7c5d]/60 dark:text-gray-600 mt-0.5">{sub}</div>}
+        <div className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 mt-0.5 leading-tight">{label}</div>
+        {sub && <div className="text-[10px] text-[#4a7c5d]/60 dark:text-gray-600 mt-0.5 leading-tight truncate">{sub}</div>}
       </div>
     </motion.div>
   );
@@ -217,7 +217,7 @@ export default function ZenProgressDashboard() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
+    <div className="flex flex-col h-full">
       {showMood && (
         <MoodCheckIn
           onClose={() => setShowMood(false)}
@@ -225,54 +225,39 @@ export default function ZenProgressDashboard() {
         />
       )}
 
-      {/* Top bar */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <div>
-          <h2 className="text-2xl font-black text-[#0a2617] dark:text-white" style={{ fontFamily: 'Syne,sans-serif' }}>
-            My Progress
-          </h2>
-          <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-0.5">
-            Your mental wellness analytics
-          </p>
-        </div>
-
+      {/* Sticky controls */}
+      <div className="flex-shrink-0 sticky top-0 z-10 bg-[#f7fbf8] dark:bg-[#050505] border-b border-[#0d5d3a]/8 dark:border-white/5 px-4 sm:px-6 pt-3 pb-3">
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Mood check-in button */}
-          {!checkedIn && (
+          {/* Mood check-in */}
+          {!checkedIn ? (
             <motion.button
               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
               onClick={() => setShowMood(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-bold shadow-md hover:from-amber-600 transition"
             >
-              <Smile className="w-4 h-4" />
-              Log Today's Mood
+              <Smile className="w-4 h-4" /> Log Today's Mood
             </motion.button>
-          )}
-          {checkedIn && (
+          ) : (
             <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] text-sm font-semibold border border-[#0d5d3a]/12">
-              <Smile className="w-4 h-4" />
-              Mood logged today ✓
+              <Smile className="w-4 h-4" /> Mood logged today
             </div>
           )}
-
           {/* Range toggle */}
-          <div className="flex rounded-2xl bg-[#f0fbf4] dark:bg-[#1a1a1a] p-1 border border-[#0d5d3a]/10 dark:border-white/08">
+          <div className="ml-auto flex rounded-2xl bg-[#f0fbf4] dark:bg-[#1a1a1a] p-1 border border-[#0d5d3a]/10 dark:border-white/08">
             {(['weekly', 'monthly'] as const).map(r => (
-              <button
-                key={r}
-                onClick={() => setRange(r)}
+              <button key={r} onClick={() => setRange(r)}
                 className={`px-4 py-1.5 rounded-xl text-sm font-semibold transition ${
-                  range === r
-                    ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow'
-                    : 'text-[#4a7c5d] dark:text-gray-400 hover:text-[#0d5d3a] dark:hover:text-white'
-                }`}
-              >
+                  range === r ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow' : 'text-[#4a7c5d] dark:text-gray-400 hover:text-[#0d5d3a] dark:hover:text-white'
+                }`}>
                 {r === 'weekly' ? '7 Days' : '30 Days'}
               </button>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
 
       {error && (
         <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">{error}</div>
@@ -457,6 +442,7 @@ export default function ZenProgressDashboard() {
           </div>
         </>
       )}
+      </div>
     </div>
   );
 }
