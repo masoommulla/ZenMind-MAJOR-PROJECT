@@ -62,12 +62,12 @@ export default function Navigation({ onGetStarted, onAdminLoginTrigger, onTherap
 
   return (
     <>
-      {/* ── Desktop nav pill (sm and above) ── */}
+      {/* ── Desktop nav pill (sm and above only — StaggeredMenu handles mobile) ── */}
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="fixed top-0 left-0 right-0 z-50 flex justify-center px-2 sm:px-4 pointer-events-none"
+        className="hidden sm:flex fixed top-0 left-0 right-0 z-50 justify-center px-4 pointer-events-none"
       >
         <motion.div
           animate={{

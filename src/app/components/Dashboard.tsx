@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   MessageCircle, Settings, BookMarked, BarChart2,
   PanelLeftOpen, PanelLeftClose, Eye, EyeOff, LogOut, Menu, X, Stethoscope,
-  Calendar, Clock, Trash2, CheckSquare, IndianRupee, Star,
+  Calendar, Clock, Trash2, CheckSquare, IndianRupee, Star, Save,
   Library, BookHeart, Users2, Target, Globe2, Dumbbell, Info, Upload
 } from 'lucide-react';
 import { apiFetch } from '../api/client';
