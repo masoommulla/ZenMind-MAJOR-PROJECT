@@ -27,6 +27,7 @@ export interface StaggeredMenuProps {
   onMenuOpen?: () => void;
   onMenuClose?: () => void;
   onLogout?: () => void;
+  onLogoDoubleClick?: () => void;
   userName?: string;
   userEmail?: string;
   avatarUrl?: string | null;
@@ -43,6 +44,7 @@ const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   onMenuOpen,
   onMenuClose,
   onLogout,
+  onLogoDoubleClick,
   userName,
   userEmail,
   avatarUrl,
@@ -301,7 +303,13 @@ const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       {/* Top bar */}
       <header className="staggered-menu-header" aria-label="Mobile navigation header">
         {/* Logo / wordmark */}
-        <div className="sm-logo" aria-label="ZenMind">
+        <div
+          className="sm-logo"
+          aria-label="ZenMind"
+          onDoubleClick={() => onLogoDoubleClick?.()}
+          title="Double-click for admin access"
+          style={{ cursor: onLogoDoubleClick ? 'pointer' : 'default' }}
+        >
           <svg width="22" height="22" viewBox="0 0 32 32" fill="none" style={{ flexShrink: 0 }}>
             <circle cx="16" cy="16" r="15" stroke={open ? '#10b981' : '#0d5d3a'} strokeWidth="2" />
             <path d="M10 20C10 14 14 10 16 10C18 10 22 14 22 20" stroke={open ? '#10b981' : '#0d5d3a'} strokeWidth="2" strokeLinecap="round" />

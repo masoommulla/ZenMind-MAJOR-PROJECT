@@ -146,6 +146,7 @@ export default function Navigation({ onGetStarted, onAdminLoginTrigger, onTherap
         accentColor="#10b981"
         displayItemNumbering={true}
         displaySocials={false}
+        onLogoDoubleClick={onAdminLoginTrigger}
       />
     </>
   );
