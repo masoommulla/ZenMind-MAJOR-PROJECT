@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   LogOut, Calendar, User, ChevronLeft, ChevronRight, PanelLeftOpen, PanelLeftClose, Menu, X,
   Camera, MapPin, Phone, Lock, Plus, Trash2, Clock, CheckCircle,
-  Shield, GraduationCap, Stethoscope, Edit3, Save, Info, MessageCircle
+  Shield, GraduationCap, Stethoscope, Edit3, Save, Info, MessageCircle, ShieldAlert
 } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
@@ -15,8 +15,9 @@ import { getImgSrc } from '../utils/image';
 import CancellationPolicy from './CancellationPolicy';
 import TherapistChatView from './TherapistChatView';
 import ReadingListsTherapist from './ReadingListsTherapist';
+import TherapistSupportDesk from './TherapistSupportDesk';
 
-type TabKey = 'profile' | 'schedule' | 'sessions' | 'chats' | 'reading';
+type TabKey = 'profile' | 'schedule' | 'sessions' | 'chats' | 'reading' | 'support';
 
 export default function TherapistDashboard({ onLogout }: { onLogout: () => void }) {
   const [tab, setTab] = useState<TabKey>('profile');
@@ -207,6 +208,7 @@ export default function TherapistDashboard({ onLogout }: { onLogout: () => void 
     { key: 'sessions', label: 'Booked Sessions', icon: <CheckCircle size={20} /> },
     { key: 'chats', label: 'Chats', icon: <MessageCircle size={20} /> },
     { key: 'reading', label: 'Reading Lists', icon: <Info size={20} /> },
+    { key: 'support', label: 'Support & Reports', icon: <ShieldAlert size={20} /> },
   ];
 
   const SidebarContent = ({ mobile }: { mobile?: boolean }) => {
@@ -296,7 +298,7 @@ export default function TherapistDashboard({ onLogout }: { onLogout: () => void 
               <Menu size={20} />
             </button>
             <h1 className="text-lg sm:text-2xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
-              {tab === 'profile' ? 'My Profile' : tab === 'schedule' ? 'Schedule & Availability' : tab === 'chats' ? 'Chats' : tab === 'reading' ? '📚 Reading Lists' : 'Booked Sessions'}
+            {tab === 'profile' ? 'My Profile' : tab === 'schedule' ? 'Schedule & Availability' : tab === 'chats' ? 'Chats' : tab === 'reading' ? '📚 Reading Lists' : tab === 'support' ? '🛡️ Support & Reports' : 'Booked Sessions'}
             </h1>
           </div>
           <ThemeToggle />
@@ -620,6 +622,13 @@ export default function TherapistDashboard({ onLogout }: { onLogout: () => void 
           {tab === 'reading' && (
             <div className="p-4 sm:p-8">
               <ReadingListsTherapist />
+            </div>
+          )}
+
+          {/* SUPPORT & REPORTS TAB */}
+          {tab === 'support' && (
+            <div className="h-full">
+              <TherapistSupportDesk />
             </div>
           )}
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye, Video, Music, Image as ImageIcon, Link2, Upload as UploadIcon, BookOpen, MessageSquare, Brain, ToggleLeft, ToggleRight, UserCircle, Briefcase } from 'lucide-react';
+import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye, Video, Music, Image as ImageIcon, Link2, Upload as UploadIcon, BookOpen, MessageSquare, Brain, ToggleLeft, ToggleRight, UserCircle, Briefcase, ShieldAlert } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import logo from '../../../asset/logo.png';
 import ThemeToggle from './ThemeToggle';
@@ -10,11 +10,12 @@ import WellnessProgramsAdmin from './WellnessProgramsAdmin';
 import TeamManagement from './TeamManagement';
 import JobsManagement from './JobsManagement';
 import ApplicationsAdmin from './ApplicationsAdmin';
+import TherapistInboxAdmin from './TherapistInboxAdmin';
 
 type AdminDashboardProps = { onLogout: () => void };
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox'>('users');
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminUsername, setAdminUsername] = useState('Admin');
@@ -23,7 +24,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     apiFetch('/admin/me').then((res: any) => setAdminUsername(res.username)).catch(() => {});
   }, []);
 
-  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications') => {
+  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox') => {
     setActiveTab(tab);
     setMobileOpen(false);
   };
@@ -48,6 +49,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <NavItem icon={Brain} label="Wellness Programs" active={activeTab === 'programs'} onClick={() => navTo('programs')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Brain} label="Quiz Questions" active={activeTab === 'quiz'} onClick={() => navTo('quiz')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={LifeBuoy} label="Support Tickets" active={activeTab === 'support'} onClick={() => navTo('support')} expanded={mobile || sidebarExpanded} />
+        <NavItem icon={ShieldAlert} label="Therapist Inbox" active={activeTab === 'therapist_inbox'} onClick={() => navTo('therapist_inbox')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={UserCircle} label="Team Members" active={activeTab === 'team'} onClick={() => navTo('team')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Briefcase} label="Job Postings" active={activeTab === 'jobs'} onClick={() => navTo('jobs')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Users} label="Applications" active={activeTab === 'applications'} onClick={() => navTo('applications')} expanded={mobile || sidebarExpanded} />
@@ -103,7 +105,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <Menu size={20} />
             </button>
             <h1 className="text-lg sm:text-2xl font-bold text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>
-            {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? '🚨 Flagged Content' : activeTab === 'reading' ? '📚 Reading Lists' : activeTab === 'programs' ? '🧘 Wellness Programs' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : activeTab === 'team' ? '👥 Team Members' : activeTab === 'jobs' ? '💼 Job Postings' : activeTab === 'applications' ? '📨 Job Applications' : 'Admin Settings'}
+            {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? '🚨 Flagged Content' : activeTab === 'reading' ? '📚 Reading Lists' : activeTab === 'programs' ? '🧘 Wellness Programs' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : activeTab === 'team' ? '👥 Team Members' : activeTab === 'jobs' ? '💼 Job Postings' : activeTab === 'applications' ? '📨 Job Applications' : activeTab === 'therapist_inbox' ? '🛡️ Therapist Inbox' : 'Admin Settings'}
             </h1>
           </div>
           <div className="flex items-center gap-4">
@@ -134,6 +136,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             {activeTab === 'team' && <TeamManagement />}
             {activeTab === 'jobs' && <JobsManagement />}
             {activeTab === 'applications' && <ApplicationsAdmin />}
+            {activeTab === 'therapist_inbox' && <TherapistInboxAdmin />}
             {activeTab === 'settings' && <AdminSettings onUpdateName={setAdminUsername} />}
           </div>
         </main>

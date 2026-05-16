@@ -7,6 +7,9 @@ import User from '../models/User.js';
 import Story from '../models/Story.js';
 import SiteSettings from '../models/SiteSettings.js';
 import SupportTicket from '../models/SupportTicket.js';
+import { TherapistTicket } from '../models/TherapistTicket.js';
+import { TherapistReport } from '../models/TherapistReport.js';
+import { Therapist } from '../models/Therapist.js';
 import { cookieOpts } from '../utils/cookieOptions.js';
 
 const router = Router();
@@ -426,6 +429,131 @@ router.post('/support/bulk-delete', requireAdmin, async (req, res) => {
     
     await SupportTicket.deleteMany({ _id: { $in: ids } });
     return res.json({ ok: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   THERAPIST SUPPORT DESK — Admin side
+───────────────────────────────────────────────────────────────── */
+
+/* GET /admin/therapist-tickets — list all tickets */
+router.get('/therapist-tickets', requireAdmin, async (req, res) => {
+  try {
+    const { status, category } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    if (category) filter.category = category;
+    const tickets = await TherapistTicket.find(filter).sort({ createdAt: -1 }).lean();
+    return res.json({ ok: true, tickets });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* PATCH /admin/therapist-tickets/:id — update status + reply */
+router.patch('/therapist-tickets/:id', requireAdmin, async (req, res) => {
+  try {
+    const { status, adminReply, adminNote } = req.body;
+    const ticket = await TherapistTicket.findById(req.params.id);
+    if (!ticket) return res.status(404).json({ error: 'Not found' });
+    if (status) ticket.status = status;
+    if (adminReply !== undefined) ticket.adminReply = adminReply;
+    if (adminNote !== undefined) ticket.adminNote = adminNote;
+    await ticket.save();
+    return res.json({ ok: true, ticket });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* PATCH /admin/therapist-tickets/:id/apply-profile — directly update therapist profile fields */
+router.patch('/therapist-tickets/:id/apply-profile', requireAdmin, async (req, res) => {
+  try {
+    const ticket = await TherapistTicket.findById(req.params.id);
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+    const { fields } = req.body; // { experience, specialization, bio, sessionCost, ... }
+    if (!fields || typeof fields !== 'object') return res.status(400).json({ error: 'fields object required' });
+    const allowed = ['name','experience','specialization','about','sessionCost','sessionTime','education','languages','clinicAddress','phone'];
+    const update = {};
+    for (const k of allowed) {
+      if (fields[k] !== undefined) update[k] = fields[k];
+    }
+    await Therapist.findByIdAndUpdate(ticket.therapistId, { $set: update });
+    ticket.status = 'resolved';
+    ticket.adminReply = ticket.adminReply || 'Profile has been updated as requested.';
+    await ticket.save();
+    return res.json({ ok: true, ticket });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   THERAPIST INCIDENT REPORTS — Admin side
+───────────────────────────────────────────────────────────────── */
+
+/* GET /admin/therapist-reports — list all reports */
+router.get('/therapist-reports', requireAdmin, async (req, res) => {
+  try {
+    const { status, urgency, reportType } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    if (urgency) filter.urgency = urgency;
+    if (reportType) filter.reportType = reportType;
+    const reports = await TherapistReport.find(filter).sort({ createdAt: -1 }).lean();
+    return res.json({ ok: true, reports });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* PATCH /admin/therapist-reports/:id — update status + notes */
+router.patch('/therapist-reports/:id', requireAdmin, async (req, res) => {
+  try {
+    const { status, actionTaken, adminNote, therapistNote } = req.body;
+    const report = await TherapistReport.findById(req.params.id);
+    if (!report) return res.status(404).json({ error: 'Not found' });
+    if (status) report.status = status;
+    if (actionTaken) report.actionTaken = actionTaken;
+    if (adminNote !== undefined) report.adminNote = adminNote;
+    if (therapistNote !== undefined) report.therapistNote = therapistNote;
+    await report.save();
+    return res.json({ ok: true, report });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* POST /admin/therapist-reports/:id/suspend-user — suspend the involved user */
+router.post('/therapist-reports/:id/suspend-user', requireAdmin, async (req, res) => {
+  try {
+    const { duration } = req.body; // '7d' | '30d' | 'permanent'
+    const report = await TherapistReport.findById(req.params.id);
+    if (!report) return res.status(404).json({ error: 'Report not found' });
+    if (!report.involvedUserEmail) return res.status(400).json({ error: 'No user email in report' });
+
+    const user = await User.findOne({ email: report.involvedUserEmail });
+    if (!user) return res.status(404).json({ error: 'User not found with that email' });
+
+    let suspendedUntil = null;
+    let actionTaken = 'no_action';
+    if (duration === '7d')  { suspendedUntil = new Date(Date.now() + 7 * 86400000); actionTaken = 'suspended_7d'; }
+    else if (duration === '30d') { suspendedUntil = new Date(Date.now() + 30 * 86400000); actionTaken = 'suspended_30d'; }
+    else if (duration === 'permanent') { suspendedUntil = new Date('2099-01-01'); actionTaken = 'suspended_perm'; }
+    else return res.status(400).json({ error: 'Invalid duration. Use 7d, 30d or permanent' });
+
+    user.isSuspended = true;
+    user.suspendedUntil = suspendedUntil;
+    await user.save();
+
+    report.status = 'action_taken';
+    report.actionTaken = actionTaken;
+    report.therapistNote = report.therapistNote || `User has been suspended (${duration}).`;
+    await report.save();
+
+    return res.json({ ok: true, report, userEmail: user.email });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

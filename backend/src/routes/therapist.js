@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import path from 'path';
 import { Therapist } from '../models/Therapist.js';
+import { TherapistTicket } from '../models/TherapistTicket.js';
+import { TherapistReport } from '../models/TherapistReport.js';
 import { cookieOpts } from '../utils/cookieOptions.js';
 
 const router = Router();
@@ -143,6 +145,94 @@ router.put('/settings', requireTherapist, async (req, res) => {
 
     await therapist.save();
     return res.json({ ok: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   SUPPORT DESK — Tickets
+───────────────────────────────────────────────────────────────── */
+
+/* POST /therapist/tickets — submit a support ticket */
+router.post('/tickets', requireTherapist, async (req, res) => {
+  try {
+    const { category, subject, message } = req.body;
+    if (!category || !subject || !message)
+      return res.status(400).json({ error: 'category, subject and message are required' });
+
+    const ticket = await TherapistTicket.create({
+      therapistId: req.therapist._id,
+      therapistName: req.therapist.name,
+      therapistEmail: req.therapist.email,
+      category, subject, message,
+    });
+    return res.status(201).json({ ok: true, ticket });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* GET /therapist/tickets — get my tickets */
+router.get('/tickets', requireTherapist, async (req, res) => {
+  try {
+    const tickets = await TherapistTicket.find({ therapistId: req.therapist._id })
+      .sort({ createdAt: -1 })
+      .lean();
+    return res.json({ ok: true, tickets });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* GET /therapist/tickets/:id — get a single ticket */
+router.get('/tickets/:id', requireTherapist, async (req, res) => {
+  try {
+    const ticket = await TherapistTicket.findOne({
+      _id: req.params.id,
+      therapistId: req.therapist._id,
+    }).lean();
+    if (!ticket) return res.status(404).json({ error: 'Not found' });
+    return res.json({ ok: true, ticket });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   INCIDENT REPORTS
+───────────────────────────────────────────────────────────────── */
+
+/* POST /therapist/reports — submit an incident report */
+router.post('/reports', requireTherapist, async (req, res) => {
+  try {
+    const { reportType, urgency, involvedUserEmail, involvedUserName, sessionReference, description } = req.body;
+    if (!reportType || !description)
+      return res.status(400).json({ error: 'reportType and description are required' });
+
+    const report = await TherapistReport.create({
+      therapistId: req.therapist._id,
+      therapistName: req.therapist.name,
+      therapistEmail: req.therapist.email,
+      reportType, urgency: urgency || 'normal',
+      involvedUserEmail: involvedUserEmail || '',
+      involvedUserName: involvedUserName || '',
+      sessionReference: sessionReference || '',
+      description,
+    });
+    return res.status(201).json({ ok: true, report });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* GET /therapist/reports — get my reports */
+router.get('/reports', requireTherapist, async (req, res) => {
+  try {
+    const reports = await TherapistReport.find({ therapistId: req.therapist._id })
+      .sort({ createdAt: -1 })
+      .lean();
+    return res.json({ ok: true, reports });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
