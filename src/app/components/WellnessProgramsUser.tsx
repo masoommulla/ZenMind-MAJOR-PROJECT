@@ -172,133 +172,137 @@ export default function WellnessProgramsUser() {
     const meta = CATEGORY_META[selected.category] || CATEGORY_META.other;
 
     return (
-      <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="max-w-3xl mx-auto pb-20">
-        {msg && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-            className={`mb-4 p-4 rounded-2xl font-semibold flex items-center gap-2 ${msg.ok ? 'bg-green-50 dark:bg-[#10b981]/10 text-green-700 dark:text-[#10b981] border border-green-200 dark:border-[#10b981]/20' : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'}`}>
-            {msg.ok ? <CheckCircle size={16} /> : null} {msg.text}
-          </motion.div>
-        )}
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 pb-24">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="max-w-3xl mx-auto">
+            {msg && (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                className={`mb-4 p-4 rounded-2xl font-semibold flex items-center gap-2 ${msg.ok ? 'bg-green-50 dark:bg-[#10b981]/10 text-green-700 dark:text-[#10b981] border border-green-200 dark:border-[#10b981]/20' : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'}`}>
+                {msg.ok ? <CheckCircle size={16} /> : null} {msg.text}
+              </motion.div>
+            )}
 
-        <button onClick={() => setSelected(null)} className="flex items-center gap-2 text-[#0d5d3a] dark:text-[#10b981] font-bold text-sm hover:opacity-75 transition mb-6">
-          <ArrowLeft size={16} /> Back to Programs
-        </button>
+            <button onClick={() => setSelected(null)} className="flex items-center gap-2 text-[#0d5d3a] dark:text-[#10b981] font-bold text-sm hover:opacity-75 transition mb-6">
+              <ArrowLeft size={16} /> Back to Programs
+            </button>
 
-        {/* Header card */}
-        <div className="rounded-3xl p-8 text-white mb-6 relative overflow-hidden"
-          style={{ background: `linear-gradient(135deg, ${selected.coverGradientFrom}, ${selected.coverGradientTo})` }}>
-          <div className="absolute inset-0 opacity-10 flex items-center justify-end pr-8">
-            <span className="text-[120px]">{meta.icon}</span>
-          </div>
-          <div className="relative z-10">
-            <span className="text-xs font-black uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full">
-              {meta.label} · {selected.difficulty}
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-black mt-3 mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>{selected.title}</h1>
-            <p className="text-white/80 text-sm leading-relaxed mb-4 max-w-lg">{selected.description}</p>
-            <div className="flex flex-wrap gap-4 text-sm font-bold text-white/90">
-              <span className="flex items-center gap-1"><Clock size={14} /> {selected.durationDays} days</span>
-              <span className="flex items-center gap-1"><Star size={14} /> {selected.enrollmentCount || 0} enrolled</span>
+            {/* Header card */}
+            <div className="rounded-3xl p-6 sm:p-8 text-white mb-6 relative overflow-hidden"
+              style={{ background: `linear-gradient(135deg, ${selected.coverGradientFrom}, ${selected.coverGradientTo})` }}>
+              <div className="absolute inset-0 opacity-10 flex items-center justify-end pr-8">
+                <span className="text-[120px]">{meta.icon}</span>
+              </div>
+              <div className="relative z-10">
+                <span className="text-xs font-black uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full">
+                  {meta.label} · {selected.difficulty}
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-black mt-3 mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>{selected.title}</h1>
+                <p className="text-white/80 text-sm leading-relaxed mb-4 max-w-lg">{selected.description}</p>
+                <div className="flex flex-wrap gap-4 text-sm font-bold text-white/90">
+                  <span className="flex items-center gap-1"><Clock size={14} /> {selected.durationDays} days</span>
+                  <span className="flex items-center gap-1"><Star size={14} /> {selected.enrollmentCount || 0} enrolled</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Progress bar (if enrolled) */}
-        {enr && (
-          <div className="bg-white dark:bg-[#111111] rounded-2xl p-5 mb-6 border border-[#0d5d3a]/10 dark:border-white/5">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-bold text-[#0a2617] dark:text-white text-sm">Your Progress</span>
-              <span className="text-[#0d5d3a] dark:text-[#10b981] font-black text-sm">{pct}%</span>
-            </div>
-            <div className="h-3 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
-              <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="h-full rounded-full" style={{ background: `linear-gradient(90deg, ${selected.coverGradientFrom}, ${selected.coverGradientTo})` }} />
-            </div>
-            <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
-              <span>{completedSet.size} of {selected.durationDays} days complete</span>
-              {enr.isCompleted && <span className="text-[#0d5d3a] dark:text-[#10b981] font-bold">🏆 Completed!</span>}
-            </div>
-          </div>
-        )}
+            {/* Progress bar (if enrolled) */}
+            {enr && (
+              <div className="bg-white dark:bg-[#111111] rounded-2xl p-5 mb-6 border border-[#0d5d3a]/10 dark:border-white/5">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-bold text-[#0a2617] dark:text-white text-sm">Your Progress</span>
+                  <span className="text-[#0d5d3a] dark:text-[#10b981] font-black text-sm">{pct}%</span>
+                </div>
+                <div className="h-3 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, ease: 'easeOut' }}
+                    className="h-full rounded-full" style={{ background: `linear-gradient(90deg, ${selected.coverGradientFrom}, ${selected.coverGradientTo})` }} />
+                </div>
+                <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  <span>{completedSet.size} of {selected.durationDays} days complete</span>
+                  {enr.isCompleted && <span className="text-[#0d5d3a] dark:text-[#10b981] font-bold">🏆 Completed!</span>}
+                </div>
+              </div>
+            )}
 
-        {/* Enroll button */}
-        {!enr && (
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-            onClick={() => handleEnroll(selected._id)} disabled={enrolling}
-            className="w-full py-4 rounded-2xl font-black text-white text-lg mb-6 shadow-xl disabled:opacity-60 transition"
-            style={{ background: `linear-gradient(135deg, ${selected.coverGradientFrom}, ${selected.coverGradientTo})` }}>
-            {enrolling ? 'Enrolling...' : '🚀 Start This Program — Free'}
-          </motion.button>
-        )}
+            {/* Enroll button */}
+            {!enr && (
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                onClick={() => handleEnroll(selected._id)} disabled={enrolling}
+                className="w-full py-4 rounded-2xl font-black text-white text-lg mb-6 shadow-xl disabled:opacity-60 transition"
+                style={{ background: `linear-gradient(135deg, ${selected.coverGradientFrom}, ${selected.coverGradientTo})` }}>
+                {enrolling ? 'Enrolling...' : '🚀 Start This Program — Free'}
+              </motion.button>
+            )}
 
-        {/* Day steps */}
-        <div className="space-y-3">
-          <h3 className="font-bold text-[#0a2617] dark:text-white text-lg flex items-center gap-2">
-            <BookOpen size={18} className="text-[#0d5d3a] dark:text-[#10b981]" /> Daily Plan
-          </h3>
-          {(selected.steps || []).map((step: any) => {
-            const done = completedSet.has(step.dayNumber);
-            const isCurrent = enr && !enr.isCompleted && step.dayNumber === enr.currentDay;
-            const locked = !enr || (step.dayNumber > enr.currentDay && !done);
+            {/* Day steps */}
+            <div className="space-y-3">
+              <h3 className="font-bold text-[#0a2617] dark:text-white text-lg flex items-center gap-2">
+                <BookOpen size={18} className="text-[#0d5d3a] dark:text-[#10b981]" /> Daily Plan
+              </h3>
+              {(selected.steps || []).map((step: any) => {
+                const done = completedSet.has(step.dayNumber);
+                const isCurrent = enr && !enr.isCompleted && step.dayNumber === enr.currentDay;
+                const locked = !enr || (step.dayNumber > enr.currentDay && !done);
 
-            // Day-gating: has prev day been completed today? If so, this day is waiting for midnight
-            const prevDayCompletedDate = enr?.dayCompletedDates?.[String(step.dayNumber - 1)];
-            const waitingForMidnight = isCurrent && step.dayNumber > 1 && prevDayCompletedDate && !nextDayUnlocked(prevDayCompletedDate);
+                // Day-gating: has prev day been completed today? If so, this day is waiting for midnight
+                const prevDayCompletedDate = enr?.dayCompletedDates?.[String(step.dayNumber - 1)];
+                const waitingForMidnight = isCurrent && step.dayNumber > 1 && prevDayCompletedDate && !nextDayUnlocked(prevDayCompletedDate);
 
-            return (
-              <motion.div key={step.dayNumber} layout
-                className={`rounded-2xl border-2 p-5 transition-all ${
-                  done ? 'border-green-200 dark:border-green-500/30 bg-green-50 dark:bg-green-500/5'
-                  : isCurrent && !waitingForMidnight ? 'bg-white dark:bg-[#111111]'
-                  : 'border-gray-100 dark:border-white/5 bg-white dark:bg-[#111111] opacity-50'
-                }`}
-                style={isCurrent && !waitingForMidnight ? { borderColor: selected.coverGradientFrom } : {}}>
-                <div className="flex items-start gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-black text-sm ${
-                    done ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400'
-                    : waitingForMidnight ? 'bg-gray-100 dark:bg-white/10 text-gray-400'
-                    : isCurrent ? 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300'
-                    : 'bg-gray-100 dark:bg-white/10 text-gray-400'
-                  }`}>
-                    {done ? <Check size={18} /> : waitingForMidnight || locked ? <Lock size={14} /> : step.dayNumber}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="font-black text-[#0a2617] dark:text-white text-sm">{step.title}</span>
-                      <span className="text-xs">{EXERCISE_ICONS[step.exerciseType] || '⚡'}</span>
-                      {isCurrent && !waitingForMidnight && (
-                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full text-white" style={{ background: selected.coverGradientFrom }}>Today</span>
-                      )}
-                    </div>
-                    {(isCurrent || done) && !waitingForMidnight && (
-                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed mt-1">{step.content}</p>
-                    )}
-                    {waitingForMidnight && (
-                      <div className="mt-2 flex items-center gap-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-3 py-2">
-                        <Moon size={13} className="text-amber-500 shrink-0" />
-                        <div>
-                          <p className="text-xs font-bold text-amber-700 dark:text-amber-400">Come back tomorrow 🌙</p>
-                          <p className="text-[10px] text-amber-600 dark:text-amber-500">Unlocks in {countdown} (at midnight)</p>
+                return (
+                  <motion.div key={step.dayNumber} layout
+                    className={`rounded-2xl border-2 p-4 sm:p-5 transition-all ${
+                      done ? 'border-green-200 dark:border-green-500/30 bg-green-50 dark:bg-green-500/5'
+                      : isCurrent && !waitingForMidnight ? 'bg-white dark:bg-[#111111]'
+                      : 'border-gray-100 dark:border-white/5 bg-white dark:bg-[#111111] opacity-50'
+                    }`}
+                    style={isCurrent && !waitingForMidnight ? { borderColor: selected.coverGradientFrom } : {}}>
+                    <div className="flex items-start gap-4">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-black text-sm ${
+                        done ? 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400'
+                        : waitingForMidnight ? 'bg-gray-100 dark:bg-white/10 text-gray-400'
+                        : isCurrent ? 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300'
+                        : 'bg-gray-100 dark:bg-white/10 text-gray-400'
+                      }`}>
+                        {done ? <Check size={18} /> : waitingForMidnight || locked ? <Lock size={14} /> : step.dayNumber}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <span className="font-black text-[#0a2617] dark:text-white text-sm">{step.title}</span>
+                          <span className="text-xs">{EXERCISE_ICONS[step.exerciseType] || '⚡'}</span>
+                          {isCurrent && !waitingForMidnight && (
+                            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full text-white" style={{ background: selected.coverGradientFrom }}>Today</span>
+                          )}
+                        </div>
+                        {(isCurrent || done) && !waitingForMidnight && (
+                          <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed mt-1">{step.content}</p>
+                        )}
+                        {waitingForMidnight && (
+                          <div className="mt-2 flex items-center gap-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-3 py-2">
+                            <Moon size={13} className="text-amber-500 shrink-0" />
+                            <div>
+                              <p className="text-xs font-bold text-amber-700 dark:text-amber-400">Come back tomorrow 🌙</p>
+                              <p className="text-[10px] text-amber-600 dark:text-amber-500">Unlocks in {countdown} (at midnight)</p>
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className="text-xs text-gray-400 flex items-center gap-1"><Clock size={10} /> {step.durationMinutes} min</span>
+                          {isCurrent && !done && !waitingForMidnight && (
+                            <button onClick={() => handleCompleteDay(selected._id, step.dayNumber)} disabled={completingDay === step.dayNumber}
+                              className="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition disabled:opacity-50"
+                              style={{ background: selected.coverGradientFrom }}>
+                              {completingDay === step.dayNumber ? 'Saving...' : '✓ Mark Complete'}
+                            </button>
+                          )}
                         </div>
                       </div>
-                    )}
-                    <div className="flex items-center gap-3 mt-2">
-                      <span className="text-xs text-gray-400 flex items-center gap-1"><Clock size={10} /> {step.durationMinutes} min</span>
-                      {isCurrent && !done && !waitingForMidnight && (
-                        <button onClick={() => handleCompleteDay(selected._id, step.dayNumber)} disabled={completingDay === step.dayNumber}
-                          className="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition disabled:opacity-50"
-                          style={{ background: selected.coverGradientFrom }}>
-                          {completingDay === step.dayNumber ? 'Saving...' : '✓ Mark Complete'}
-                        </button>
-                      )}
                     </div>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 

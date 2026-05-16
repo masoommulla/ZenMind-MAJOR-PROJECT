@@ -148,6 +148,7 @@ export default function Navigation({ onGetStarted, onAdminLoginTrigger, onTherap
         displaySocials={false}
         logoUrl={logo}
         onLogoDoubleClick={onAdminLoginTrigger}
+        isScrolled={isScrolled}
       />
     </>
   );

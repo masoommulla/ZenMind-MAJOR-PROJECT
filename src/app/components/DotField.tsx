@@ -79,11 +79,15 @@ const DotField = memo(
       const glowEl = glowRef.current;
       if (!canvas) return undefined;
 
+      // ── Skip heavy canvas on narrow mobile — just show static dots via CSS fallback ──
+      if (window.innerWidth < 640) return undefined;
+
       const ctx = canvas.getContext('2d', { alpha: true });
       if (!ctx) return undefined;
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       let resizeTimer: number | undefined;
+      let visible = true; // controlled by IntersectionObserver
 
       function buildDots(w: number, h: number) {
         const p = propsRef.current;
@@ -131,7 +135,7 @@ const DotField = memo(
 
       function resize() {
         if (resizeTimer) window.clearTimeout(resizeTimer);
-        resizeTimer = window.setTimeout(doResize, 100);
+        resizeTimer = window.setTimeout(doResize, 150);
       }
 
       function onMouseMove(e: MouseEvent) {
@@ -151,10 +155,17 @@ const DotField = memo(
         m.prevY = m.y;
       }
 
-      const speedInterval = window.setInterval(updateMouseSpeed, 20);
+      // Reduced from 20ms → 50ms (saves ~30 extra calls/sec)
+      const speedInterval = window.setInterval(updateMouseSpeed, 50);
       let frameCount = 0;
 
       function tick() {
+        // Pause loop when section is scrolled out of viewport
+        if (!visible) {
+          rafRef.current = requestAnimationFrame(tick);
+          return;
+        }
+
         frameCount += 1;
         const dots = dotsRef.current;
         const m = mouseRef.current;
@@ -249,6 +260,13 @@ const DotField = memo(
       window.addEventListener('mousemove', onMouseMove, { passive: true });
       rafRef.current = requestAnimationFrame(tick);
 
+      // ── IntersectionObserver: pause rendering when off-screen ──
+      const observer = new IntersectionObserver(
+        (entries) => { visible = entries[0]?.isIntersecting ?? true; },
+        { threshold: 0 }
+      );
+      observer.observe(canvas);
+
       rebuildRef.current = () => {
         const { w, h } = sizeRef.current;
         if (w > 0 && h > 0) buildDots(w, h);
@@ -260,6 +278,7 @@ const DotField = memo(
         if (resizeTimer) window.clearTimeout(resizeTimer);
         window.removeEventListener('resize', resize);
         window.removeEventListener('mousemove', onMouseMove);
+        observer.disconnect();
       };
     }, []);
 
@@ -276,6 +295,8 @@ const DotField = memo(
             inset: 0,
             width: '100%',
             height: '100%',
+            willChange: 'transform',
+            contain: 'strict',
           }}
         />
         <svg

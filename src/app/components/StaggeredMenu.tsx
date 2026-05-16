@@ -29,6 +29,7 @@ export interface StaggeredMenuProps {
   onLogout?: () => void;
   onLogoDoubleClick?: () => void;
   logoUrl?: string;
+  isScrolled?: boolean;
   userName?: string;
   userEmail?: string;
   avatarUrl?: string | null;
@@ -47,12 +48,14 @@ const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   onLogout,
   onLogoDoubleClick,
   logoUrl,
+  isScrolled = false,
   userName,
   userEmail,
   avatarUrl,
   initials = 'ZM',
 }) => {
   const [open, setOpen]         = useState(false);
+  const lastTapRef              = useRef<number>(0);  // for touch double-tap
   const openRef                 = useRef(false);
   const panelRef                = useRef<HTMLElement>(null);
   const preLayersRef            = useRef<HTMLDivElement>(null);
@@ -302,15 +305,38 @@ const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         ))}
       </div>
 
-      {/* Top bar */}
-      <header className="staggered-menu-header" aria-label="Mobile navigation header">
+      {/* Top bar — gets frosted bg when scrolled (and always when open) */}
+      <header
+        className="staggered-menu-header"
+        aria-label="Mobile navigation header"
+        style={{
+          background: open
+            ? 'transparent'
+            : isScrolled
+              ? 'rgba(255,255,255,0.95)'
+              : 'transparent',
+          backdropFilter: (!open && isScrolled) ? 'blur(12px)' : undefined,
+          WebkitBackdropFilter: (!open && isScrolled) ? 'blur(12px)' : undefined,
+          borderBottom: (!open && isScrolled) ? '1px solid rgba(13,93,58,0.12)' : 'none',
+          borderRadius: (!open && isScrolled) ? '0 0 1.25rem 1.25rem' : undefined,
+          transition: 'background 0.3s, border-color 0.3s',
+        }}
+      >
         {/* Logo / wordmark */}
         <div
           className="sm-logo"
           aria-label="ZenMind"
           onDoubleClick={() => onLogoDoubleClick?.()}
-          title="Double-click for admin access"
-          style={{ cursor: onLogoDoubleClick ? 'pointer' : 'default' }}
+          onTouchEnd={(e) => {
+            const now = Date.now();
+            if (now - lastTapRef.current < 350) {
+              e.preventDefault();
+              onLogoDoubleClick?.();
+            }
+            lastTapRef.current = now;
+          }}
+          title="Double-tap for admin access"
+          style={{ cursor: onLogoDoubleClick ? 'pointer' : 'default', userSelect: 'none' }}
         >
           {logoUrl ? (
             <img

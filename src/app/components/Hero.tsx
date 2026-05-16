@@ -92,14 +92,17 @@ export default function Hero({ onGetStarted }: HeroProps) {
       <div
         ref={(el) => (circleRefs.current[0] = el)}
         className="absolute top-20 left-10 w-64 h-64 bg-[#0d5d3a]/5 dark:bg-[#10b981]/10 rounded-full blur-3xl z-[1] lg:hidden"
+        style={{ willChange: 'transform', contain: 'layout' }}
       />
       <div
         ref={(el) => (circleRefs.current[1] = el)}
         className="absolute bottom-20 right-10 w-96 h-96 bg-[#1a8a5a]/5 dark:bg-[#10b981]/10 rounded-full blur-3xl z-[1] lg:hidden"
+        style={{ willChange: 'transform', contain: 'layout' }}
       />
       <div
         ref={(el) => (circleRefs.current[2] = el)}
         className="absolute top-1/2 left-1/2 w-72 h-72 bg-[#c8e6c9]/10 dark:bg-[#0d5d3a]/20 rounded-full blur-3xl z-[1] lg:hidden"
+        style={{ willChange: 'transform', contain: 'layout' }}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 lg:py-16 relative z-10">
