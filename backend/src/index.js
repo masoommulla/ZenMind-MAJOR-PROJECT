@@ -88,6 +88,106 @@ app.use('/api/wellness-programs', wellnessProgramsRoute);
 import companyRoutes from './routes/companyRoutes.js';
 app.use('/api', companyRoutes);
 
+// Seed Jobs
+import { Job } from './models/Job.js';
+const jobCount = await Job.countDocuments();
+if (jobCount === 0) {
+  await Job.insertMany([
+    {
+      title: 'Frontend Developer (React)',
+      department: 'Engineering',
+      location: 'Remote / Bangalore',
+      employmentType: 'Full-time',
+      experience: '1–3 Years',
+      salary: '₹6–10 LPA',
+      shortDescription: 'Build beautiful, accessible UI for a platform that impacts thousands of adolescents every day.',
+      description: 'As a Frontend Developer at ZenMind, you will craft pixel-perfect, highly performant interfaces that make mental health care feel approachable and safe for young users across India.',
+      responsibilities: ['Develop and maintain React components', 'Implement smooth animations and micro-interactions', 'Collaborate with designers on Figma-to-code workflows', 'Optimise performance for mobile users', 'Write clean, maintainable TypeScript code'],
+      requirements: ['1+ years with React and TypeScript', 'Strong understanding of CSS and responsive design', 'Experience with REST APIs and state management', 'Passion for mental health or social impact'],
+      benefits: ['Fully remote work', 'Flexible working hours', 'Learning & development budget', 'Equity options for early joiners', 'Mental wellness subscription'],
+      skills: ['React', 'TypeScript', 'Tailwind CSS', 'Framer Motion', 'REST APIs'],
+      openings: 2, status: 'active', featured: true,
+    },
+    {
+      title: 'Backend Developer (Node.js)',
+      department: 'Engineering',
+      location: 'Remote',
+      employmentType: 'Full-time',
+      experience: '1–3 Years',
+      salary: '₹7–12 LPA',
+      shortDescription: 'Power the backend of a real-time mental wellness platform serving users across India.',
+      description: 'Build robust, secure APIs and real-time services that keep ZenMind running reliably for thousands of users every day.',
+      responsibilities: ['Design and build RESTful APIs', 'Maintain MongoDB schemas and queries', 'Implement real-time features using Socket.IO', 'Ensure API security and data privacy compliance', 'Write backend tests and documentation'],
+      requirements: ['1+ years with Node.js and Express', 'Strong MongoDB knowledge', 'Familiarity with JWT authentication', 'Understanding of real-time communication (WebSockets)'],
+      benefits: ['Fully remote work', 'Flexible working hours', 'Learning & development budget', 'Equity options for early joiners'],
+      skills: ['Node.js', 'Express', 'MongoDB', 'Socket.IO', 'REST APIs'],
+      openings: 1, status: 'active', featured: false,
+    },
+    {
+      title: 'UI/UX Designer',
+      department: 'Design',
+      location: 'Remote / Hybrid',
+      employmentType: 'Full-time',
+      experience: '1–2 Years',
+      salary: '₹5–8 LPA',
+      shortDescription: 'Design calming, accessible experiences that make mental health feel approachable and safe.',
+      description: 'At ZenMind, design is not just about aesthetics — it is about empathy. You will create interfaces that feel safe, trustworthy, and calming for adolescents navigating real mental health challenges.',
+      responsibilities: ['Design mobile-first screens in Figma', 'Build and maintain a consistent design system', 'Conduct user research and usability testing', 'Work closely with the engineering team', 'Create micro-interaction prototypes'],
+      requirements: ['Strong Figma skills', '1+ years of product design experience', 'Portfolio with mobile app designs', 'Understanding of accessibility standards'],
+      benefits: ['Fully remote work', 'Flexible hours', 'Creative freedom', 'Mental wellness subscription'],
+      skills: ['Figma', 'Prototyping', 'Design Systems', 'Mobile UI', 'User Research'],
+      openings: 1, status: 'active', featured: false,
+    },
+    {
+      title: 'Mental Health Content Writer',
+      department: 'Marketing',
+      location: 'Remote',
+      employmentType: 'Full-time',
+      experience: '0–2 Years',
+      salary: '₹3–5 LPA',
+      shortDescription: 'Write blogs, wellness guides, and in-app content that genuinely helps adolescents navigate mental health.',
+      description: 'Your words will be the first thing thousands of struggling students read. You will create empathetic, accurate, and engaging content that educates, inspires, and comforts.',
+      responsibilities: ['Write weekly blog articles on adolescent mental health', 'Create in-app wellness program content', 'Research and cite credible mental health sources', 'Collaborate with therapists on content accuracy', 'Optimise content for SEO'],
+      requirements: ['Strong English writing skills', 'Interest or background in psychology or mental health', 'Ability to write with empathy and clarity', 'Basic SEO knowledge'],
+      benefits: ['Fully remote', 'Flexible schedule', 'Published byline on ZenMind blog', 'Access to premium wellness resources'],
+      skills: ['Content Writing', 'SEO', 'Mental Health Knowledge', 'Storytelling', 'Research'],
+      openings: 1, status: 'active', featured: false,
+    },
+    {
+      title: 'Clinical Psychology Intern',
+      department: 'Clinical',
+      location: 'Remote',
+      employmentType: 'Internship',
+      experience: '0 Years',
+      salary: '₹8,000–15,000 / month',
+      shortDescription: 'Work alongside our clinical team to review therapeutic content and shape the wellness roadmap.',
+      description: 'Final year psychology students and fresh graduates — this is your chance to contribute meaningfully to a platform that is changing how adolescents access mental health care in India.',
+      responsibilities: ['Review and validate AI-generated wellness content', 'Assist in designing new wellness program steps', 'Provide feedback on chatbot response quality', 'Contribute to research on adolescent mental health trends'],
+      requirements: ['Final year or completed Bachelor\'s/Master\'s in Psychology', 'Strong understanding of CBT and mindfulness', 'Empathy and attention to detail', 'Ability to commit 20+ hours/week'],
+      benefits: ['Internship certificate', 'Mentorship from licensed psychologists', 'Letter of recommendation', 'Potential full-time conversion'],
+      skills: ['Psychology', 'CBT', 'Mindfulness', 'Research', 'Content Review'],
+      openings: 2, status: 'active', featured: false,
+    },
+    {
+      title: 'Growth & Marketing Intern',
+      department: 'Marketing',
+      location: 'Remote',
+      employmentType: 'Internship',
+      experience: '0 Years',
+      salary: '₹5,000–10,000 / month',
+      shortDescription: 'Help ZenMind reach thousands more students through creative growth strategies and social campaigns.',
+      description: 'If you love social media, storytelling, and making a real difference — this is your role. You will help ZenMind grow its community and bring mental health conversations to college campuses across India.',
+      responsibilities: ['Manage ZenMind\'s Instagram and LinkedIn presence', 'Create engaging social media content about mental wellness', 'Run community outreach campaigns in colleges', 'Track analytics and report on growth metrics', 'Ideate viral campaigns around mental health awareness'],
+      requirements: ['Passion for social media and digital marketing', 'Creative mindset with strong communication skills', 'Basic Canva / graphic design skills', 'Ability to commit 15+ hours/week'],
+      benefits: ['Internship certificate', 'Portfolio-worthy campaigns', 'Letter of recommendation', 'Flexible schedule'],
+      skills: ['Social Media', 'Canva', 'Content Strategy', 'Analytics', 'Community Building'],
+      openings: 2, status: 'active', featured: true,
+    },
+  ]);
+  console.log('Default Jobs seeded (6 positions)');
+}
+
+
 
 const port = process.env.PORT || 5000;
 const mongoUri = process.env.MONGODB_URI;
