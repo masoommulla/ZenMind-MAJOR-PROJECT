@@ -57,7 +57,15 @@ const EXERCISE_ICONS: Record<string, string> = {
   reading: '📖', reflection: '🪞', other: '⚡',
 };
 
-export default function WellnessProgramsUser() {
+export default function WellnessProgramsUser({
+  onDetailOpen,
+  onDetailClose,
+  closeDetailSignal,
+}: {
+  onDetailOpen?: () => void;
+  onDetailClose?: () => void;
+  closeDetailSignal?: number;
+}) {
   const [programs, setPrograms]         = useState<any[]>([]);
   const [myEnrollments, setMyEnrollments] = useState<any[]>([]);
   const [loading, setLoading]           = useState(true);
@@ -70,6 +78,14 @@ export default function WellnessProgramsUser() {
   const [enrolling, setEnrolling]       = useState(false);
   const [completingDay, setCompletingDay] = useState<number | null>(null);
   const [msg, setMsg]                   = useState<{ text: string; ok: boolean } | null>(null);
+
+  // Notify parent when detail opens/closes
+  useEffect(() => { if (selected) onDetailOpen?.(); else onDetailClose?.(); }, [selected]);
+
+  // Handle external close signal (from back-button handler in Dashboard)
+  useEffect(() => {
+    if (closeDetailSignal && closeDetailSignal > 0) setSelected(null);
+  }, [closeDetailSignal]);
 
   const load = async () => {
     try {

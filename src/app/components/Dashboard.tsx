@@ -64,6 +64,46 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
   const [mobileOpen, setMobileOpen] = useState(false);
   const [chatTherapist, setChatTherapist] = useState<any | null>(null);
 
+  // ── Back-button navigation ──
+  const [navStack, setNavStack]             = useState<TabKey[]>([]);
+  const [programDetailOpen, setProgramDetailOpen] = useState(false);
+  const [closeProgramSignal, setCloseProgramSignal] = useState(0);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  // Push initial history entry when dashboard mounts
+  useEffect(() => { history.pushState({ zmDash: true }, ''); }, []);
+
+  // Navigate to a new tab, pushing browser + internal history
+  const navigateToTab = (newTab: TabKey) => {
+    if (newTab === tab) { setMobileOpen(false); return; }
+    history.pushState({ zmDash: true }, '');
+    setNavStack(prev => [...prev, tab]);
+    setTab(newTab);
+    setMobileOpen(false);
+  };
+
+  // Back-button handler
+  useEffect(() => {
+    const handlePop = () => {
+      if (programDetailOpen) {
+        setCloseProgramSignal(c => c + 1);
+        setProgramDetailOpen(false);
+        return;
+      }
+      if (navStack.length > 0) {
+        const prev = navStack[navStack.length - 1];
+        setNavStack(s => s.slice(0, -1));
+        setTab(prev);
+        return;
+      }
+      // At root — show logout confirmation and push a state back so we keep the page
+      history.pushState({ zmDash: true }, '');
+      setShowLogoutConfirm(true);
+    };
+    window.addEventListener('popstate', handlePop);
+    return () => window.removeEventListener('popstate', handlePop);
+  }, [programDetailOpen, navStack]);
+
   useEffect(() => {
     // If prefetchedMe was already provided, skip the fetch
     if (prefetchedMe) { setMe(prefetchedMe); setLoading(false); return; }
@@ -125,7 +165,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
             </div>
             <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
               {NAV_ITEMS.map(({ key, label, icon }) => (
-                <button key={key} type="button" onClick={() => { setTab(key); setMobileOpen(false); }}
+                <button key={key} type="button" onClick={() => { navigateToTab(key); }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl border transition-all ${
                     tab === key
                       ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white border-[#0d5d3a] dark:border-[#1a8a5a] zen-nav-active'
@@ -141,7 +181,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
                 <div className="text-xs text-[#4a7c5d] dark:text-[#6aad8a]">Signed in as</div>
                 <div className="text-xs font-semibold text-[#0a2617] dark:text-gray-200 truncate">{me?.email || '-'}</div>
               </div>
-              <button type="button" onClick={onLogout}
+              <button type="button" onClick={() => setShowLogoutConfirm(true)}
                 className="w-full flex items-center gap-2.5 text-sm font-semibold text-[#e05555] hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl px-3 py-2.5 transition">
                 <LogOut className="w-4 h-4 flex-shrink-0" /><span>Sign out</span>
               </button>
@@ -189,7 +229,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
           {/* Nav items */}
           <nav className="flex-1 p-2 space-y-1">
             {NAV_ITEMS.map(({ key, label, icon }) => (
-              <button key={key} type="button" onClick={() => setTab(key)} title={collapsed ? label : undefined}
+              <button key={key} type="button" onClick={() => navigateToTab(key)} title={collapsed ? label : undefined}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl border transition-all ${
                   tab === key
                     ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white border-[#0d5d3a] dark:border-[#1a8a5a] zen-nav-active'
@@ -213,7 +253,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
               </div>
             )}
             <div className={`p-2 ${collapsed ? 'flex justify-center' : ''}`}>
-              <button type="button" onClick={onLogout} title="Sign out"
+              <button type="button" onClick={() => setShowLogoutConfirm(true)} title="Sign out"
                 className={`flex items-center gap-2.5 text-sm font-semibold text-[#e05555] hover:bg-red-50 rounded-2xl transition px-3 py-2.5 ${
                   collapsed ? 'justify-center w-10 h-10 px-0' : 'w-full'
                 }`}>
@@ -340,7 +380,14 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
             </div>
           ) : tab === 'programs' ? (
             <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-              <WellnessProgramsUser />
+              <WellnessProgramsUser
+                onDetailOpen={() => {
+                  history.pushState({ zmDash: true }, '');
+                  setProgramDetailOpen(true);
+                }}
+                onDetailClose={() => setProgramDetailOpen(false)}
+                closeDetailSignal={closeProgramSignal}
+              />
             </div>
           ) : tab === 'settings' ? (
             <div className="flex-1 overflow-y-auto">
@@ -360,6 +407,53 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
           )}
         </main>
       </div>
+
+      {/* ── Logout Confirmation Modal ── */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowLogoutConfirm(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="bg-white dark:bg-[#111] rounded-3xl shadow-2xl border border-[#0d5d3a]/10 dark:border-white/10 p-8 max-w-sm w-full text-center"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Icon */}
+              <div className="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center mx-auto mb-5">
+                <LogOut className="w-8 h-8 text-red-500" />
+              </div>
+
+              <h2 className="text-xl font-black text-[#0a2617] dark:text-white mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>
+                Sign out of ZenMind?
+              </h2>
+              <p className="text-[#4a7c5d] dark:text-gray-400 text-sm leading-relaxed mb-7">
+                Your progress is saved. You can sign back in anytime to continue your wellness journey.
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={onLogout}
+                  className="w-full py-3.5 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-black text-sm transition-colors shadow-lg shadow-red-500/20"
+                >
+                  Yes, Sign Out
+                </button>
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="w-full py-3.5 rounded-2xl bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 hover:bg-[#e8f5e9] dark:hover:bg-[#0d5d3a]/30 text-[#0d5d3a] dark:text-[#10b981] font-black text-sm transition-colors"
+                >
+                  Stay on ZenMind
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

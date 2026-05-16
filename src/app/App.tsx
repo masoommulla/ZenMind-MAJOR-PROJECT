@@ -68,8 +68,8 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePop);
   }, []);
 
-  /* Loading screen state — only for very first render */
-  const [checking, setChecking] = useState(true);   // show loader?
+  /* Loading screen — only on very first fresh browser open this session */
+  const [checking, setChecking] = useState(() => sessionStorage.getItem('zm_loaded') !== '1');
   const [apiReady, setApiReady] = useState(false);  // backend responded?
   const isDashboard = adminAuthed || therapistAuthed || authed || activeFooterPage !== null;
 
@@ -157,7 +157,7 @@ export default function App() {
     return (
       <LoadingScreen
         apiReady={apiReady}
-        onComplete={() => setChecking(false)}
+        onComplete={() => { sessionStorage.setItem('zm_loaded', '1'); setChecking(false); }}
       />
     );
   }
