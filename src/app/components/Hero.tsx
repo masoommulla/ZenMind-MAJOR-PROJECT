@@ -73,7 +73,6 @@ export default function Hero({ onGetStarted }: HeroProps) {
             transform: 'translateZ(0)',
             backfaceVisibility: 'hidden',
             willChange: 'transform',
-            filter: 'saturate(0.92) hue-rotate(8deg) brightness(1.04)',
           }}
           autoPlay
           muted
