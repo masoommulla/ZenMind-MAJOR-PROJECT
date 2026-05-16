@@ -246,9 +246,7 @@ router.post('/stories/bulk-action', requireAdmin, async (req, res) => {
   return res.status(400).json({ error: 'action must be approve or delete' });
 });
 
-
 /* ── THERAPIST MANAGEMENT ── */
-import { Therapist } from '../models/Therapist.js';
 import multer from 'multer';
 import path from 'path';
 
