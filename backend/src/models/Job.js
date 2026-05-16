@@ -19,7 +19,7 @@ const jobSchema = new mongoose.Schema({
   lastDate:        { type: Date },
   status:          { type: String, default: 'active', enum: ['active', 'closed'] },
   featured:        { type: Boolean, default: false },
-  slug:            { type: String, unique: true },
+  slug:            { type: String, unique: true, sparse: true },
   postedDate:      { type: Date, default: Date.now },
 }, { timestamps: true });
 

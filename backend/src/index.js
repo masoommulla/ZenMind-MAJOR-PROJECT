@@ -407,9 +407,12 @@ if (wpCount === 0) {
 }
 
 // Seed Jobs — MUST be after mongoose.connect
+// NOTE: Use individual .save() calls (not insertMany) so the pre-save slug hook fires
+// Clean up any partially-seeded jobs with null slugs from failed previous attempts
+await Job.deleteMany({ slug: null });
 const jobCount = await Job.countDocuments();
 if (jobCount === 0) {
-  await Job.insertMany([
+  const jobsToSeed = [
     {
       title: 'Frontend Developer (React)', department: 'Engineering', location: 'Remote / Bangalore',
       employmentType: 'Full-time', experience: '1–3 Years', salary: '₹6–10 LPA',
@@ -470,7 +473,10 @@ if (jobCount === 0) {
       benefits: ['Internship certificate', 'Portfolio-worthy campaigns', 'Letter of recommendation', 'Flexible schedule'],
       skills: ['Social Media', 'Canva', 'Content Strategy', 'Analytics', 'Community Building'], openings: 2, status: 'active', featured: true,
     },
-  ]);
+  ];
+  for (const jobData of jobsToSeed) {
+    await new Job(jobData).save();
+  }
   console.log('Default Jobs seeded (6 positions)');
 }
 
