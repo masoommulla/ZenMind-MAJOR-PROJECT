@@ -9,11 +9,12 @@ import ReadingListsAdmin from './ReadingListsAdmin';
 import WellnessProgramsAdmin from './WellnessProgramsAdmin';
 import TeamManagement from './TeamManagement';
 import JobsManagement from './JobsManagement';
+import ApplicationsAdmin from './ApplicationsAdmin';
 
 type AdminDashboardProps = { onLogout: () => void };
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications'>('users');
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminUsername, setAdminUsername] = useState('Admin');
@@ -22,7 +23,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     apiFetch('/admin/me').then((res: any) => setAdminUsername(res.username)).catch(() => {});
   }, []);
 
-  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs') => {
+  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications') => {
     setActiveTab(tab);
     setMobileOpen(false);
   };
@@ -49,6 +50,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <NavItem icon={LifeBuoy} label="Support Tickets" active={activeTab === 'support'} onClick={() => navTo('support')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={UserCircle} label="Team Members" active={activeTab === 'team'} onClick={() => navTo('team')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Briefcase} label="Job Postings" active={activeTab === 'jobs'} onClick={() => navTo('jobs')} expanded={mobile || sidebarExpanded} />
+        <NavItem icon={Users} label="Applications" active={activeTab === 'applications'} onClick={() => navTo('applications')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => navTo('settings')} expanded={mobile || sidebarExpanded} />
       </nav>
       <div className="p-3 border-t border-[#0d5d3a]/10 dark:border-white/10">
@@ -101,7 +103,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <Menu size={20} />
             </button>
             <h1 className="text-lg sm:text-2xl font-bold text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>
-            {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? '🚨 Flagged Content' : activeTab === 'reading' ? '📚 Reading Lists' : activeTab === 'programs' ? '🧘 Wellness Programs' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : activeTab === 'team' ? '👥 Team Members' : activeTab === 'jobs' ? '💼 Job Postings' : 'Admin Settings'}
+            {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? '🚨 Flagged Content' : activeTab === 'reading' ? '📚 Reading Lists' : activeTab === 'programs' ? '🧘 Wellness Programs' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : activeTab === 'team' ? '👥 Team Members' : activeTab === 'jobs' ? '💼 Job Postings' : activeTab === 'applications' ? '📨 Job Applications' : 'Admin Settings'}
             </h1>
           </div>
           <div className="flex items-center gap-4">
@@ -131,6 +133,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             {activeTab === 'support' && <SupportManagement />}
             {activeTab === 'team' && <TeamManagement />}
             {activeTab === 'jobs' && <JobsManagement />}
+            {activeTab === 'applications' && <ApplicationsAdmin />}
             {activeTab === 'settings' && <AdminSettings onUpdateName={setAdminUsername} />}
           </div>
         </main>

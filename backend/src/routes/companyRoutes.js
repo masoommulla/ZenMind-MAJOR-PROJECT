@@ -149,4 +149,33 @@ router.patch('/admin/applications/:id/status', requireAdmin, async (req, res) =>
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
+// Admin: GET ALL applications across all jobs (with optional filters)
+router.get('/admin/applications', requireAdmin, async (req, res) => {
+  try {
+    const filter = {};
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.jobId) filter.jobId = req.query.jobId;
+
+    const applications = await JobApplication.find(filter)
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Stats
+    const total      = await JobApplication.countDocuments();
+    const newCount   = await JobApplication.countDocuments({ status: 'new' });
+    const shortlisted = await JobApplication.countDocuments({ status: 'shortlisted' });
+    const rejected   = await JobApplication.countDocuments({ status: 'rejected' });
+
+    res.json({ applications, stats: { total, new: newCount, shortlisted, rejected } });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Admin: delete a single application
+router.delete('/admin/applications/:id', requireAdmin, async (req, res) => {
+  try {
+    await JobApplication.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 export default router;
