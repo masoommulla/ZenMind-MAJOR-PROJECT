@@ -20,11 +20,13 @@ const socialLinks = [
 export default function Footer({ 
   onTherapistLoginTrigger, 
   onProductLinkClick,
-  onSupportLinkClick
+  onSupportLinkClick,
+  onCompanyLinkClick,
 }: { 
   onTherapistLoginTrigger?: () => void;
   onProductLinkClick?: (page: string) => void;
   onSupportLinkClick?: (page: string) => void;
+  onCompanyLinkClick?: (page: string) => void;
 }) {
   return (
     <footer id="about" className="bg-gradient-to-br from-[#071d13] via-[#0a2617] to-[#0d5d3a] dark:from-[#050505] dark:via-[#0a0a0a] dark:to-[#111111] transition-colors duration-300 text-white relative overflow-hidden">
@@ -80,6 +82,13 @@ export default function Footer({
                       ) : category === 'Support' && onSupportLinkClick ? (
                         <button
                           onClick={() => onSupportLinkClick(link)}
+                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block text-left break-words w-full leading-snug"
+                        >
+                          {link}
+                        </button>
+                      ) : category === 'Company' && onCompanyLinkClick ? (
+                        <button
+                          onClick={() => onCompanyLinkClick(link)}
                           className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block text-left break-words w-full leading-snug"
                         >
                           {link}

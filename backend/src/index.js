@@ -85,6 +85,9 @@ import readingListsRoute from './routes/readingLists.js';
 app.use('/api/reading-lists', readingListsRoute);
 import wellnessProgramsRoute from './routes/wellnessPrograms.js';
 app.use('/api/wellness-programs', wellnessProgramsRoute);
+import companyRoutes from './routes/companyRoutes.js';
+app.use('/api', companyRoutes);
+
 
 const port = process.env.PORT || 5000;
 const mongoUri = process.env.MONGODB_URI;

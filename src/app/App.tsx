@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { AnimatePresence } from 'motion/react';
 import Hero from './components/Hero';
 import Navigation from './components/Navigation';
 import Features from './components/Features';
@@ -18,6 +19,9 @@ import TherapistLogin from './components/TherapistLogin';
 import TherapistDashboard from './components/TherapistDashboard';
 import LoadingScreen from './components/LoadingScreen';
 import ProductPage from './components/ProductPage';
+import AboutPage from './components/AboutPage';
+import CareersPage from './components/CareersPage';
+import ComingSoonPage from './components/ComingSoonPage';
 import { apiFetch } from './api/client';
 
 
@@ -43,6 +47,7 @@ export default function App() {
   const [loginIntent, setLoginIntent] = useState<'progress' | 'aichat' | 'therapy'>('progress');
 
   const [activeFooterPage, setActiveFooterPage] = useState<string | null>(null);
+  const [activeCompanyPage, setActiveCompanyPage] = useState<string | null>(null);
 
   /* Loading screen state — only for very first render */
   const [checking, setChecking] = useState(true);   // show loader?
@@ -193,8 +198,18 @@ export default function App() {
                 setActiveFooterPage(link);
               }
             }}
+            onCompanyLinkClick={(link) => setActiveCompanyPage(link)}
           />
           {activeFooterPage && <ProductPage page={activeFooterPage} onClose={() => setActiveFooterPage(null)} />}
+
+          {/* ── Company Pages ── */}
+          <AnimatePresence>
+            {activeCompanyPage === 'About Us' && <AboutPage onClose={() => setActiveCompanyPage(null)} />}
+            {activeCompanyPage === 'Careers' && <CareersPage onClose={() => setActiveCompanyPage(null)} />}
+            {(activeCompanyPage === 'Blog' || activeCompanyPage === 'Press' || activeCompanyPage === 'Partners') && (
+              <ComingSoonPage page={activeCompanyPage} onClose={() => setActiveCompanyPage(null)} />
+            )}
+          </AnimatePresence>
 
           {/* ── Robot Widget — only on the landing page, hidden when ProductPage is open ── */}
           {!activeFooterPage && (
