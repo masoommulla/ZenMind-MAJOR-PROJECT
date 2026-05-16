@@ -421,7 +421,8 @@ export default function ProductPage({ page, onClose }: { page: string; onClose: 
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       className="fixed inset-0 z-[100] bg-[#f7fbf8] dark:bg-[#050505] overflow-y-auto"
     >
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#050505]/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/10 px-4 sm:px-8 py-4 flex items-center justify-between">
+      {/* Desktop header — hidden on mobile */}
+      <header className="hidden sm:flex sticky top-0 z-50 bg-white/80 dark:bg-[#050505]/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/10 px-4 sm:px-8 py-4 items-center justify-between">
         <button 
           onClick={onClose}
           className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 text-[#0a2617] dark:text-white font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition-colors flex items-center gap-2"
@@ -433,6 +434,10 @@ export default function ProductPage({ page, onClose }: { page: string; onClose: 
           ZenMind / {page}
         </span>
       </header>
+      {/* Mobile floating close button */}
+      <button onClick={onClose} className="sm:hidden fixed top-4 right-4 z-[110] w-10 h-10 rounded-full bg-white dark:bg-[#1a1a1a] shadow-lg border border-gray-200 dark:border-white/10 flex items-center justify-center text-[#0a2617] dark:text-white hover:bg-gray-100 transition">
+        <ChevronLeft size={18} />
+      </button>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-8 py-10 pb-32">
         {renderContent()}

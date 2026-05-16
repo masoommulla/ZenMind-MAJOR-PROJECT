@@ -35,11 +35,10 @@ export default function CareersPage({ onClose }: { onClose: () => void }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 bg-white dark:bg-[#050505] overflow-y-auto">
-      {/* Header */}
-      <div className="sticky top-0 z-20 bg-white/90 dark:bg-[#050505]/90 backdrop-blur-md border-b border-[#0d5d3a]/10 dark:border-white/10 flex items-center justify-between px-4 sm:px-8 py-4">
-        <span className="font-black text-[#0d5d3a] dark:text-[#10b981] text-lg" style={{ fontFamily: 'Syne, sans-serif' }}>ZenMind · Careers</span>
-        <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 transition"><X size={20} /></button>
-      </div>
+      {/* Floating close button */}
+      <button onClick={onClose} className="fixed top-4 right-4 z-[110] w-10 h-10 rounded-full bg-white dark:bg-[#1a1a1a] shadow-lg border border-[#0d5d3a]/20 dark:border-white/10 flex items-center justify-center text-[#0a2617] dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition">
+        <X size={18} />
+      </button>
 
       <AnimatePresence mode="wait">
         {selected ? (

@@ -22,6 +22,7 @@ import ProductPage from './components/ProductPage';
 import AboutPage from './components/AboutPage';
 import CareersPage from './components/CareersPage';
 import ComingSoonPage from './components/ComingSoonPage';
+import ResourcesPage from './components/ResourcesPage';
 import { apiFetch } from './api/client';
 
 
@@ -48,6 +49,24 @@ export default function App() {
 
   const [activeFooterPage, setActiveFooterPage] = useState<string | null>(null);
   const [activeCompanyPage, setActiveCompanyPage] = useState<string | null>(null);
+  const [activeResourcesPage, setActiveResourcesPage] = useState<string | null>(null);
+
+  // Helper: open any overlay and push history so browser back button closes it
+  const openOverlay = (setter: (v: string) => void, value: string) => {
+    history.pushState({ zmOverlay: true }, '');
+    setter(value);
+  };
+
+  // Back button listener — close whichever overlay is open
+  useEffect(() => {
+    const handlePop = () => {
+      setActiveCompanyPage(null);
+      setActiveFooterPage(null);
+      setActiveResourcesPage(null);
+    };
+    window.addEventListener('popstate', handlePop);
+    return () => window.removeEventListener('popstate', handlePop);
+  }, []);
 
   /* Loading screen state — only for very first render */
   const [checking, setChecking] = useState(true);   // show loader?
@@ -189,18 +208,19 @@ export default function App() {
           />
           <Footer 
             onTherapistLoginTrigger={() => setShowTherapistLogin(true)} 
-            onProductLinkClick={setActiveFooterPage} 
+            onProductLinkClick={(link) => openOverlay(setActiveFooterPage, link)} 
             onSupportLinkClick={(link) => {
               if (link === 'Feedback') {
                 const el = document.getElementById('stories');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               } else {
-                setActiveFooterPage(link);
+                openOverlay(setActiveFooterPage, link);
               }
             }}
-            onCompanyLinkClick={(link) => setActiveCompanyPage(link)}
+            onCompanyLinkClick={(link) => openOverlay(setActiveCompanyPage, link)}
+            onResourcesLinkClick={(link) => openOverlay(setActiveResourcesPage, link)}
           />
-          {activeFooterPage && <ProductPage page={activeFooterPage} onClose={() => setActiveFooterPage(null)} />}
+          {activeFooterPage && <ProductPage page={activeFooterPage} onClose={() => { setActiveFooterPage(null); }} />}
 
           {/* ── Company Pages ── */}
           <AnimatePresence>
@@ -211,8 +231,15 @@ export default function App() {
             )}
           </AnimatePresence>
 
-          {/* ── Robot Widget — only on the landing page, hidden when ProductPage is open ── */}
-          {!activeFooterPage && (
+          {/* ── Resources Pages ── */}
+          <AnimatePresence>
+            {activeResourcesPage && (
+              <ResourcesPage page={activeResourcesPage} onClose={() => setActiveResourcesPage(null)} />
+            )}
+          </AnimatePresence>
+
+          {/* ── Robot Widget — ONLY on landing page, hidden when any overlay is open ── */}
+          {!activeFooterPage && !activeCompanyPage && !activeResourcesPage && (
             <RobotWidget onOpen={() => { setLoginIntent('aichat'); setShowAuth(true); }} />
           )}
         </>
