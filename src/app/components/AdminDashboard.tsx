@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye, Video, Music, Image as ImageIcon, Link2, Upload as UploadIcon, BookOpen, MessageSquare, Brain, ToggleLeft, ToggleRight, UserCircle, Briefcase, ShieldAlert, TrendingUp, TrendingDown, Minus, Bell, Send, RefreshCw } from 'lucide-react';
 import { apiFetch } from '../api/client';
@@ -12,11 +12,12 @@ import JobsManagement from './JobsManagement';
 import ApplicationsAdmin from './ApplicationsAdmin';
 import TherapistInboxAdmin from './TherapistInboxAdmin';
 import SessionInsightsWidget from './SessionInsightsWidget';
+import AdminAnalytics from './AdminAnalytics';
 
 type AdminDashboardProps = { onLogout: () => void };
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox' | 'crisis' | 'notifications' | 'session_insights'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox' | 'crisis' | 'notifications' | 'session_insights' | 'analytics'>('users');
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminUsername, setAdminUsername] = useState('Admin');
@@ -25,7 +26,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     apiFetch('/admin/me').then((res: any) => setAdminUsername(res.username)).catch(() => {});
   }, []);
 
-  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox' | 'crisis' | 'notifications' | 'session_insights') => {
+  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox' | 'crisis' | 'notifications' | 'session_insights' | 'analytics') => {
     setActiveTab(tab);
     setMobileOpen(false);
   };
@@ -41,6 +42,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         )}
       </div>
       <nav className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1">
+        <NavItem icon={Activity} label="Analytics" active={activeTab === 'analytics'} onClick={() => navTo('analytics')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Users} label="Members Directory" active={activeTab === 'users'} onClick={() => navTo('users')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Stethoscope} label="Therapists Directory" active={activeTab === 'therapists'} onClick={() => navTo('therapists')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={FileText} label="Content Mgmt" active={activeTab === 'content'} onClick={() => navTo('content')} expanded={mobile || sidebarExpanded} />
@@ -109,7 +111,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <Menu size={20} />
             </button>
             <h1 className="text-lg sm:text-2xl font-bold text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>
-            {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? 'ðŸš¨ Flagged Content' : activeTab === 'reading' ? 'ðŸ“š Reading Lists' : activeTab === 'programs' ? 'ðŸ§˜ Wellness Programs' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : activeTab === 'team' ? 'ðŸ‘¥ Team Members' : activeTab === 'jobs' ? 'ðŸ’¼ Job Postings' : activeTab === 'applications' ? 'ðŸ“¨ Job Applications' : activeTab === 'therapist_inbox' ? 'ðŸ›¡ï¸ Therapist Inbox' : activeTab === 'crisis' ? 'ðŸ†˜ Crisis Monitor' : activeTab === 'notifications' ? 'ðŸ”” Notification Center' : activeTab === 'session_insights' ? 'ðŸ“ˆ Session Insights' : 'Admin Settings'}
+            {activeTab === 'analytics' ? 'Platform Analytics' : activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? 'Flagged Content' : activeTab === 'reading' ? 'Reading Lists' : activeTab === 'programs' ? 'Wellness Programs' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : activeTab === 'team' ? 'Team Members' : activeTab === 'jobs' ? 'Job Postings' : activeTab === 'applications' ? 'Job Applications' : activeTab === 'therapist_inbox' ? 'Therapist Inbox' : activeTab === 'crisis' ? 'Crisis Monitor' : activeTab === 'notifications' ? 'Notification Center' : activeTab === 'session_insights' ? 'Session Insights' : 'Admin Settings'}
             </h1>
           </div>
           <div className="flex items-center gap-4">
@@ -128,6 +130,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-8">
           <div className="mx-auto w-full max-w-7xl">
+            {activeTab === 'analytics' && <AdminAnalytics />}
             {activeTab === 'users' && <UsersManagement />}
             {activeTab === 'therapists' && <TherapistsManagement />}
             {activeTab === 'content' && <ContentManagement />}

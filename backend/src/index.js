@@ -92,6 +92,8 @@ app.use('/api/notifications', notificationsRoute);
 import sessionPrepRoute from './routes/sessionPrep.js';
 app.use('/api/session-prep', sessionPrepRoute);
 app.use('/api/admin/analytics', sessionPrepRoute); // admin mood analytics sub-route
+import adminAnalyticsRoute from './routes/adminAnalytics.js';
+app.use('/api/admin-analytics', adminAnalyticsRoute);
 import { Job } from './models/Job.js';
 
 
