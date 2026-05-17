@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye, Video, Music, Image as ImageIcon, Link2, Upload as UploadIcon, BookOpen, MessageSquare, Brain, ToggleLeft, ToggleRight, UserCircle, Briefcase, ShieldAlert } from 'lucide-react';
+import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye, Video, Music, Image as ImageIcon, Link2, Upload as UploadIcon, BookOpen, MessageSquare, Brain, ToggleLeft, ToggleRight, UserCircle, Briefcase, ShieldAlert, TrendingUp, TrendingDown, Minus, Bell, Send, RefreshCw } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import logo from '../../../asset/logo.png';
 import ThemeToggle from './ThemeToggle';
@@ -11,11 +11,12 @@ import TeamManagement from './TeamManagement';
 import JobsManagement from './JobsManagement';
 import ApplicationsAdmin from './ApplicationsAdmin';
 import TherapistInboxAdmin from './TherapistInboxAdmin';
+import SessionInsightsWidget from './SessionInsightsWidget';
 
 type AdminDashboardProps = { onLogout: () => void };
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox' | 'crisis' | 'notifications' | 'session_insights'>('users');
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminUsername, setAdminUsername] = useState('Admin');
@@ -24,7 +25,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     apiFetch('/admin/me').then((res: any) => setAdminUsername(res.username)).catch(() => {});
   }, []);
 
-  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox') => {
+  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox' | 'crisis' | 'notifications' | 'session_insights') => {
     setActiveTab(tab);
     setMobileOpen(false);
   };
@@ -50,6 +51,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <NavItem icon={Brain} label="Quiz Questions" active={activeTab === 'quiz'} onClick={() => navTo('quiz')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={LifeBuoy} label="Support Tickets" active={activeTab === 'support'} onClick={() => navTo('support')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={ShieldAlert} label="Therapist Inbox" active={activeTab === 'therapist_inbox'} onClick={() => navTo('therapist_inbox')} expanded={mobile || sidebarExpanded} />
+        <NavItem icon={AlertTriangle} label="Crisis Monitor" active={activeTab === 'crisis'} onClick={() => navTo('crisis')} expanded={mobile || sidebarExpanded} />
+        <NavItem icon={Bell} label="Notifications" active={activeTab === 'notifications'} onClick={() => navTo('notifications')} expanded={mobile || sidebarExpanded} />
+        <NavItem icon={TrendingUp} label="Session Insights" active={activeTab === 'session_insights'} onClick={() => navTo('session_insights')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={UserCircle} label="Team Members" active={activeTab === 'team'} onClick={() => navTo('team')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Briefcase} label="Job Postings" active={activeTab === 'jobs'} onClick={() => navTo('jobs')} expanded={mobile || sidebarExpanded} />
         <NavItem icon={Users} label="Applications" active={activeTab === 'applications'} onClick={() => navTo('applications')} expanded={mobile || sidebarExpanded} />
@@ -105,7 +109,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <Menu size={20} />
             </button>
             <h1 className="text-lg sm:text-2xl font-bold text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>
-            {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? '🚨 Flagged Content' : activeTab === 'reading' ? '📚 Reading Lists' : activeTab === 'programs' ? '🧘 Wellness Programs' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : activeTab === 'team' ? '👥 Team Members' : activeTab === 'jobs' ? '💼 Job Postings' : activeTab === 'applications' ? '📨 Job Applications' : activeTab === 'therapist_inbox' ? '🛡️ Therapist Inbox' : 'Admin Settings'}
+            {activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? 'ðŸš¨ Flagged Content' : activeTab === 'reading' ? 'ðŸ“š Reading Lists' : activeTab === 'programs' ? 'ðŸ§˜ Wellness Programs' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : activeTab === 'team' ? 'ðŸ‘¥ Team Members' : activeTab === 'jobs' ? 'ðŸ’¼ Job Postings' : activeTab === 'applications' ? 'ðŸ“¨ Job Applications' : activeTab === 'therapist_inbox' ? 'ðŸ›¡ï¸ Therapist Inbox' : activeTab === 'crisis' ? 'ðŸ†˜ Crisis Monitor' : activeTab === 'notifications' ? 'ðŸ”” Notification Center' : activeTab === 'session_insights' ? 'ðŸ“ˆ Session Insights' : 'Admin Settings'}
             </h1>
           </div>
           <div className="flex items-center gap-4">
@@ -137,6 +141,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             {activeTab === 'jobs' && <JobsManagement />}
             {activeTab === 'applications' && <ApplicationsAdmin />}
             {activeTab === 'therapist_inbox' && <TherapistInboxAdmin />}
+            {activeTab === 'crisis' && <CrisisMonitorWidget />}
+            {activeTab === 'notifications' && <NotificationBroadcastWidget />}
+            {activeTab === 'session_insights' && <SessionInsightsWidget />}
             {activeTab === 'settings' && <AdminSettings onUpdateName={setAdminUsername} />}
           </div>
         </main>
@@ -156,7 +163,7 @@ function NavItem({ icon: Icon, label, active, onClick, expanded }: any) {
   );
 }
 
-/* ── Custom Confirm Modal ── */
+/* â”€â”€ Custom Confirm Modal â”€â”€ */
 function ConfirmModal({ open, title, message, confirmLabel, danger, onConfirm, onCancel, busy }: {
   open: boolean; title: string; message: string; confirmLabel: string;
   danger?: boolean; onConfirm: () => void; onCancel: () => void; busy?: boolean;
@@ -182,7 +189,7 @@ function ConfirmModal({ open, title, message, confirmLabel, danger, onConfirm, o
           </button>
           <button onClick={onConfirm} disabled={busy}
             className={`px-5 py-2.5 rounded-xl text-white font-bold transition disabled:opacity-50 ${danger ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-500 hover:bg-amber-600'}`}>
-            {busy ? 'Processing…' : confirmLabel}
+            {busy ? 'Processingâ€¦' : confirmLabel}
           </button>
         </div>
       </motion.div>
@@ -341,7 +348,7 @@ function UsersManagement() {
           <div className="bg-white dark:bg-[#111111] rounded-3xl p-5 border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm">
             <div className="flex items-center gap-2 text-[#4a7c5d] dark:text-gray-400 font-bold text-xs uppercase tracking-wider mb-2"><Users size={14} /> Total Members</div>
             <div className="text-3xl font-black text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>{stats.total}</div>
-            <div className="text-xs text-[#0d5d3a] dark:text-[#10b981] mt-1 font-semibold">{stats.active} active • {stats.suspended} suspended</div>
+            <div className="text-xs text-[#0d5d3a] dark:text-[#10b981] mt-1 font-semibold">{stats.active} active â€¢ {stats.suspended} suspended</div>
           </div>
           <div className="bg-[#0d5d3a] dark:bg-[#1a8a5a] rounded-3xl p-5 text-white shadow-lg shadow-[#0d5d3a]/20 dark:shadow-[#1a8a5a]/20 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-3 opacity-20"><Activity size={56} /></div>
@@ -375,7 +382,7 @@ function UsersManagement() {
               className="flex-1 sm:flex-none px-3 py-2.5 bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 dark:focus:ring-[#1a8a5a]/50 text-sm font-medium text-[#0a2617] dark:text-white cursor-pointer">
               <option value="all">All Ages</option>
               <option value="under18">Under 18</option>
-              <option value="18-25">18 – 25</option>
+              <option value="18-25">18 â€“ 25</option>
               <option value="over25">Over 25</option>
             </select>
           </div>
@@ -438,6 +445,357 @@ function UsersManagement() {
   );
 }
 
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   CRISIS MONITOR WIDGET
+   Shows anonymized crisis event statistics â€” no user PII.
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+function CrisisMonitorWidget() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    apiFetch<any>('/admin/analytics/crisis')
+      .then(d => { setData(d); setLoading(false); })
+      .catch(e => { setError(e.message || 'Failed to load crisis data'); setLoading(false); });
+  }, []);
+
+  const CAT: Record<string, { label: string; color: string; desc: string }> = {
+    suicide_ideation: { label: 'Suicide Ideation',  color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',      desc: 'User message contained direct language about ending their life or suicidal thoughts.' },
+    self_harm:        { label: 'Self-Harm',          color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300', desc: 'User message referenced self-harm or deliberate injury to themselves.' },
+    severe_distress:  { label: 'Severe Distress',    color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',  desc: 'User message expressed hopelessness, giving up, or severe emotional distress.' },
+    hindi_crisis:     { label: 'Hindi Keywords',     color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300', desc: 'Crisis keywords detected in Hindi / Romanized Hindi language.' },
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-24">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-10 h-10 rounded-full border-4 border-[#0d5d3a]/20 border-t-[#0d5d3a] animate-spin" />
+        <p className="text-sm font-semibold text-[#4a7c5d]">Loading crisis analytics...</p>
+      </div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/20 p-6 text-red-700 dark:text-red-400 font-semibold">
+      {error}
+    </div>
+  );
+
+  const maxCount = Math.max(1, ...(data?.recentWeeks?.map((w: any) => w.count) || [1]));
+  const weekCount = data?.recentWeeks?.length ?? 0;
+
+  return (
+    <div className="flex flex-col gap-6">
+
+      {/* Privacy Notice */}
+      <div className="flex items-start gap-3 bg-[#f0fbf4] dark:bg-[#0d5d3a]/10 border border-[#0d5d3a]/20 dark:border-[#0d5d3a]/30 rounded-2xl px-5 py-4">
+        <Shield size={18} className="text-[#0d5d3a] dark:text-[#10b981] mt-0.5 flex-shrink-0" />
+        <div>
+          <p className="text-sm font-bold text-[#0a2617] dark:text-gray-100">Fully Anonymized â€” Privacy Protected</p>
+          <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-0.5">
+            User IDs are stored as one-way SHA-256 hashes. No message content, names, or identifiable information is ever logged. This page shows counts only.
+          </p>
+        </div>
+      </div>
+
+      {/* KPI row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white dark:bg-[#111111] rounded-3xl p-6 border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm">
+          <div className="flex items-center gap-2 text-[#4a7c5d] dark:text-gray-400 font-bold text-xs uppercase tracking-wider mb-3">
+            <AlertTriangle size={14} /> This Week
+          </div>
+          <div className="text-4xl font-black text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne,sans-serif' }}>
+            {data?.thisCount ?? 0}
+          </div>
+          <div className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-1 font-medium">{data?.thisWeek} â€” crisis events</div>
+        </div>
+
+        <div className={`rounded-3xl p-6 shadow-sm relative overflow-hidden ${
+          data?.trend === 'up'   ? 'bg-red-500 text-white' :
+          data?.trend === 'down' ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white' :
+          'bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10'
+        }`}>
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            {data?.trend === 'up' ? <TrendingUp size={56} /> : data?.trend === 'down' ? <TrendingDown size={56} /> : <Minus size={56} />}
+          </div>
+          <div className={`flex items-center gap-2 font-bold text-xs uppercase tracking-wider mb-3 relative z-10 ${data?.trend === 'same' ? 'text-[#4a7c5d] dark:text-gray-400' : 'text-white/80'}`}>
+            {data?.trend === 'up' ? <TrendingUp size={14} /> : data?.trend === 'down' ? <TrendingDown size={14} /> : <Minus size={14} />} Trend vs Last Week
+          </div>
+          <div className={`text-3xl font-black relative z-10 ${data?.trend === 'same' ? 'text-[#0a2617] dark:text-gray-100' : ''}`} style={{ fontFamily: 'Syne,sans-serif' }}>
+            {data?.trend === 'up' ? 'â–² More' : data?.trend === 'down' ? 'â–¼ Fewer' : 'â€” Same'}
+          </div>
+          <div className={`text-xs mt-1 font-medium relative z-10 ${data?.trend === 'same' ? 'text-[#4a7c5d] dark:text-gray-400' : 'text-white/70'}`}>
+            Last week: {data?.lastCount ?? 0} events
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-[#111111] rounded-3xl p-6 border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm">
+          <div className="flex items-center gap-2 text-[#4a7c5d] dark:text-gray-400 font-bold text-xs uppercase tracking-wider mb-3">
+            <Activity size={14} /> This Week by Type
+          </div>
+          {data?.byCategory && Object.keys(data.byCategory).length > 0 ? (
+            <div className="flex flex-col gap-1.5">
+              {Object.entries(data.byCategory).map(([cat, count]: any) => (
+                <div key={cat} className="flex items-center justify-between gap-2">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${CAT[cat]?.color || 'bg-gray-100 text-gray-600'}`}>
+                    {CAT[cat]?.label || cat}
+                  </span>
+                  <span className="text-sm font-black text-[#0a2617] dark:text-gray-100">{count}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-[#4a7c5d] dark:text-gray-400 font-medium">No events this week ðŸŒ¿</p>
+          )}
+        </div>
+      </div>
+
+      {/* 8-week sparkline bar chart */}
+      <div className="bg-white dark:bg-[#111111] rounded-3xl p-6 border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm">
+        <h3 className="text-base font-bold text-[#0a2617] dark:text-gray-100 mb-5 flex items-center gap-2" style={{ fontFamily: 'Syne,sans-serif' }}>
+          <Activity size={18} className="text-[#0d5d3a] dark:text-[#10b981]" />
+          8-Week Crisis Event Trend
+        </h3>
+        <div className="flex items-end gap-2 sm:gap-3 h-36">
+          {(data?.recentWeeks || []).map((w: any, i: number) => {
+            const heightPct = Math.max(4, (w.count / maxCount) * 100);
+            const isNow = i === weekCount - 1;
+            return (
+              <div key={w.week} className="flex-1 flex flex-col items-center gap-1">
+                <span className="text-[10px] font-bold text-[#0a2617] dark:text-gray-200" style={{ minHeight: 16 }}>
+                  {w.count > 0 ? w.count : ''}
+                </span>
+                <div className="w-full rounded-t-lg relative overflow-hidden"
+                  style={{
+                    height: `${heightPct}%`,
+                    background: isNow
+                      ? 'linear-gradient(to top, #b91c1c, #f87171)'
+                      : 'linear-gradient(to top, #0d5d3a, #10b981)',
+                  }}
+                >
+                  {isNow && <div className="absolute inset-0 animate-pulse opacity-25 bg-white" />}
+                </div>
+                <span className="text-[9px] text-[#4a7c5d] dark:text-gray-500 font-medium truncate w-full text-center">
+                  {w.week.replace(/\d{4}-/, '')}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-[10px] text-[#4a7c5d] dark:text-gray-500 mt-3 text-center">
+          Red = current week. Counts only â€” no user data stored.
+        </p>
+      </div>
+
+      {/* Category explanation */}
+      <div className="bg-white dark:bg-[#111111] rounded-3xl p-6 border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm">
+        <h3 className="text-base font-bold text-[#0a2617] dark:text-gray-100 mb-4" style={{ fontFamily: 'Syne,sans-serif' }}>
+          Category Definitions
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {Object.entries(CAT).map(([key, { label, color, desc }]) => (
+            <div key={key} className="flex items-start gap-3 p-3 rounded-xl bg-[#f7fbf8] dark:bg-[#1a1a1a] border border-[#0d5d3a]/08 dark:border-white/08">
+              <span className={`text-[10px] font-bold px-2 py-1 rounded-full flex-shrink-0 ${color}`}>{label}</span>
+              <p className="text-xs text-[#4a7c5d] dark:text-gray-400 leading-relaxed">{desc}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-500/20">
+          <p className="text-xs text-amber-700 dark:text-amber-300 font-semibold leading-relaxed">
+            âš ï¸ When a crisis keyword is detected, Zeni AI <strong>automatically</strong> skips the standard AI response and delivers a warm, empathetic reply followed by Indian crisis helpline numbers and a direct "Talk to a Therapist Now" button. No admin action is required per event.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   NOTIFICATION BROADCAST WIDGET
+   Admin composes and sends system notifications to all / one user.
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+function NotificationBroadcastWidget() {
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [actionTab, setActionTab] = useState('');
+  const [targetUserId, setTargetUserId] = useState('');
+  const [sending, setSending] = useState(false);
+  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [recentNotifs, setRecentNotifs] = useState<any[]>([]);
+  const [loadingRecent, setLoadingRecent] = useState(true);
+
+  const toast = (text: string, ok = true) => { setMsg({ text, ok }); setTimeout(() => setMsg(null), 4000); };
+
+  const loadRecent = async () => {
+    setLoadingRecent(true);
+    try {
+      const r = await apiFetch<any>('/admin/notifications/recent');
+      setRecentNotifs(r.notifications || []);
+    } catch { /* silent */ }
+    finally { setLoadingRecent(false); }
+  };
+
+  useEffect(() => { loadRecent(); }, []);
+
+  const handleSend = async () => {
+    if (!title.trim() || !body.trim()) { toast('Title and message are required', false); return; }
+    setSending(true);
+    try {
+      const payload: any = { title: title.trim(), body: body.trim() };
+      if (actionTab) payload.actionTab = actionTab;
+      if (targetUserId.trim()) payload.targetUserId = targetUserId.trim();
+      const r = await apiFetch<any>('/admin/notifications/broadcast', { method: 'POST', body: JSON.stringify(payload) });
+      toast(`âœ… Sent to ${r.sent} user${r.sent !== 1 ? 's' : ''}`);
+      setTitle(''); setBody(''); setActionTab(''); setTargetUserId('');
+      loadRecent();
+    } catch (e: any) { toast(e.message || 'Send failed', false); }
+    finally { setSending(false); }
+  };
+
+  const ACTION_TAB_OPTIONS = [
+    { value: '', label: 'No action (info only)' },
+    { value: 'therapy', label: 'ðŸ©º Therapy Hub' },
+    { value: 'sessions', label: 'ðŸ“… My Sessions' },
+    { value: 'programs', label: 'ðŸ‹ï¸ Wellness Programs' },
+    { value: 'reading', label: 'ðŸ“š Reading Lists' },
+    { value: 'goals', label: 'ðŸŽ¯ My Goals' },
+    { value: 'aichat', label: 'ðŸ¤– AI Chat' },
+  ];
+
+  const inputCls = 'w-full px-3 py-2.5 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-[#0a2617] dark:text-white text-sm outline-none focus:ring-2 focus:ring-[#0d5d3a]/25';
+
+  return (
+    <div className="flex flex-col gap-6 max-w-3xl">
+      {/* Toast */}
+      <AnimatePresence>
+        {msg && (
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className={`fixed top-4 left-1/2 -translate-x-1/2 z-[500] px-5 py-3 rounded-2xl text-sm font-bold shadow-lg ${msg.ok ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+            {msg.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Info banner */}
+      <div className="flex items-start gap-3 bg-[#f0fbf4] dark:bg-[#0d5d3a]/10 border border-[#0d5d3a]/20 dark:border-[#0d5d3a]/30 rounded-2xl px-5 py-4">
+        <Bell size={18} className="text-[#0d5d3a] dark:text-[#10b981] mt-0.5 flex-shrink-0" />
+        <div>
+          <p className="text-sm font-bold text-[#0a2617] dark:text-gray-100">Broadcast Notifications</p>
+          <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-0.5">
+            Send a system notification to all users or a specific user by their MongoDB user ID.
+            Notifications appear in the bell icon inside each user's dashboard in real-time on next page load or poll.
+          </p>
+        </div>
+      </div>
+
+      {/* Compose form */}
+      <div className="bg-white dark:bg-[#111111] rounded-3xl p-6 border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm space-y-4">
+        <h3 className="text-base font-black text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>
+          Compose Notification
+        </h3>
+
+        <div>
+          <label className="block text-xs font-bold text-[#4a7c5d] dark:text-gray-400 mb-1 uppercase tracking-wide">Title *</label>
+          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. New Wellness Program Available!"
+            className={inputCls} maxLength={120} />
+          <p className="text-[10px] text-[#4a7c5d]/70 mt-1">{title.length}/120 characters</p>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-[#4a7c5d] dark:text-gray-400 mb-1 uppercase tracking-wide">Message *</label>
+          <textarea value={body} onChange={e => setBody(e.target.value)} placeholder="Write a helpful, empathetic message for your usersâ€¦"
+            rows={3} className={`${inputCls} resize-none`} maxLength={400} />
+          <p className="text-[10px] text-[#4a7c5d]/70 mt-1">{body.length}/400 characters</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-[#4a7c5d] dark:text-gray-400 mb-1 uppercase tracking-wide">Action Link (optional)</label>
+            <select value={actionTab} onChange={e => setActionTab(e.target.value)} className={inputCls}>
+              {ACTION_TAB_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+            <p className="text-[10px] text-[#4a7c5d]/70 mt-1">Tapping the notification opens this tab</p>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-[#4a7c5d] dark:text-gray-400 mb-1 uppercase tracking-wide">Target User ID (optional)</label>
+            <input value={targetUserId} onChange={e => setTargetUserId(e.target.value)} placeholder="Leave empty to broadcast to all"
+              className={inputCls} />
+            <p className="text-[10px] text-[#4a7c5d]/70 mt-1">Paste a MongoDB user _id to target one user</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 pt-2">
+          <button onClick={handleSend} disabled={sending || !title.trim() || !body.trim()}
+            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white font-black text-sm hover:bg-[#0a4a2e] transition-all disabled:opacity-50 shadow-md shadow-[#0d5d3a]/20">
+            {sending ? <><RefreshCw size={14} className="animate-spin" /> Sendingâ€¦</> : <><Send size={14} /> {targetUserId.trim() ? 'Send to User' : 'Broadcast to All'}</>}
+          </button>
+          {!targetUserId.trim() && (
+            <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1">
+              <AlertTriangle size={12} /> Will send to every registered user
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Recent notifications audit */}
+      <div className="bg-white dark:bg-[#111111] rounded-3xl p-6 border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-black text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>
+            Recent Notifications (Audit)
+          </h3>
+          <button onClick={loadRecent} disabled={loadingRecent}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#0d5d3a] dark:text-[#10b981] bg-[#f0fbf4] dark:bg-[#0d5d3a]/15 hover:bg-[#e8f5e9] dark:hover:bg-[#0d5d3a]/25 transition disabled:opacity-50">
+            <RefreshCw size={12} className={loadingRecent ? 'animate-spin' : ''} /> Refresh
+          </button>
+        </div>
+        <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mb-4">
+          Last 50 notifications across all users. User IDs are shown as 12-char hashes for privacy.
+        </p>
+
+        {loadingRecent ? (
+          <div className="flex justify-center py-8">
+            <div className="w-8 h-8 border-4 border-[#0d5d3a]/20 border-t-[#0d5d3a] rounded-full animate-spin" />
+          </div>
+        ) : recentNotifs.length === 0 ? (
+          <div className="text-center py-8 text-[#4a7c5d] dark:text-gray-400 text-sm font-semibold">
+            No notifications sent yet.
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+            {recentNotifs.map((n: any) => (
+              <div key={n._id} className="flex items-start justify-between gap-3 p-3 rounded-xl bg-[#f7fbf8] dark:bg-[#1a1a1a] border border-[#0d5d3a]/08 dark:border-white/08">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                      n.type === 'system' ? 'bg-[#0d5d3a]/10 text-[#0d5d3a] dark:bg-[#0d5d3a]/20 dark:text-[#10b981]' :
+                      n.type === 'crisis_followup' ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300' :
+                      'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300'
+                    }`}>{n.type}</span>
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${n.isRead ? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300'}`}>
+                      {n.isRead ? 'read' : 'unread'}
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold text-[#0a2617] dark:text-gray-100 truncate">{n.title}</p>
+                  <p className="text-[10px] text-[#4a7c5d] dark:text-gray-500 mt-0.5 font-mono">
+                    user:{n.userHash}â€¦ Â· {new Date(n.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+                {n.actionTab && (
+                  <span className="text-[9px] font-bold text-[#0d5d3a] dark:text-[#10b981] bg-[#0d5d3a]/08 dark:bg-[#0d5d3a]/20 px-2 py-1 rounded-lg whitespace-nowrap flex-shrink-0">
+                    â†’ {n.actionTab}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ContentManagement() {
   const [activeSubTab, setActiveSubTab] = useState<'stats' | 'stories' | 'approval' | 'resources'>('approval');
   const [settings, setSettings] = useState({ activeUsers: '', satisfactionRate: '', therapistsCount: '', supportAvailable: '' });
@@ -494,7 +852,7 @@ function ContentManagement() {
         const story = pending.find(s => s._id === id);
         if (story) setStories(prev => [{ ...story, isApproved: true }, ...prev]);
       }
-      setMsg({ text: approved ? '✅ Story approved and is now live.' : '🗑️ Story rejected and removed.', ok: approved });
+      setMsg({ text: approved ? 'âœ… Story approved and is now live.' : 'ðŸ—‘ï¸ Story rejected and removed.', ok: approved });
     } catch (e: any) { setMsg({ text: e.message || 'Failed', ok: false }); }
     finally { setBusyId(null); }
   };
@@ -509,7 +867,7 @@ function ContentManagement() {
       setStories(prev => [...approved.map(s => ({ ...s, isApproved: true })), ...prev]);
       setPendingCount(c => Math.max(0, c - ids.length));
       setSelectedIds(new Set());
-      setMsg({ text: `✅ ${ids.length} stories approved.`, ok: true });
+      setMsg({ text: `âœ… ${ids.length} stories approved.`, ok: true });
     } catch (e: any) { setMsg({ text: e.message || 'Bulk approve failed', ok: false }); }
   };
 
@@ -521,7 +879,7 @@ function ContentManagement() {
       setPending(prev => prev.filter(s => !ids.includes(s._id)));
       setPendingCount(c => Math.max(0, c - ids.length));
       setSelectedIds(new Set());
-      setMsg({ text: `🗑️ ${ids.length} stories rejected.`, ok: true });
+      setMsg({ text: `ðŸ—‘ï¸ ${ids.length} stories rejected.`, ok: true });
     } catch (e: any) { setMsg({ text: e.message || 'Bulk reject failed', ok: false }); }
   };
 
@@ -532,9 +890,9 @@ function ContentManagement() {
   };
 
   const CATEGORY_LABELS: Record<string, string> = {
-    anxiety: '😰 Anxiety', depression: '💙 Depression', stress: '😤 Stress',
-    exam_pressure: '📚 Exam Pressure', bullying: '🛡️ Bullying', loneliness: '🌙 Loneliness',
-    family_issues: '🏠 Family', self_esteem: '💪 Self-Esteem', trauma: '🌿 Trauma', other: '💬 Other',
+    anxiety: 'ðŸ˜° Anxiety', depression: 'ðŸ’™ Depression', stress: 'ðŸ˜¤ Stress',
+    exam_pressure: 'ðŸ“š Exam Pressure', bullying: 'ðŸ›¡ï¸ Bullying', loneliness: 'ðŸŒ™ Loneliness',
+    family_issues: 'ðŸ  Family', self_esteem: 'ðŸ’ª Self-Esteem', trauma: 'ðŸŒ¿ Trauma', other: 'ðŸ’¬ Other',
   };
 
   if (loading) return <div className="text-[#4a7c5d] font-bold">Loading content...</div>;
@@ -575,13 +933,13 @@ function ContentManagement() {
         </button>
       </div>
 
-      {/* ── APPROVAL QUEUE ── */}
+      {/* â”€â”€ APPROVAL QUEUE â”€â”€ */}
       {activeSubTab === 'approval' && (
         <section className="flex flex-col gap-4">
           {/* Toolbar */}
           <div className="flex flex-wrap items-center gap-3">
             <div className="text-sm font-bold text-[#0a2617] dark:text-gray-100">
-              {pending.length === 0 ? '🎉 All clear — no stories pending review' : `${pending.length} stor${pending.length !== 1 ? 'ies' : 'y'} awaiting review`}
+              {pending.length === 0 ? 'ðŸŽ‰ All clear â€” no stories pending review' : `${pending.length} stor${pending.length !== 1 ? 'ies' : 'y'} awaiting review`}
             </div>
             {selectedIds.size > 0 && (
               <div className="flex items-center gap-2 ml-auto flex-wrap">
@@ -604,7 +962,7 @@ function ContentManagement() {
 
           {pending.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
-              <div className="text-5xl mb-4">🌿</div>
+              <div className="text-5xl mb-4">ðŸŒ¿</div>
               <div className="text-lg font-bold text-[#0a2617] dark:text-white mb-1">No pending stories</div>
               <div className="text-sm text-[#4a7c5d] dark:text-gray-400">New user submissions will appear here for your review.</div>
             </div>
@@ -628,7 +986,7 @@ function ContentManagement() {
                       <p className="text-sm text-[#0a2617] dark:text-gray-200 leading-relaxed italic mb-3">"{s.story}"</p>
                       {/* Meta */}
                       <div className="flex flex-wrap items-center gap-3 text-xs text-[#4a7c5d] dark:text-gray-500">
-                        <span className="font-bold">— {s.isAnonymous ? 'Anonymous' : s.author}</span>
+                        <span className="font-bold">â€” {s.isAnonymous ? 'Anonymous' : s.author}</span>
                         <span className="flex items-center gap-1"><Clock size={11}/>{new Date(s.createdAt).toLocaleString()}</span>
                         {s.isAnonymous && <span className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 font-semibold">Anonymous</span>}
                       </div>
@@ -652,7 +1010,7 @@ function ContentManagement() {
         </section>
       )}
 
-      {/* ── LIVE STORIES ── */}
+      {/* â”€â”€ LIVE STORIES â”€â”€ */}
       {activeSubTab === 'stories' && (
         <section className="bg-white dark:bg-[#111111] rounded-3xl p-6 border border-[#0d5d3a]/08 dark:border-white/08 shadow-sm flex flex-col" style={{ maxHeight: 'calc(100vh - 220px)' }}>
           <h2 className="text-xl font-bold text-[#0a2617] dark:text-gray-100 mb-4 flex items-center gap-2 shrink-0">
@@ -669,9 +1027,9 @@ function ContentManagement() {
                   )}
                   <p className="text-sm text-[#0a2617] dark:text-gray-300 italic mb-2">"{s.story}"</p>
                   <div className="flex flex-wrap items-center gap-3 text-xs text-[#4a7c5d] dark:text-gray-500">
-                    <span className="font-bold">— {s.author}</span>
+                    <span className="font-bold">â€” {s.author}</span>
                     <span className="flex items-center gap-1"><Clock size={11}/>{new Date(s.createdAt).toLocaleString()}</span>
-                    <span className="text-[#10b981] font-bold">❤️ {s.likes || 0}</span>
+                    <span className="text-[#10b981] font-bold">â¤ï¸ {s.likes || 0}</span>
                   </div>
                 </div>
                 <button onClick={() => deleteStory(s._id)} className="shrink-0 p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition" title="Delete">
@@ -684,7 +1042,7 @@ function ContentManagement() {
         </section>
       )}
 
-      {/* ── SITE STATS ── */}
+      {/* â”€â”€ SITE STATS â”€â”€ */}
       {activeSubTab === 'stats' && (
         <section className="bg-white dark:bg-[#111111] rounded-3xl p-6 border border-[#0d5d3a]/08 dark:border-white/08 shadow-sm">
           <h2 className="text-xl font-bold text-[#0a2617] dark:text-gray-100 mb-4 flex items-center gap-2">
@@ -707,15 +1065,15 @@ function ContentManagement() {
         </section>
       )}
 
-      {/* ── RESOURCES ── */}
+      {/* â”€â”€ RESOURCES â”€â”€ */}
       {activeSubTab === 'resources' && <AdminResourcesPanel />}
     </div>
   );
 }
 
-/* ════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    ADMIN RESOURCES PANEL
-════════════════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 type ResType = 'video' | 'audio' | 'image' | 'link';
 type SrcType = 'upload' | 'youtube' | 'url';
 
@@ -803,7 +1161,7 @@ function AdminResourcesPanel() {
           tags: selectedTags,
         }),
       });
-      setMsg({ text: '✅ Resource added successfully!', ok: true });
+      setMsg({ text: 'âœ… Resource added successfully!', ok: true });
       resetForm(); setShowForm(false); load();
     } catch (e: any) { setMsg({ text: e.message || 'Failed to add resource', ok: false }); }
     finally { setSaving(false); }
@@ -859,7 +1217,7 @@ function AdminResourcesPanel() {
         </button>
       </div>
 
-      {/* ── ADD FORM ── */}
+      {/* â”€â”€ ADD FORM â”€â”€ */}
       <AnimatePresence>
         {showForm && (
           <motion.form onSubmit={handleSubmit}
@@ -877,7 +1235,7 @@ function AdminResourcesPanel() {
               </label>
               <label className="block sm:col-span-2">
                 <span className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 block mb-1">Description</span>
-                <textarea value={description} onChange={e=>setDesc(e.target.value)} rows={2} placeholder="Short description shown on the card…"
+                <textarea value={description} onChange={e=>setDesc(e.target.value)} rows={2} placeholder="Short description shown on the cardâ€¦"
                   className="w-full px-4 py-2.5 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 dark:focus:ring-[#1a8a5a]/50 resize-none" />
               </label>
             </div>
@@ -888,10 +1246,10 @@ function AdminResourcesPanel() {
                 <span className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 block mb-1">Resource Type</span>
                 <select value={type} onChange={e=>{ setType(e.target.value as ResType); setSourceType(e.target.value === 'image' ? 'upload' : 'youtube'); setFileData(''); setFileMime(''); }}
                   className="w-full px-4 py-2.5 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 dark:focus:ring-[#1a8a5a]/50">
-                  <option value="video">🎬 Video</option>
-                  <option value="audio">🎵 Audio</option>
-                  <option value="image">🖼️ Image</option>
-                  <option value="link">🔗 Link / Article</option>
+                  <option value="video">ðŸŽ¬ Video</option>
+                  <option value="audio">ðŸŽµ Audio</option>
+                  <option value="image">ðŸ–¼ï¸ Image</option>
+                  <option value="link">ðŸ”— Link / Article</option>
                 </select>
               </label>
               {type !== 'image' && type !== 'link' && (
@@ -925,7 +1283,7 @@ function AdminResourcesPanel() {
                   accept={type === 'video' ? 'video/*' : type === 'audio' ? 'audio/*' : 'image/*'}
                   onChange={handleFileChange}
                   className="w-full text-sm text-[#0a2617] dark:text-white file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#0d5d3a] file:text-white file:font-bold file:cursor-pointer" />
-                {fileData && <p className="text-[10px] text-[#0d5d3a] dark:text-[#10b981] mt-1 font-semibold">✓ File loaded ({fileMime})</p>}
+                {fileData && <p className="text-[10px] text-[#0d5d3a] dark:text-[#10b981] mt-1 font-semibold">âœ“ File loaded ({fileMime})</p>}
               </label>
             )}
 
@@ -935,7 +1293,7 @@ function AdminResourcesPanel() {
                 <span className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-400 block mb-1">Thumbnail Image (optional)</span>
                 <input ref={thumbRef} type="file" accept="image/*" onChange={handleThumbChange}
                   className="w-full text-sm text-[#0a2617] dark:text-white file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#f0fbf4] dark:file:bg-[#0d5d3a]/20 file:text-[#0d5d3a] dark:file:text-[#10b981] file:font-bold file:cursor-pointer" />
-                {thumbData && <p className="text-[10px] text-[#0d5d3a] dark:text-[#10b981] mt-1 font-semibold">✓ Thumbnail loaded</p>}
+                {thumbData && <p className="text-[10px] text-[#0d5d3a] dark:text-[#10b981] mt-1 font-semibold">âœ“ Thumbnail loaded</p>}
               </label>
             )}
 
@@ -962,19 +1320,19 @@ function AdminResourcesPanel() {
               </button>
               <button type="submit" disabled={saving}
                 className="px-6 py-2.5 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white font-bold text-sm hover:bg-[#0a4a2e] dark:hover:bg-[#10b981] disabled:opacity-60 transition flex items-center gap-2 shadow-lg shadow-[#0d5d3a]/20">
-                {saving ? <><span className="animate-spin">⟳</span> Saving…</> : <><Save size={15}/> Add Resource</>}
+                {saving ? <><span className="animate-spin">âŸ³</span> Savingâ€¦</> : <><Save size={15}/> Add Resource</>}
               </button>
             </div>
           </motion.form>
         )}
       </AnimatePresence>
 
-      {/* ── RESOURCE LIST ── */}
+      {/* â”€â”€ RESOURCE LIST â”€â”€ */}
       {loading ? (
-        <div className="text-center py-12 text-[#4a7c5d] font-bold">Loading resources…</div>
+        <div className="text-center py-12 text-[#4a7c5d] font-bold">Loading resourcesâ€¦</div>
       ) : resources.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
-          <div className="text-5xl mb-4">📚</div>
+          <div className="text-5xl mb-4">ðŸ“š</div>
           <div className="text-lg font-bold text-[#0a2617] dark:text-white mb-1">No resources yet</div>
           <div className="text-sm text-[#4a7c5d] dark:text-gray-400">Click "Add Resource" to upload your first item.</div>
         </div>
@@ -1267,10 +1625,10 @@ function SupportManagement() {
   );
 }
 
-/* ════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    PEER CIRCLES MANAGEMENT
-════════════════════════════════════════════════════════════ */
-const CIRCLE_ICONS = ['💬','🧠','💚','🌿','🌙','🔥','🎯','🌈','🤝','⚡','🕊️','🌸'];
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+const CIRCLE_ICONS = ['ðŸ’¬','ðŸ§ ','ðŸ’š','ðŸŒ¿','ðŸŒ™','ðŸ”¥','ðŸŽ¯','ðŸŒˆ','ðŸ¤','âš¡','ðŸ•Šï¸','ðŸŒ¸'];
 const CIRCLE_CATS  = ['general','anxiety','depression','trauma','relationships','teen','stress','grief'];
 
 function PeerCirclesManagement() {
@@ -1290,7 +1648,7 @@ function PeerCirclesManagement() {
   const [name, setName]         = useState('');
   const [desc, setDesc]         = useState('');
   const [category, setCategory] = useState('general');
-  const [icon, setIcon]         = useState('💬');
+  const [icon, setIcon]         = useState('ðŸ’¬');
   const [gradFrom, setGradFrom] = useState('#0d5d3a');
   const [gradTo, setGradTo]     = useState('#1a8a5a');
 
@@ -1366,8 +1724,8 @@ function PeerCirclesManagement() {
         name:name.trim(), description:desc.trim(), category, icon,
         gradientFrom:gradFrom, gradientTo:gradTo
       })});
-      setMsg({text:'✅ Circle created!',ok:true});
-      setName(''); setDesc(''); setCategory('general'); setIcon('💬');
+      setMsg({text:'âœ… Circle created!',ok:true});
+      setName(''); setDesc(''); setCategory('general'); setIcon('ðŸ’¬');
       setShowForm(false); load();
     } catch(e:any){ setMsg({text:e.message,ok:false}); }
     finally { setSaving(false); }
@@ -1387,7 +1745,7 @@ function PeerCirclesManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>Peer Support Circles</h2>
-          <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-0.5">{circles.length} circles · create, enable/disable, moderate messages</p>
+          <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-0.5">{circles.length} circles Â· create, enable/disable, moderate messages</p>
         </div>
         <button onClick={()=>setShowForm(s=>!s)}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white font-bold text-sm hover:bg-[#0a4a2e] transition shadow-md">
@@ -1445,7 +1803,7 @@ function PeerCirclesManagement() {
               className="px-4 py-2 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition">Cancel</button>
             <button type="submit" disabled={saving||!name.trim()}
               className="px-5 py-2 rounded-xl bg-[#0d5d3a] text-white font-bold text-sm hover:bg-[#0a4a2e] transition disabled:opacity-50">
-              {saving?'Creating…':'Create Circle'}
+              {saving?'Creatingâ€¦':'Create Circle'}
             </button>
           </div>
         </form>
@@ -1459,11 +1817,11 @@ function PeerCirclesManagement() {
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 shadow-md"
                   style={{background:`linear-gradient(135deg,${c.gradientFrom||'#0d5d3a'},${c.gradientTo||'#1a8a5a'})`}}>
-                  {c.icon||'💬'}
+                  {c.icon||'ðŸ’¬'}
                 </div>
                 <div>
                   <div className="font-black text-[#0a2617] dark:text-white text-sm">{c.name}</div>
-                  <div className="text-[10px] text-[#4a7c5d] dark:text-gray-400 capitalize mt-0.5">{c.category} · {c.memberCount||0} members · {c.messageCount||0} msgs</div>
+                  <div className="text-[10px] text-[#4a7c5d] dark:text-gray-400 capitalize mt-0.5">{c.category} Â· {c.memberCount||0} members Â· {c.messageCount||0} msgs</div>
                 </div>
               </div>
               <button onClick={()=>toggleCircle(c)} title={c.isActive?'Disable circle':'Enable circle'}
@@ -1476,7 +1834,7 @@ function PeerCirclesManagement() {
             </div>
             {c.description && <p className="text-xs text-[#4a7c5d] dark:text-gray-400 line-clamp-2">{c.description}</p>}
             <span className={`text-[10px] font-bold px-2 py-1 rounded-full w-fit ${c.isActive?'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400':'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-500'}`}>
-              {c.isActive?'● Active':'○ Disabled'}
+              {c.isActive?'â— Active':'â—‹ Disabled'}
             </span>
             <div className="flex gap-2 mt-1">
               <button onClick={()=>openMessages(c)}
@@ -1492,7 +1850,7 @@ function PeerCirclesManagement() {
         ))}
         {circles.length===0 && (
           <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
-            <div className="text-5xl mb-3">💬</div>
+            <div className="text-5xl mb-3">ðŸ’¬</div>
             <div className="font-bold text-[#0a2617] dark:text-white mb-1">No circles yet</div>
             <div className="text-sm text-[#4a7c5d] dark:text-gray-400">Click "New Circle" to create the first peer support space.</div>
           </div>
@@ -1508,16 +1866,16 @@ function PeerCirclesManagement() {
               <div className="flex items-center justify-between p-5 border-b border-[#0d5d3a]/10 dark:border-white/10 shrink-0">
                 <div>
                   <h3 className="font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>
-                    {viewCircle.icon} {viewCircle.name} — Messages
+                    {viewCircle.icon} {viewCircle.name} â€” Messages
                   </h3>
-                  <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-0.5">Hover a message and click 🗑️ to moderate</p>
+                  <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-0.5">Hover a message and click ðŸ—‘ï¸ to moderate</p>
                 </div>
                 <button onClick={()=>setViewCircle(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition">
                   <X size={18} className="text-gray-500"/>
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                {msgsLoading && <div className="text-center py-10 text-[#4a7c5d] font-bold">Loading messages…</div>}
+                {msgsLoading && <div className="text-center py-10 text-[#4a7c5d] font-bold">Loading messagesâ€¦</div>}
                 {!msgsLoading && viewMsgs.length===0 && <div className="text-center py-10 text-gray-400 font-medium">No messages in this circle yet.</div>}
                 {!msgsLoading && viewMsgs.map((m:any)=>(
                   <div key={m._id} className="flex items-start gap-3 p-3 rounded-xl bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/8 dark:border-white/5 group">
@@ -1531,7 +1889,7 @@ function PeerCirclesManagement() {
                         <span className="text-[10px] text-gray-400 ml-auto">{new Date(m.createdAt).toLocaleString()}</span>
                       </div>
                       <p className="text-sm text-[#0a2617] dark:text-gray-300 break-words leading-relaxed">{m.content}</p>
-                      {/* Action buttons — visible on hover */}
+                      {/* Action buttons â€” visible on hover */}
                       <div className="flex gap-1.5 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={()=>deleteMsg(m._id)}
                           className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete message">
@@ -1565,7 +1923,7 @@ function PeerCirclesManagement() {
           <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
             <motion.div initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} exit={{opacity:0,scale:0.95}}
               className="bg-white dark:bg-[#111111] rounded-2xl w-full max-w-sm p-6 shadow-2xl border border-[#0d5d3a]/15 dark:border-white/10">
-              <h3 className="font-black text-[#0a2617] dark:text-white mb-1" style={{fontFamily:'Syne,sans-serif'}}>⏳ Timed Suspension</h3>
+              <h3 className="font-black text-[#0a2617] dark:text-white mb-1" style={{fontFamily:'Syne,sans-serif'}}>â³ Timed Suspension</h3>
               <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mb-5">Suspending <strong className="text-[#0a2617] dark:text-white">{suspendTarget.name}</strong>. They will be auto-unsuspended after the set duration.</p>
               <div className="mb-5">
                 <label className="text-xs font-bold text-[#4a7c5d] uppercase tracking-wide block mb-2">Suspension Duration</label>
@@ -1590,7 +1948,7 @@ function PeerCirclesManagement() {
                 <button onClick={()=>setSuspendTarget(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition">Cancel</button>
                 <button onClick={doSuspend} disabled={suspending}
                   className="flex-1 py-2.5 rounded-xl bg-purple-600 text-white font-bold text-sm hover:bg-purple-700 transition disabled:opacity-50">
-                  {suspending ? 'Suspending…' : `Suspend ${suspendHours}h`}
+                  {suspending ? 'Suspendingâ€¦' : `Suspend ${suspendHours}h`}
                 </button>
               </div>
             </motion.div>
@@ -1601,16 +1959,16 @@ function PeerCirclesManagement() {
   );
 }
 
-/* ════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    QUIZ QUESTIONS MANAGEMENT
-════════════════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 const DEFAULT_QUIZ_QUESTIONS = [
-  { id:'concern',    emoji:'💭', question:"What's been weighing on you lately?",   options:['Anxiety & Stress','Depression & Low Mood','Relationship Issues','Trauma & PTSD','Teen / Youth Support',"I'm not sure yet"] },
-  { id:'situation',  emoji:'🪞', question:'How would you describe your situation?', options:['I need someone to talk to','I want structured therapy',"I'm in crisis, need help now",'Just exploring my options'] },
-  { id:'format',     emoji:'🖥️', question:'Session format preference?',             options:['Online — from home','In-person at clinic','Either works for me'] },
-  { id:'budget',     emoji:'💰', question:"What's your budget per session?",        options:['Under ₹500','₹500 – ₹1,000','₹1,000+','No preference'] },
-  { id:'language',   emoji:'🌐', question:'Language preference?',                   options:['English','Hindi','Both are fine','No preference'] },
-  { id:'experience', emoji:'🎓', question:'Experience level preference?',           options:['New but passionate (1–3 yrs)','Experienced (3–5 yrs)','Highly seasoned (5+ yrs)',"Doesn't matter"] },
+  { id:'concern',    emoji:'ðŸ’­', question:"What's been weighing on you lately?",   options:['Anxiety & Stress','Depression & Low Mood','Relationship Issues','Trauma & PTSD','Teen / Youth Support',"I'm not sure yet"] },
+  { id:'situation',  emoji:'ðŸªž', question:'How would you describe your situation?', options:['I need someone to talk to','I want structured therapy',"I'm in crisis, need help now",'Just exploring my options'] },
+  { id:'format',     emoji:'ðŸ–¥ï¸', question:'Session format preference?',             options:['Online â€” from home','In-person at clinic','Either works for me'] },
+  { id:'budget',     emoji:'ðŸ’°', question:"What's your budget per session?",        options:['Under â‚¹500','â‚¹500 â€“ â‚¹1,000','â‚¹1,000+','No preference'] },
+  { id:'language',   emoji:'ðŸŒ', question:'Language preference?',                   options:['English','Hindi','Both are fine','No preference'] },
+  { id:'experience', emoji:'ðŸŽ“', question:'Experience level preference?',           options:['New but passionate (1â€“3 yrs)','Experienced (3â€“5 yrs)','Highly seasoned (5+ yrs)',"Doesn't matter"] },
 ];
 
 function QuizManagement() {
@@ -1633,7 +1991,7 @@ function QuizManagement() {
 
       {saved && (
         <div className="flex items-center gap-2 p-4 rounded-xl bg-green-50 dark:bg-[#10b981]/10 text-green-700 dark:text-[#10b981] font-semibold text-sm border border-green-200 dark:border-[#10b981]/20">
-          <CheckCircle size={16}/> Configuration saved — {enabledCount} of {questions.length} questions active.
+          <CheckCircle size={16}/> Configuration saved â€” {enabledCount} of {questions.length} questions active.
           <button onClick={()=>setSaved(false)} className="ml-auto opacity-60 hover:opacity-100"><X size={14}/></button>
         </div>
       )}
@@ -1682,19 +2040,19 @@ function QuizManagement() {
   );
 }
 
-/* ════════════════════════════════════════════════════════════
-/* ─── Profanity detection engine ───────────────────────────────
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* â”€â”€â”€ Profanity detection engine â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Strategy:
    1. Normalize text: collapse spaces, strip punctuation between letters,
-      map common leetspeak substitutions (@ → a, 3 → e, 0 → o, $ → s, etc.)
-   2. Match against a flat pattern list (plain words) — checked via indexOf
+      map common leetspeak substitutions (@ â†’ a, 3 â†’ e, 0 â†’ o, $ â†’ s, etc.)
+   2. Match against a flat pattern list (plain words) â€” checked via indexOf
       on the normalized string for broad coverage.
    3. Also run regex patterns for abbreviations and spaced-out variants.
-──────────────────────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 // Plain word patterns (matched on normalized text)
 const BAD_WORDS: string[] = [
-  // ── English — sexual ──
+  // â”€â”€ English â€” sexual â”€â”€
   'fuck','fucker','fucking','fucked','fck','fuk','fvck','phuck','f u c k',
   'shit','sht','sh1t','shyt','shitting','bullshit',
   'bitch','b1tch','biatch','bytch','btch',
@@ -1704,22 +2062,22 @@ const BAD_WORDS: string[] = [
   'whore','slut','hoe','ho','skank','tramp',
   'porn','porno','xxx','nude','naked','nsfw','sex','sexting','boobs','tits','boob',
   'masturbat','orgasm','ejacul','erection','horny','pervert',
-  // ── English — violence / threats ──
+  // â”€â”€ English â€” violence / threats â”€â”€
   'kill','murder','stab','shoot','bomb','terrorist','attack','harm','hurt',
   'rape','rapist','molest','abuse','beat you','beat him','beat her',
   'die','drop dead','go die','kys','kill yourself','end your life',
   'suicide','suicidal','self harm','cut yourself','overdose','hang yourself',
-  // ── English — slurs ──
+  // â”€â”€ English â€” slurs â”€â”€
   'nigger','nigga','nig','negro','spic','chink','gook','wetback','kike',
   'faggot','fag','dyke','tranny','retard','retarded','spastic','cripple',
-  // ── English — hate / toxic ──
+  // â”€â”€ English â€” hate / toxic â”€â”€
   'hate you','i hate','loser','moron','idiot','stupid','dumb','fool','ugly',
   'worthless','useless','pathetic','disgusting','trash','garbage','scum',
   'bastard','son of a bitch','sob','prick','wanker','twat','bellend',
-  // ── Abbreviations / shortcuts ──
+  // â”€â”€ Abbreviations / shortcuts â”€â”€
   'mf','mfr','stfu','gtfo','wtf','omfg','lmfao','af','ffs','pos',
   'foff','f off','fu','foh','fhritp',
-  // ── Hindi / Urdu profanity ──
+  // â”€â”€ Hindi / Urdu profanity â”€â”€
   'chutiya','chutiye','chu','bc','bkl','bsdk','bhenchod','bhainchod',
   'madarchod','mc','maderchod','gaand','gand','lund','lauda','lavda',
   'randi','rand','harami','haramzada','haramkhor','kamina','kameena',
@@ -1727,9 +2085,9 @@ const BAD_WORDS: string[] = [
   'behenchod','behenchodi','maa ki','teri maa','teri behen','behen ke',
   'teri gand','tere baap','aukaat','jhaat','jhatu','lawde','chod',
   'chodna','chodega','chudai','chudwa','randa','randwa',
-  // ── Urdu / Punjabi ──
+  // â”€â”€ Urdu / Punjabi â”€â”€
   'choot','chooti','madar','madarjat','harami','haram',
-  // ── Drug references ──
+  // â”€â”€ Drug references â”€â”€
   'cocaine','heroin','weed','marijuana','meth','crack','drug','drugs',
 ];
 
@@ -1860,27 +2218,27 @@ function FlaggedContent() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>🚨 Flagged Content</h2>
+          <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>ðŸš¨ Flagged Content</h2>
           <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-0.5">
-            {loading ? 'Scanning…' : `${filtered.length} flagged message${filtered.length!==1?'s':''} detected across all circles`}
+            {loading ? 'Scanningâ€¦' : `${filtered.length} flagged message${filtered.length!==1?'s':''} detected across all circles`}
           </p>
         </div>
         <button onClick={load} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#0d5d3a]/20 dark:border-white/10 text-sm font-bold text-[#0d5d3a] dark:text-[#10b981] hover:bg-[#0d5d3a]/5 transition">
-          ↻ Rescan
+          â†» Rescan
         </button>
       </div>
 
       {/* Info banner */}
       <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-sm text-amber-800 dark:text-amber-300">
         <AlertTriangle size={16} className="shrink-0 mt-0.5"/>
-        <p>Messages are scanned using a built-in bad-word filter ({BAD_WORDS.length} patterns). Anonymous messages can only have the message deleted — user actions require a known identity.</p>
+        <p>Messages are scanned using a built-in bad-word filter ({BAD_WORDS.length} patterns). Anonymous messages can only have the message deleted â€” user actions require a known identity.</p>
       </div>
 
-      {loading && <div className="text-center py-20 text-[#4a7c5d] font-bold">🔍 Scanning all circle messages…</div>}
+      {loading && <div className="text-center py-20 text-[#4a7c5d] font-bold">ðŸ” Scanning all circle messagesâ€¦</div>}
 
       {!loading && filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-24 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
-          <div className="text-5xl mb-3">✅</div>
+          <div className="text-5xl mb-3">âœ…</div>
           <div className="font-bold text-[#0a2617] dark:text-white mb-1">No flagged content</div>
           <div className="text-sm text-[#4a7c5d] dark:text-gray-400">All messages are clean. Last scanned {new Date().toLocaleTimeString()}.</div>
         </div>
@@ -1905,13 +2263,13 @@ function FlaggedContent() {
               <div className="flex flex-wrap gap-1.5 justify-end">
                 {m.flaggedWords.map((w:string) => (
                   <span key={w} className="px-2 py-0.5 bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-400 text-[10px] font-bold rounded-full border border-red-200 dark:border-red-500/20">
-                    ⚠️ {w}
+                    âš ï¸ {w}
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* Message content — bad words highlighted */}
+            {/* Message content â€” bad words highlighted */}
             <div className="bg-red-50/50 dark:bg-red-500/5 rounded-xl p-3 mb-3 text-sm text-[#0a2617] dark:text-gray-300 border border-red-100 dark:border-red-500/10 leading-relaxed">
               {m.content}
             </div>
@@ -1945,7 +2303,7 @@ function FlaggedContent() {
           <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
             <motion.div initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} exit={{opacity:0,scale:0.95}}
               className="bg-white dark:bg-[#111111] rounded-2xl w-full max-w-sm p-6 shadow-2xl border border-[#0d5d3a]/15 dark:border-white/10">
-              <h3 className="font-black text-[#0a2617] dark:text-white mb-1" style={{fontFamily:'Syne,sans-serif'}}>⏳ Timed Suspension</h3>
+              <h3 className="font-black text-[#0a2617] dark:text-white mb-1" style={{fontFamily:'Syne,sans-serif'}}>â³ Timed Suspension</h3>
               <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mb-5">
                 Suspending <strong className="text-[#0a2617] dark:text-white">{suspendTarget.name}</strong>. Auto-unsuspended after the set duration.
               </p>
@@ -1972,7 +2330,7 @@ function FlaggedContent() {
                 <button onClick={()=>setSuspendTarget(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition">Cancel</button>
                 <button onClick={doSuspend} disabled={suspending}
                   className="flex-1 py-2.5 rounded-xl bg-purple-600 text-white font-bold text-sm hover:bg-purple-700 transition disabled:opacity-50">
-                  {suspending ? 'Suspending…' : `Suspend ${suspendHours}h`}
+                  {suspending ? 'Suspendingâ€¦' : `Suspend ${suspendHours}h`}
                 </button>
               </div>
             </motion.div>

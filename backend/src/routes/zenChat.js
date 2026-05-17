@@ -1,9 +1,90 @@
 import { Router } from 'express';
+import crypto from 'crypto';
 import { requireAuth } from '../middleware/auth.js';
 import ZenSession from '../models/ZenSession.js';
 import ZenMessage from '../models/ZenMessage.js';
+import CrisisLog from '../models/CrisisLog.js';
 
 const router = Router();
+
+// ── ISO Week helper ────────────────────────────────────────────────────────────
+function getISOWeekString(date = new Date()) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(week).padStart(2, '0')}`;
+}
+
+// ── Privacy helper ─────────────────────────────────────────────────────────────
+function hashUserId(userId) {
+  return crypto.createHash('sha256').update(String(userId)).digest('hex');
+}
+
+// ── Crisis keyword definitions ─────────────────────────────────────────────────
+// Grouped by category. Text is lowercased before matching.
+// Phrases chosen carefully — broad enough to catch real signals, narrow enough to
+// avoid false positives on casual language.
+const CRISIS_PATTERNS = [
+  {
+    category: 'suicide_ideation',
+    phrases: [
+      'end my life', 'ending my life', 'take my life', 'taking my life',
+      'kill myself', 'killing myself', 'want to die', 'wants to die',
+      'wish i was dead', 'wish i were dead', 'better off dead',
+      'no reason to live', 'not worth living', 'don\'t want to be alive',
+      'dont want to be alive', 'suicidal', 'suicide',
+    ],
+  },
+  {
+    category: 'self_harm',
+    phrases: [
+      'hurt myself', 'hurting myself', 'cut myself', 'cutting myself',
+      'self harm', 'self-harm', 'selfharm', 'harming myself',
+      'burn myself', 'burning myself', 'harm myself',
+    ],
+  },
+  {
+    category: 'severe_distress',
+    phrases: [
+      'can\'t go on', 'cant go on', 'cannot go on', 'can\'t take it anymore',
+      'cant take it anymore', 'cannot take it anymore', 'give up on life',
+      'giving up on life', 'have nothing to live for', 'has nothing to live for',
+      'life is not worth', 'feel hopeless', 'feeling hopeless', 'no hope left',
+      'lost all hope', 'completely hopeless',
+    ],
+  },
+  {
+    category: 'hindi_crisis',
+    phrases: [
+      'marna chahta', 'marna chahti', 'mar jaana chahta', 'mar jaana chahti',
+      'jeena nahi', 'jina nahi', 'zindagi nahi chahiye', 'khud ko hurt karna',
+      'khud ko cut karna', 'maut chahiye', 'khatam karna chahta', 'khatam karna chahti',
+    ],
+  },
+];
+
+/**
+ * Checks whether a user message contains a crisis signal.
+ * Returns { triggered: boolean, category?: string } — never throws.
+ */
+function checkCrisisKeywords(message) {
+  if (!message || typeof message !== 'string') return { triggered: false };
+  const lower = message.toLowerCase().trim();
+  for (const group of CRISIS_PATTERNS) {
+    for (const phrase of group.phrases) {
+      if (lower.includes(phrase)) {
+        return { triggered: true, category: group.category };
+      }
+    }
+  }
+  return { triggered: false };
+}
+
+// ── Per-user cooldown map (in-memory, resets on server restart) ────────────────
+// Prevents log spam if user repeatedly sends crisis messages in quick succession.
+const CRISIS_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+const lastCrisisTime = new Map(); // userId -> timestamp
 
 /**
  * POST /api/zen-chat
@@ -16,6 +97,12 @@ const router = Router();
  *   - No sessionId → creates a new ZenSession automatically
  *   - sessionId provided → appends to existing session
  *   - DB writes are fire-and-forget (never delay the AI response)
+ *
+ * Crisis flow:
+ *   - Latest user message is scanned BEFORE the Groq call
+ *   - If a crisis keyword is detected: skip Groq, return crisis type response
+ *   - Log is stored anonymized (hashed userId + phrase category + ISO week)
+ *   - 10-minute per-user cooldown prevents log flooding
  */
 router.post('/', requireAuth, async (req, res) => {
   const { messages, sessionId: incomingSessionId } = req.body;
@@ -41,7 +128,6 @@ router.post('/', requireAuth, async (req, res) => {
       session = await ZenSession.findOne({ _id: sessionId, userId: req.user.id });
     }
 
-    // If no valid session yet, create one now using the first user message as title
     if (!session) {
       const firstUserMsg = messages.find(m => m.role === 'user');
       const title = firstUserMsg
@@ -51,7 +137,6 @@ router.post('/', requireAuth, async (req, res) => {
       sessionId = session._id.toString();
     }
   } catch (dbErr) {
-    // DB error must NOT block the AI response — log and continue
     console.error('[ZenChat] Session resolve error:', dbErr.message);
   }
 
@@ -63,6 +148,48 @@ router.post('/', requireAuth, async (req, res) => {
       role: 'user',
       content: latestUserMsg.content,
     }).catch(e => console.error('[ZenChat] Save user msg error:', e.message));
+  }
+
+  // ── 🚨 CRISIS KEYWORD SCAN (runs BEFORE any Groq call) ──────────────────
+  if (latestUserMsg) {
+    const { triggered, category } = checkCrisisKeywords(latestUserMsg.content);
+
+    if (triggered) {
+      const userId = req.user.id;
+      const now = Date.now();
+      const lastTime = lastCrisisTime.get(userId) || 0;
+      const inCooldown = (now - lastTime) < CRISIS_COOLDOWN_MS;
+
+      if (!inCooldown) {
+        // Update cooldown timestamp
+        lastCrisisTime.set(userId, now);
+
+        // Persist anonymized log (fire-and-forget — never blocks response)
+        CrisisLog.create({
+          userHash: hashUserId(userId),
+          phraseCategory: category,
+          isoWeek: getISOWeekString(),
+        }).catch(e => console.error('[ZenChat] Crisis log error:', e.message));
+      }
+
+      // Build a warm, non-alarmist empathy response
+      const crisisReply = `I hear you, and what you're feeling right now is real and valid. I'm really glad you're talking to me. You don't have to carry this alone — reaching out like this takes real courage. Can you tell me a little more about what's been happening for you?\n\n[ACTION:CRISIS]`;
+
+      // Save assistant crisis reply (fire-and-forget)
+      if (session) {
+        Promise.all([
+          ZenMessage.create({
+            sessionId: session._id,
+            role: 'assistant',
+            content: crisisReply,
+            action: 'CRISIS',
+          }),
+          ZenSession.findByIdAndUpdate(session._id, { $inc: { messageCount: 2 } }),
+        ]).catch(e => console.error('[ZenChat] Save crisis msg error:', e.message));
+      }
+
+      return res.json({ reply: crisisReply, sessionId });
+    }
   }
 
   // ── ZenMind Mental Wellness System Prompt ─────────────────────────────────
@@ -123,7 +250,7 @@ After they answer, in your NEXT message:
 → Then add this EXACT tag at the END: [ACTION:THERAPY_BUTTON]
 
 ━━━ CRISIS PROTOCOL ━━━
-- If a user mentions feeling hopeless, not wanting to live, ending their life, or self-harm — DO NOT immediately share helpline numbers.
+- IMPORTANT: The backend already scans for direct crisis keywords and handles them automatically before your response is generated. If you still sense indirect crisis signals not caught by the filter (e.g. vague hopelessness, indirect self-harm references), follow these steps:
 - First respond with warmth and empathy. Let them feel heard. Say something like: "I hear you, and what you're feeling is real and valid. I'm really glad you're talking to me right now. Can you tell me a bit more about what's happening?"
 - If after 1-2 more messages they still express serious risk, OR if they say something very direct about harming themselves — THEN include crisis support with this EXACT tag at END: [ACTION:CRISIS]
 - The [ACTION:CRISIS] tag will show Indian crisis helplines as clickable links. You do not need to type the numbers yourself.
@@ -136,7 +263,7 @@ When asked to share a story, tell a brief, realistic, first-person style story o
 - Always end with a gentle follow-up question (unless adding an ACTION tag)
 - Never use bullet points or headers in responses — speak naturally
 - ACTION tags must ALWAYS be the very last thing in your message, on their own line
-- Never add any text after an ACTION tag`
+- Never add any text after an ACTION tag`,
   };
 
   const fullMessages = [systemPrompt, ...messages];

@@ -87,6 +87,11 @@ import wellnessProgramsRoute from './routes/wellnessPrograms.js';
 app.use('/api/wellness-programs', wellnessProgramsRoute);
 import companyRoutes from './routes/companyRoutes.js';
 app.use('/api', companyRoutes);
+import notificationsRoute from './routes/notifications.js';
+app.use('/api/notifications', notificationsRoute);
+import sessionPrepRoute from './routes/sessionPrep.js';
+app.use('/api/session-prep', sessionPrepRoute);
+app.use('/api/admin/analytics', sessionPrepRoute); // admin mood analytics sub-route
 import { Job } from './models/Job.js';
 
 

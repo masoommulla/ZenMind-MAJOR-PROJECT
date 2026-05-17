@@ -21,6 +21,9 @@ import PeerCircles from './PeerCircles';
 import WellnessGoalTracker from './WellnessGoalTracker';
 import ReadingListsUser from './ReadingListsUser';
 import WellnessProgramsUser from './WellnessProgramsUser';
+import NotificationCenter from './NotificationCenter';
+import SessionPrepCard from './SessionPrepCard';
+import PostSessionModal from './PostSessionModal';
 
 type DashboardProps = {
   onLogout: () => void;
@@ -320,6 +323,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <ThemeToggle />
+              <NotificationCenter onNavigate={(tab) => navigateToTab(tab as TabKey)} />
               {/* Mobile hamburger */}
               <button
                 type="button"
@@ -333,13 +337,28 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
         </header>
 
         <main className="zen-panel flex-1 overflow-hidden flex flex-col min-h-0">
+          {/* Post-session feedback modal — auto-appears when a session is completed */}
+          <PostSessionModal />
+
           {tab === 'therapy' ? (
-            <TherapyHub 
-              onSessionBooked={() => setTab('sessions')} 
-              onStartChat={(t) => { setChatTherapist(t); setTab('chat'); }} 
-            />
+            <div className="flex flex-col h-full overflow-hidden">
+              {/* Pre-session prep card — only shows when session < 24h */}
+              <div className="flex-shrink-0 px-4 sm:px-6 pt-4">
+                <SessionPrepCard />
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <TherapyHub
+                  onSessionBooked={() => setTab('sessions')}
+                  onStartChat={(t) => { setChatTherapist(t); setTab('chat'); }}
+                />
+              </div>
+            </div>
           ) : tab === 'sessions' ? (
             <div className="flex-1 overflow-y-auto">
+              {/* Pre-session prep card on sessions tab too */}
+              <div className="px-4 sm:px-6 pt-4">
+                <SessionPrepCard />
+              </div>
               <MySessionsPanel />
             </div>
           ) : tab === 'chat' && chatTherapist && me ? (

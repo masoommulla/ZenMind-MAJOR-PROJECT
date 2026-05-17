@@ -16,7 +16,14 @@ const userSchema = new mongoose.Schema(
     },
     isOnline: { type: Boolean, default: false },
     lastSeen: { type: Date, default: Date.now },
-    favouriteResources: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Resource' }]
+    favouriteResources: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Resource' }],
+    onboardingDone: { type: Boolean, default: false },
+    onboardingData: {
+      goals:        { type: [String], default: [] },
+      currentMood:  { type: Number, default: null },  // 1–5
+      stressLevel:  { type: Number, default: null },  // 1–5
+      completedAt:  { type: Date, default: null },
+    }
   },
   { timestamps: true }
 );

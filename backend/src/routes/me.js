@@ -12,13 +12,14 @@ router.get('/', requireAuth, async (req, res) => {
   const user = await User.findById(req.user.id).lean();
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
   return res.json({
-    id:     String(user._id),
-    name:   user.name,
-    email:  user.email,
-    phone:  user.phone,
-    age:    user.age,
-    gender: user.gender,
-    avatar: user.avatar?.data ? { mime: user.avatar.mime, data: user.avatar.data } : null
+    id:             String(user._id),
+    name:           user.name,
+    email:          user.email,
+    phone:          user.phone,
+    age:            user.age,
+    gender:         user.gender,
+    avatar:         user.avatar?.data ? { mime: user.avatar.mime, data: user.avatar.data } : null,
+    onboardingDone: user.onboardingDone ?? false,
   });
 });
 
@@ -92,6 +93,40 @@ router.put('/avatar', requireAuth, async (req, res) => {
   user.avatar = { mime: parsed.data.mime, data: parsed.data.data };
   await user.save();
   return res.json({ ok: true });
+});
+
+/* ── POST /me/onboarding  — save completion state ── */
+router.post('/onboarding', requireAuth, async (req, res) => {
+  try {
+    const { goals, currentMood, stressLevel } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    user.onboardingDone = true;
+    user.onboardingData = {
+      goals:       Array.isArray(goals) ? goals.slice(0, 10) : [],
+      currentMood: typeof currentMood === 'number' ? Math.min(5, Math.max(1, currentMood)) : null,
+      stressLevel: typeof stressLevel === 'number' ? Math.min(5, Math.max(1, stressLevel)) : null,
+      completedAt: new Date(),
+    };
+    await user.save();
+
+    // Fire-and-forget: send a welcome notification
+    try {
+      const Notification = (await import('../models/Notification.js')).default;
+      await Notification.create({
+        userId: user._id,
+        type: 'system',
+        title: `Welcome to ZenMind, ${user.name.split(' ')[0]}! 🌿`,
+        body: 'Your personalised wellness journey starts now. Explore AI Chat, book a therapist, or set your first wellness goal!',
+        actionTab: 'aichat',
+      });
+    } catch { /* non-critical */ }
+
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 /* ── DELETE /me ── */

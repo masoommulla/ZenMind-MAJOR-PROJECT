@@ -11,6 +11,7 @@ import { TherapistTicket } from '../models/TherapistTicket.js';
 import { TherapistReport } from '../models/TherapistReport.js';
 import { Therapist } from '../models/Therapist.js';
 import { cookieOpts } from '../utils/cookieOptions.js';
+import CrisisLog from '../models/CrisisLog.js';
 
 const router = Router();
 
@@ -557,4 +558,151 @@ router.post('/therapist-reports/:id/suspend-user', requireAdmin, async (req, res
   }
 });
 
+/* ─────────────────────────────────────────────────────────────────
+   CRISIS ANALYTICS — admin-only, fully anonymized (counts only, no PII)
+───────────────────────────────────────────────────────────────── */
+
+/**
+ * ISO Week helper — returns e.g. "2026-W20" for the current or offset week.
+ * offset = 0 → current week, offset = -1 → last week, etc.
+ */
+function getISOWeekString(offset = 0) {
+  const date = new Date();
+  date.setDate(date.getDate() + offset * 7);
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(week).padStart(2, '0')}`;
+}
+
+/**
+ * GET /admin/analytics/crisis
+ * Returns:
+ *   - thisWeek: total crisis events this ISO week
+ *   - lastWeek: total crisis events last ISO week
+ *   - trend: 'up' | 'down' | 'same'
+ *   - byCategory: breakdown of this week's events by phraseCategory
+ *   - recentWeeks: last 8 weeks of counts for sparkline display
+ */
+router.get('/analytics/crisis', requireAdmin, async (req, res) => {
+  try {
+    const thisWeek = getISOWeekString(0);
+    const lastWeek = getISOWeekString(-1);
+
+    // Build last-8-weeks array (oldest → newest)
+    const weeks = Array.from({ length: 8 }, (_, i) => getISOWeekString(i - 7));
+
+    const [thisCount, lastCount, byCategory, weeklyRaw] = await Promise.all([
+      CrisisLog.countDocuments({ isoWeek: thisWeek }),
+      CrisisLog.countDocuments({ isoWeek: lastWeek }),
+      CrisisLog.aggregate([
+        { $match: { isoWeek: thisWeek } },
+        { $group: { _id: '$phraseCategory', count: { $sum: 1 } } },
+      ]),
+      CrisisLog.aggregate([
+        { $match: { isoWeek: { $in: weeks } } },
+        { $group: { _id: '$isoWeek', count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    // Map weekly aggregation into ordered array
+    const weekMap = Object.fromEntries(weeklyRaw.map(w => [w._id, w.count]));
+    const recentWeeks = weeks.map(w => ({ week: w, count: weekMap[w] || 0 }));
+
+    const trend = thisCount > lastCount ? 'up' : thisCount < lastCount ? 'down' : 'same';
+
+    return res.json({
+      ok: true,
+      thisWeek,
+      thisCount,
+      lastCount,
+      trend,
+      byCategory: Object.fromEntries(byCategory.map(b => [b._id, b.count])),
+      recentWeeks,
+    });
+  } catch (err) {
+    console.error('[Admin] Crisis analytics error:', err.message);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   NOTIFICATION BROADCAST — admin sends to all users (or one)
+───────────────────────────────────────────────────────────────── */
+import Notification from '../models/Notification.js';
+
+/**
+ * POST /admin/notifications/broadcast
+ * Body: { title, body, actionTab?, targetUserId? }
+ *   - If targetUserId is set, send only to that user.
+ *   - If omitted, send to all registered users (batched in 200s).
+ */
+router.post('/notifications/broadcast', requireAdmin, async (req, res) => {
+  const { title, body, actionTab, targetUserId } = req.body;
+  if (!title || !body) return res.status(400).json({ error: 'title and body are required' });
+
+  try {
+    if (targetUserId) {
+      // Single user
+      await Notification.create({ userId: targetUserId, type: 'system', title, body, actionTab: actionTab || null });
+      return res.json({ ok: true, sent: 1 });
+    }
+
+    // All users — paginate through in batches of 200 to avoid overwhelming the DB
+    const users = await User.find({}, '_id').lean();
+    const docs = users.map(u => ({
+      userId: u._id,
+      type: 'system',
+      title,
+      body,
+      actionTab: actionTab || null,
+      isRead: false,
+    }));
+
+    const BATCH = 200;
+    let created = 0;
+    for (let i = 0; i < docs.length; i += BATCH) {
+      const result = await Notification.insertMany(docs.slice(i, i + BATCH), { ordered: false });
+      created += result.length;
+    }
+
+    return res.json({ ok: true, sent: created });
+  } catch (err) {
+    console.error('[Admin] Broadcast error:', err.message);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /admin/notifications/recent
+ * Returns last 50 notifications across all users (for audit purposes).
+ * Hides body text for privacy — only type, title, userId hash, timestamp.
+ */
+router.get('/notifications/recent', requireAdmin, async (req, res) => {
+  try {
+    const crypto = await import('crypto');
+    const notifs = await Notification.find({})
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+
+    const sanitized = notifs.map(n => ({
+      _id: n._id,
+      type: n.type,
+      title: n.title,
+      actionTab: n.actionTab,
+      isRead: n.isRead,
+      createdAt: n.createdAt,
+      // Hash userId for audit display — never expose raw ID here
+      userHash: crypto.createHash('sha256').update(String(n.userId)).digest('hex').slice(0, 12),
+    }));
+
+    return res.json({ ok: true, notifications: sanitized });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
+

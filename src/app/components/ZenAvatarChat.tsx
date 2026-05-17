@@ -33,10 +33,11 @@ function parseReply(raw: string): { text: string; action: MessageAction } {
 }
 
 const CRISIS_NUMBERS = [
-  { name: 'iCall', number: '9152987821' },
-  { name: 'Vandrevala Foundation', number: '18602662345' },
-  { name: 'AASRA', number: '9820466627' },
-  { name: 'Snehi', number: '044-24640050' },
+  { name: 'iCall', number: '9152987821', tag: 'Mon–Sat, 8am–9pm' },
+  { name: 'Vandrevala Foundation', number: '1860 2662 345', tag: '24/7 · Free' },
+  { name: 'AASRA', number: '9820466627', tag: '24/7 · Confidential' },
+  { name: 'Snehi', number: '044-24640050', tag: 'Mon–Sat, 8am–9pm' },
+  { name: 'NIMHANS Helpline', number: '080-46110007', tag: 'Mon–Sat, 8am–8pm' },
 ];
 
 /* ── Waveform ─────────────────────────────────────────────── */
@@ -57,23 +58,59 @@ function WaveVisualizer({ active }: { active: boolean }) {
 }
 
 /* ── Crisis card ───────────────────────────────────────────── */
-function CrisisCard() {
+function CrisisCard({ onGoToTherapy }: { onGoToTherapy?: () => void }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-      className="mt-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 rounded-2xl p-4">
-      <p className="text-xs font-bold text-red-700 dark:text-red-400 mb-3 uppercase tracking-wide">🆘 Immediate Support — India</p>
-      <div className="flex flex-col gap-2">
-        {CRISIS_NUMBERS.map(({ name, number }) => (
-          <a key={name} href={`tel:${number}`}
-            className="flex items-center justify-between bg-white dark:bg-red-900/30 border border-red-200 dark:border-red-500/20 rounded-xl px-3 py-2 hover:bg-red-100 dark:hover:bg-red-800/30 transition group">
-            <span className="text-sm font-semibold text-red-800 dark:text-red-300">{name}</span>
-            <span className="flex items-center gap-1 text-sm font-bold text-red-600 dark:text-red-400 group-hover:underline">
-              {number.replace(/(\d{4})(\d{3})(\d{4})/, '$1 $2 $3')} <ExternalLink size={11} />
+    <motion.div
+      initial={{ opacity: 0, y: 10, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      className="mt-3 rounded-2xl overflow-hidden shadow-lg border border-rose-200/60 dark:border-rose-500/25"
+    >
+      {/* Header strip */}
+      <div className="bg-gradient-to-r from-rose-500 to-rose-600 px-4 py-3 flex items-center gap-2.5">
+        <span className="text-xl">🆘</span>
+        <div>
+          <p className="text-white font-bold text-sm leading-tight">You are not alone.</p>
+          <p className="text-rose-100 text-xs">Real support is just one call away.</p>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="bg-rose-50 dark:bg-rose-950/40 px-4 py-3 flex flex-col gap-2">
+        <p className="text-[10px] text-rose-700 dark:text-rose-300 font-bold uppercase tracking-wider mb-0.5">
+          India Crisis Helplines — Available Now
+        </p>
+
+        {CRISIS_NUMBERS.map(({ name, number, tag }) => (
+          <a
+            key={name}
+            href={`tel:${number.replace(/[^0-9]/g, '')}`}
+            className="flex items-center justify-between bg-white dark:bg-rose-900/30 border border-rose-200 dark:border-rose-500/20 rounded-xl px-3 py-2.5 hover:bg-rose-100 dark:hover:bg-rose-800/30 transition-colors group"
+          >
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-bold text-rose-800 dark:text-rose-200 leading-tight truncate">{name}</span>
+              {tag && <span className="text-[10px] text-rose-500 dark:text-rose-400 font-medium">{tag}</span>}
+            </div>
+            <span className="flex items-center gap-1 text-xs font-bold text-rose-600 dark:text-rose-300 group-hover:underline whitespace-nowrap ml-2">
+              {number} <ExternalLink size={10} />
             </span>
           </a>
         ))}
+
+        {/* Therapy Hub CTA */}
+        {onGoToTherapy && (
+          <button
+            onClick={onGoToTherapy}
+            className="mt-1 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] text-white text-sm font-bold hover:from-[#0a4a2e] hover:to-[#0d5d3a] transition-all shadow-md shadow-[#0d5d3a]/20"
+          >
+            🌿 Talk to a Therapist Now
+          </button>
+        )}
+
+        <p className="text-[10px] text-rose-500/70 dark:text-rose-400/50 text-center mt-0.5">
+          Tap any number to call directly from your device
+        </p>
       </div>
-      <p className="text-[10px] text-red-600/70 dark:text-red-400/60 mt-2 text-center">Tap a number to call directly from your phone</p>
     </motion.div>
   );
 }
@@ -143,7 +180,7 @@ function MessageBubble({ msg, onStoryYes, onStoryNo, onFeelingGood, onConnectRea
         )}
 
         {/* Crisis numbers */}
-        {isBot && msg.action === 'CRISIS' && <CrisisCard />}
+        {isBot && msg.action === 'CRISIS' && <CrisisCard onGoToTherapy={onGoToTherapy} />}
       </div>
     </motion.div>
   );

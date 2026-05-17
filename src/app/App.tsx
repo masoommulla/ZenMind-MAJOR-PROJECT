@@ -24,6 +24,7 @@ import CareersPage from './components/CareersPage';
 import ComingSoonPage from './components/ComingSoonPage';
 import ResourcesPage from './components/ResourcesPage';
 import { apiFetch } from './api/client';
+import OnboardingFlow from './components/OnboardingFlow';
 
 
 gsap.registerPlugin(ScrollTrigger);
@@ -39,7 +40,8 @@ export default function App() {
   const [authed, setAuthed]           = useState(() => ls.get('zm_authed'));
   const [adminAuthed, setAdminAuthed] = useState(() => ls.get('zm_admin'));
   const [therapistAuthed, setTherapistAuthed] = useState(() => ls.get('zm_therapist'));
-  const [meData, setMeData] = useState<any>(null); // prefetched /me data passed to Dashboard
+  const [meData, setMeData] = useState<any>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const [showAuth, setShowAuth]       = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -126,7 +128,11 @@ export default function App() {
     Promise.all([verifyMe(), verifyOther('/admin/me'), verifyOther('/therapist/me')]).then(([u, a, t]) => {
       if (!alive) return;
       setAuthed(u.ok); ls.set('zm_authed', u.ok);
-      if (u.data) setMeData(u.data); // store prefetched profile
+      if (u.data) {
+        setMeData(u.data);
+        // If returning user hasn't done onboarding yet, show it
+        if (u.ok && u.data.onboardingDone === false) setShowOnboarding(true);
+      }
       if (a !== null) { setAdminAuthed(!!a); ls.set('zm_admin', !!a); }
       if (t !== null) { setTherapistAuthed(!!t); ls.set('zm_therapist', !!t); }
       setApiReady(true);
@@ -183,11 +189,27 @@ export default function App() {
           }}
         />
       ) : authed ? (
-        <Dashboard onLogout={logoutUser} prefetchedMe={meData} initialTab={loginIntent} />
+        showOnboarding ? (
+          <OnboardingFlow
+            userName={meData?.name || 'Friend'}
+            onComplete={() => { setShowOnboarding(false); setMeData((d: any) => d ? { ...d, onboardingDone: true } : d); }}
+          />
+        ) : (
+          <Dashboard onLogout={logoutUser} prefetchedMe={meData} initialTab={loginIntent} />
+        )
       ) : showAuth ? (
         <AuthPage
           onBackHome={() => setShowAuth(false)}
-          onAuthSuccess={() => { setAuthed(true); ls.set('zm_authed', true); setShowAuth(false); }}
+          onAuthSuccess={() => {
+          setAuthed(true);
+          ls.set('zm_authed', true);
+          setShowAuth(false);
+          // Fetch /me to check onboardingDone for brand-new signups
+          apiFetch<any>('/me').then(d => {
+            setMeData(d);
+            if (!d.onboardingDone) setShowOnboarding(true);
+          }).catch(() => {});
+        }}
         />
       ) : (
         <>
