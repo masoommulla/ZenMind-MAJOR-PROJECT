@@ -246,10 +246,11 @@ router.get('/my-feedback', requireAuth, async (req, res) => {
 });
 
 /* ─────────────────────────────────────────────────────────────────────────
-   GET /admin/analytics/post-session-mood
+   GET /api/admin/analytics/post-session-mood
+   Mounted at: app.use('/api/admin/analytics', sessionPrepRoute)
    Anonymized aggregate: average mood, distribution, trend over 8 weeks.
 ───────────────────────────────────────────────────────────────────────── */
-router.get('/admin/mood-analytics', requireAdmin, async (req, res) => {
+router.get('/post-session-mood', requireAdmin, async (req, res) => {
   try {
     const eightWeeksAgo = new Date(Date.now() - 56 * 24 * 60 * 60 * 1000);
 
