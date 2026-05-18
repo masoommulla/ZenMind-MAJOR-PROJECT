@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import { Server } from 'socket.io';
+import cron from 'node-cron';
 
 import authRoutes from './routes/auth.js';
 import meRoutes from './routes/me.js';
@@ -94,6 +95,9 @@ app.use('/api/session-prep', sessionPrepRoute);
 app.use('/api/admin/analytics', sessionPrepRoute); // admin mood analytics sub-route
 import adminAnalyticsRoute from './routes/adminAnalytics.js';
 app.use('/api/admin-analytics', adminAnalyticsRoute);
+import insightsRoute from './routes/insights.js';
+import { generateInsightForUser } from './routes/insights.js';
+app.use('/api/insights', insightsRoute);
 import { Job } from './models/Job.js';
 
 
@@ -573,6 +577,33 @@ server.listen(port, () => {
   // eslint-disable-next-line no-console
   console.log(`API and Socket.IO listening on port ${port}`);
 });
+
+// ── Weekly Insights Cron — every Sunday at 8:00 AM IST (UTC+5:30 = 02:30 UTC) ──
+// Cron format: minute hour day-of-month month day-of-week
+cron.schedule('30 2 * * 0', async () => {
+  console.log('[Cron] Generating weekly insights for all users…');
+  try {
+    const User = (await import('./models/User.js')).default;
+    const users = await User.find({}).select('_id').lean();
+    let success = 0, failed = 0;
+    for (const user of users) {
+      try {
+        await generateInsightForUser(user._id);
+        success++;
+      } catch (e) {
+        console.error(`[Cron] Insight failed for user ${user._id}:`, e.message);
+        failed++;
+      }
+      // Small delay to avoid Groq rate limits
+      await new Promise(r => setTimeout(r, 400));
+    }
+    console.log(`[Cron] Weekly insights done. Success: ${success}, Failed: ${failed}`);
+  } catch (err) {
+    console.error('[Cron] Weekly insights cron error:', err.message);
+  }
+}, { timezone: 'Asia/Kolkata' });
+
+
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {

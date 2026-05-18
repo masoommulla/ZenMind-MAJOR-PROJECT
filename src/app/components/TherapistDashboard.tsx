@@ -16,6 +16,7 @@ import CancellationPolicy from './CancellationPolicy';
 import TherapistChatView from './TherapistChatView';
 import ReadingListsTherapist from './ReadingListsTherapist';
 import TherapistSupportDesk from './TherapistSupportDesk';
+import ClientWellnessSnapshot from './ClientWellnessSnapshot';
 
 type TabKey = 'profile' | 'schedule' | 'sessions' | 'chats' | 'reading' | 'support';
 
@@ -670,6 +671,7 @@ function TherapistSessionsPanel() {
   const [activeVideoSession, setActiveVideoSession] = useState<string | null>(null);
 
   const [cancelSessionId, setCancelSessionId] = useState<string | null>(null);
+  const [snapshotUserId, setSnapshotUserId] = useState<string | null>(null);
   const [showPolicy, setShowPolicy] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
@@ -741,7 +743,7 @@ function TherapistSessionsPanel() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {today.map(s => (
-              <SessionCard key={s._id} s={s} formatCountdown={formatCountdown} isJoinable={isJoinable} onJoin={() => setActiveVideoSession(s._id)} onCancel={() => setCancelSessionId(s._id)} />
+              <SessionCard key={s._id} s={s} formatCountdown={formatCountdown} isJoinable={isJoinable} onJoin={() => setActiveVideoSession(s._id)} onCancel={() => setCancelSessionId(s._id)} onViewSnapshot={() => setSnapshotUserId(s.user?._id)} />
             ))}
           </div>
         </div>
@@ -754,7 +756,7 @@ function TherapistSessionsPanel() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {upcoming.map(s => (
-              <SessionCard key={s._id} s={s} formatCountdown={formatCountdown} isJoinable={isJoinable} onJoin={() => setActiveVideoSession(s._id)} onCancel={() => setCancelSessionId(s._id)} />
+              <SessionCard key={s._id} s={s} formatCountdown={formatCountdown} isJoinable={isJoinable} onJoin={() => setActiveVideoSession(s._id)} onCancel={() => setCancelSessionId(s._id)} onViewSnapshot={() => setSnapshotUserId(s.user?._id)} />
             ))}
           </div>
         )}
@@ -805,17 +807,34 @@ function TherapistSessionsPanel() {
         {showPolicy && <CancellationPolicy onClose={() => setShowPolicy(false)} />}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {snapshotUserId && (
+          <ClientWellnessSnapshot userId={snapshotUserId} onClose={() => setSnapshotUserId(null)} />
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
 
-function SessionCard({ s, formatCountdown, isJoinable, onJoin, onCancel }: any) {
+function SessionCard({ s, formatCountdown, isJoinable, onJoin, onCancel, onViewSnapshot }: any) {
   return (
     <div className="bg-white dark:bg-[#111111] border border-[#0d5d3a]/20 dark:border-white/10 rounded-3xl p-6 shadow-sm flex flex-col h-full">
       <div className="mb-4 text-xs font-bold text-[#0d5d3a] dark:text-[#10b981] bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 px-3 py-1 rounded-full self-start">
         {formatCountdown(new Date(s.date))}
       </div>
-      <h4 className="font-bold text-[#0a2617] dark:text-white text-lg mb-2">{s.user?.name || 'Unknown Patient'}</h4>
+      <div className="flex justify-between items-start mb-2">
+        <h4 className="font-bold text-[#0a2617] dark:text-white text-lg">{s.user?.name || 'Unknown Patient'}</h4>
+        {s.user?._id && (
+          <button 
+            onClick={onViewSnapshot}
+            className="text-xs flex items-center gap-1 bg-[#f0fbf4] dark:bg-white/5 text-[#0d5d3a] dark:text-[#10b981] px-2 py-1 rounded-lg font-bold hover:bg-[#e0f5ea] dark:hover:bg-white/10 transition"
+            title="View Wellness Snapshot"
+          >
+            <User size={12} /> Profile
+          </button>
+        )}
+      </div>
       <div className="space-y-1 text-sm font-medium text-[#4a7c5d] dark:text-gray-400 flex-1">
         <div className="flex items-center gap-2"><Calendar size={14} className="text-[#0d5d3a] dark:text-[#10b981]" /> {new Date(s.date).toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
         <div className="flex items-center gap-2"><Clock size={14} className="text-[#0d5d3a] dark:text-[#10b981]" /> {new Date(s.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>

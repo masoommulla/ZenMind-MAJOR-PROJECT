@@ -23,7 +23,8 @@ const userSchema = new mongoose.Schema(
       currentMood:  { type: Number, default: null },  // 1–5
       stressLevel:  { type: Number, default: null },  // 1–5
       completedAt:  { type: Date, default: null },
-    }
+    },
+    shareProgressWithTherapist: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

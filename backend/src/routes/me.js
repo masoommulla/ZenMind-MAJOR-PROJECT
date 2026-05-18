@@ -20,6 +20,7 @@ router.get('/', requireAuth, async (req, res) => {
     gender:         user.gender,
     avatar:         user.avatar?.data ? { mime: user.avatar.mime, data: user.avatar.data } : null,
     onboardingDone: user.onboardingDone ?? false,
+    shareProgressWithTherapist: user.shareProgressWithTherapist ?? false,
   });
 });
 
@@ -137,6 +138,25 @@ router.delete('/', requireAuth, async (req, res) => {
   // Clear auth cookie upon account deletion
   res.clearCookie('auth_token', cookieOpts);
   return res.json({ ok: true });
+});
+
+/* ── PATCH /me/share-progress ── */
+router.patch('/share-progress', requireAuth, async (req, res) => {
+  try {
+    const { shareProgressWithTherapist } = req.body;
+    if (typeof shareProgressWithTherapist !== 'boolean') {
+      return res.status(400).json({ error: 'shareProgressWithTherapist must be a boolean' });
+    }
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    user.shareProgressWithTherapist = shareProgressWithTherapist;
+    await user.save();
+    
+    return res.json({ ok: true, shareProgressWithTherapist: user.shareProgressWithTherapist });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 export default router;

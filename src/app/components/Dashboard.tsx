@@ -39,6 +39,7 @@ type Me = {
   age: number;
   gender: string;
   avatar: { mime: string; data: string } | null;
+  shareProgressWithTherapist?: boolean;
 };
 
 type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources' | 'journal' | 'circles' | 'goals' | 'reading' | 'programs';
@@ -519,7 +520,17 @@ function SettingsPanel({ me, setMe, onLogout }: { me: Me | null; setMe: (v: Me |
   const [saving, setSaving]     = useState(false);
   const [profileMsg, setProfileMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
-  useEffect(() => { setName(me?.name||''); setPhone(me?.phone||''); setAge(me?.age!==undefined?String(me.age):''); setGender(me?.gender||''); }, [me]);
+  /* ---- Privacy state ---- */
+  const [shareProgress, setShareProgress] = useState(me?.shareProgressWithTherapist ?? false);
+  const [privacyBusy, setPrivacyBusy] = useState(false);
+
+  useEffect(() => { 
+    setName(me?.name||''); 
+    setPhone(me?.phone||''); 
+    setAge(me?.age!==undefined?String(me.age):''); 
+    setGender(me?.gender||''); 
+    setShareProgress(me?.shareProgressWithTherapist ?? false);
+  }, [me]);
 
   const avatarUrl = me?.avatar?.data ? `data:${me.avatar.mime};base64,${me.avatar.data}` : null;
   const initials  = me?.name ? me.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) : 'ZM';
@@ -539,6 +550,20 @@ function SettingsPanel({ me, setMe, onLogout }: { me: Me | null; setMe: (v: Me |
       setMe(updated); setProfileMsg({ text: 'Profile saved ✓', ok: true });
     } catch (e: any) { setProfileMsg({ text: e.message || 'Save failed', ok: false }); }
     finally { setSaving(false); }
+  };
+
+  const toggleShareProgress = async () => {
+    const newVal = !shareProgress;
+    setPrivacyBusy(true);
+    try {
+      await apiFetch('/me/share-progress', { method: 'PATCH', body: JSON.stringify({ shareProgressWithTherapist: newVal }) });
+      setShareProgress(newVal);
+      if (me) setMe({ ...me, shareProgressWithTherapist: newVal });
+    } catch (e) {
+      console.error('Failed to update privacy settings', e);
+    } finally {
+      setPrivacyBusy(false);
+    }
   };
 
   /* ---- Password state ---- */
@@ -686,6 +711,35 @@ function SettingsPanel({ me, setMe, onLogout }: { me: Me | null; setMe: (v: Me |
             className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white font-semibold shadow-lg shadow-[#0d5d3a]/20 dark:shadow-[#1a8a5a]/20 disabled:opacity-60 hover:bg-[#0a4a2e] dark:hover:bg-[#10b981] transition">
             <Save className="w-4 h-4" />
             {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-[#0d5d3a]/10 my-8" />
+
+      {/* PRIVACY SECTION */}
+      <div className="mb-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-[#0a2617] dark:text-gray-100 text-xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>Privacy & Sharing</h2>
+            <p className="text-sm text-[#4a7c5d] dark:text-gray-400">Control who sees your wellness data.</p>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-[#111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <div className="text-sm font-bold text-[#0a2617] dark:text-gray-100">Share Progress with Therapist</div>
+            <div className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-1 max-w-sm">
+              Allow your assigned therapist to view your mood trends, goal streaks, and wellness program progress. This helps them prepare better for your sessions.
+            </div>
+          </div>
+          <button 
+            type="button" 
+            onClick={toggleShareProgress} 
+            disabled={privacyBusy}
+            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${shareProgress ? 'bg-[#0d5d3a]' : 'bg-gray-200 dark:bg-gray-700'} ${privacyBusy ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <span aria-hidden="true" className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${shareProgress ? 'translate-x-5' : 'translate-x-0'}`} />
           </button>
         </div>
       </div>

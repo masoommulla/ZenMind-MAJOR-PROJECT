@@ -5,6 +5,7 @@ import { apiFetch } from '../api/client';
 import ZenTalkingHead from './ZenTalkingHead';
 import ZenChatSidebar from './ZenChatSidebar';
 import MoodCheckIn from './MoodCheckIn';
+import WeeklyInsightsBanner from './WeeklyInsightsBanner';
 
 type MessageAction = 'STORY_BUTTONS' | 'POST_STORY' | 'THERAPY_BUTTON' | 'CRISIS' | null;
 type Message = { role: 'user' | 'assistant'; content: string; id: string; action?: MessageAction };
@@ -430,6 +431,8 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
           </div>
           <div className="ml-auto text-xs text-[#4a7c5d] dark:text-gray-500 bg-[#f0fbf4] dark:bg-white/5 px-2 py-1 rounded-full">{messages.length} message{messages.length !== 1 ? 's' : ''}</div>
         </div>
+        
+        <WeeklyInsightsBanner onPreFillChat={(text) => setInput(text)} />
 
         <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4">
           {messages.map(msg => (

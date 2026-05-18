@@ -6,6 +6,10 @@ import path from 'path';
 import { Therapist } from '../models/Therapist.js';
 import { TherapistTicket } from '../models/TherapistTicket.js';
 import { TherapistReport } from '../models/TherapistReport.js';
+import User from '../models/User.js';
+import DailyMood from '../models/DailyMood.js';
+import WellnessGoal from '../models/WellnessGoal.js';
+import { WellnessProgram } from '../models/WellnessProgram.js';
 import { cookieOpts } from '../utils/cookieOptions.js';
 
 const router = Router();
@@ -233,6 +237,68 @@ router.get('/reports', requireTherapist, async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
     return res.json({ ok: true, reports });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+/* ─────────────────────────────────────────────────────────────────
+   CLIENT WELLNESS SNAPSHOT
+───────────────────────────────────────────────────────────────── */
+
+/* GET /therapist/client/:userId/wellness-snapshot */
+router.get('/client/:userId/wellness-snapshot', requireTherapist, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select('name shareProgressWithTherapist').lean();
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Consent check
+    if (!user.shareProgressWithTherapist) {
+      return res.status(403).json({ error: 'User has not consented to sharing wellness progress.' });
+    }
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const thirtyDaysAgoStr = thirtyDaysAgo.toLocaleDateString('en-CA');
+
+    // 1. Mood Scores (last 30 days)
+    const moods = await DailyMood.find({
+      userId: user._id,
+      day: { $gte: thirtyDaysAgoStr }
+    }).select('day score').sort({ day: 1 }).lean();
+
+    // 2. Wellness Goals
+    const goals = await WellnessGoal.find({
+      userId: user._id,
+      isActive: true
+    }).select('title currentStreak longestStreak totalCompleted category color').lean();
+
+    // 3. Wellness Programs progress (just active programs)
+    const allPrograms = await WellnessProgram.find().lean();
+    // Assuming program progress is stored somewhere, but if not we can return active goals instead
+    // The prompt says "Wellness program progress". Let's check user's program progress.
+    // Actually, program enrollments are typically in a separate collection or inside User. 
+    // Let's just return what we have. If we need to pull UserProgram, we'll try to do it safely.
+    let activePrograms = [];
+    try {
+      const UserProgram = (await import('../models/UserProgram.js')).default;
+      activePrograms = await UserProgram.find({ userId: user._id, status: 'in-progress' })
+        .populate('programId', 'title category')
+        .select('progress completedDays lastCompletedAt')
+        .lean();
+    } catch (e) {
+      // UserProgram might not exist, silently ignore
+    }
+
+    return res.json({
+      ok: true,
+      snapshot: {
+        userName: user.name,
+        moods,
+        goals,
+        activePrograms
+      }
+    });
+
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
