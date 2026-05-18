@@ -36,9 +36,9 @@ export default function SessionInsightsWidget() {
   const avgMood = data?.averageMood;
 
   const kpis = [
-    { label: 'Total Feedbacks',       value: data?.totalFeedbacks ?? '—', emoji: '📋' },
-    { label: 'Avg Post-Session Mood', value: avgMood ? `${avgMood}/10` : '—', emoji: '😊' },
-    { label: 'High Mood (7–10)',      value: dist.high ?? '—', emoji: '🌟' },
+    { label: 'Total Feedbacks',       value: data?.totalFeedbacks ?? '—', emoji: '' },
+    { label: 'Avg Post-Session Mood', value: avgMood ? `${avgMood}/10` : '—', emoji: '' },
+    { label: 'High Mood (7–10)',      value: dist.high ?? '—', emoji: '' },
   ];
 
   const bars = [

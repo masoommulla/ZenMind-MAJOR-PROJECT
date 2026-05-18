@@ -31,16 +31,16 @@ interface Stats {
 const GOAL_COLORS = ['#0d5d3a','#7c3aed','#0369a1','#b45309','#be123c','#065f46','#374151','#1e40af'];
 
 const CATEGORIES = [
-  { value: 'mindfulness', label: '🧘 Mindfulness' },
-  { value: 'exercise',    label: '🏃 Exercise' },
-  { value: 'sleep',       label: '😴 Sleep' },
-  { value: 'journaling',  label: '📓 Journaling' },
-  { value: 'nutrition',   label: '🥗 Nutrition' },
-  { value: 'social',      label: '🤝 Social' },
-  { value: 'breathing',   label: '🌬️ Breathing' },
-  { value: 'gratitude',   label: '🙏 Gratitude' },
-  { value: 'learning',    label: '📚 Learning' },
-  { value: 'other',       label: '✨ Other' },
+  { value: 'mindfulness', label: ' Mindfulness' },
+  { value: 'exercise',    label: ' Exercise' },
+  { value: 'sleep',       label: ' Sleep' },
+  { value: 'journaling',  label: ' Journaling' },
+  { value: 'nutrition',   label: ' Nutrition' },
+  { value: 'social',      label: ' Social' },
+  { value: 'breathing',   label: '️ Breathing' },
+  { value: 'gratitude',   label: ' Gratitude' },
+  { value: 'learning',    label: ' Learning' },
+  { value: 'other',       label: ' Other' },
 ];
 
 /* ── Ring Progress ── */

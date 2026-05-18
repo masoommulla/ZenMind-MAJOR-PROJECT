@@ -81,7 +81,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
             <div className="zen-chat-box">
               <div className="zen-chat-inner">
                 <div style={{ position: 'relative', display: 'flex' }}>
-                  <textarea className="zen-chat-textarea" placeholder="Share how you're feeling... ✦˚" style={{ height: 90 }} />
+                  <textarea className="zen-chat-textarea" placeholder="Share how you're feeling... ˚" style={{ height: 90 }} />
                 </div>
                 <div className="zen-chat-options">
                   <div className="zen-chat-btns">

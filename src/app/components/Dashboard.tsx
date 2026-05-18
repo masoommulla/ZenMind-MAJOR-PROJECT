@@ -45,9 +45,9 @@ type Me = {
 type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources' | 'journal' | 'circles' | 'goals' | 'reading' | 'programs';
 
 const TAB_ICONS: Record<TabKey, string> = {
-  aichat: '🤖', therapy: '🩺', settings: '⚙️', sessions: '📅', chat: '💬',
-  progress: '📊', community: '🌿', resources: '📚', journal: '📓',
-  circles: '👥', goals: '🎯', reading: '📖', programs: '💪',
+  aichat: '', therapy: '🩺', settings: '️', sessions: '', chat: '',
+  progress: '', community: '', resources: '', journal: '',
+  circles: '', goals: '', reading: '', programs: '',
 };
 
 const NAV_ITEMS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
@@ -301,7 +301,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
                   : <div className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold flex-shrink-0" style={{ background: 'linear-gradient(135deg,#0d5d3a,#1a8a5a)' }}>{initials}</div>
                 }
                 <span className="text-xs font-bold" style={{ color: '#0d5d3a' }}>
-                  {loading ? 'Loading…' : `Hi, ${me?.name?.split(' ')[0] || 'there'}! 👋`}
+                  {loading ? 'Loading…' : `Hi, ${me?.name?.split(' ')[0] || 'there'}! `}
                 </span>
               </div>
 
@@ -311,7 +311,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
               {/* Tab title with emoji */}
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-base leading-none">{TAB_ICONS[tab] || '✨'}</span>
+                  <span className="text-base leading-none">{TAB_ICONS[tab] || ''}</span>
                   <span className="zen-dash-header-title truncate">
                     {tab === 'sessions'  ? 'My Sessions' :
                      tab === 'therapy'   ? 'Therapy Hub' :
@@ -547,7 +547,7 @@ function SettingsPanel({ me, setMe, onLogout }: { me: Me | null; setMe: (v: Me |
     setSaving(true); setProfileMsg(null);
     try {
       const updated = await apiFetch<Me>('/me', { method: 'PUT', body: JSON.stringify({ name, phone, age: Number(age), gender }) });
-      setMe(updated); setProfileMsg({ text: 'Profile saved ✓', ok: true });
+      setMe(updated); setProfileMsg({ text: 'Profile saved ', ok: true });
     } catch (e: any) { setProfileMsg({ text: e.message || 'Save failed', ok: false }); }
     finally { setSaving(false); }
   };
@@ -599,7 +599,7 @@ function SettingsPanel({ me, setMe, onLogout }: { me: Me | null; setMe: (v: Me |
     try {
       await apiFetch('/auth/update-password', { method: 'POST', body: JSON.stringify({ oldPassword, newPassword }) });
       setOldPassword(''); setNewPassword(''); setConfirmPw('');
-      setPwMsg({ text: 'Password updated ✓', ok: true });
+      setPwMsg({ text: 'Password updated ', ok: true });
     } catch (e: any) { setPwMsg({ text: e.message||'Update failed', ok: false }); }
     finally { setPwBusy(false); }
   };
@@ -610,7 +610,7 @@ function SettingsPanel({ me, setMe, onLogout }: { me: Me | null; setMe: (v: Me |
       /* /auth/send-otp is authenticated â€” fetches email from DB via JWT */
       await apiFetch('/auth/send-otp', { method: 'POST', body: '{}' });
       setOtpSecs(120); setOtpStep('verify');
-      setPwMsg({ text: 'OTP sent to your registered email ✓', ok: true });
+      setPwMsg({ text: 'OTP sent to your registered email ', ok: true });
     } catch (e: any) { setPwMsg({ text: e.message||'Failed to send OTP', ok: false }); }
     finally { setPwBusy(false); }
   };
@@ -620,7 +620,7 @@ function SettingsPanel({ me, setMe, onLogout }: { me: Me | null; setMe: (v: Me |
     setPwBusy(true); setPwMsg(null);
     try {
       await apiFetch('/auth/verify-otp', { method: 'POST', body: JSON.stringify({ phone: me?.phone, code: otpCode }) });
-      setOtpStep('reset'); setPwMsg({ text: 'Code verified ✓', ok: true });
+      setOtpStep('reset'); setPwMsg({ text: 'Code verified ', ok: true });
     } catch (e: any) { setPwMsg({ text: e.message||'Invalid code', ok: false }); }
     finally { setPwBusy(false); }
   };
@@ -631,7 +631,7 @@ function SettingsPanel({ me, setMe, onLogout }: { me: Me | null; setMe: (v: Me |
     setPwBusy(true); setPwMsg(null);
     try {
       await apiFetch('/auth/reset-password', { method: 'POST', body: JSON.stringify({ phone: me?.phone, code: otpCode, newPassword: otpNew }) });
-      resetOtp(); setPwMsg({ text: 'Password reset ✓', ok: true });
+      resetOtp(); setPwMsg({ text: 'Password reset ', ok: true });
     } catch (e: any) { setPwMsg({ text: e.message||'Reset failed', ok: false }); }
     finally { setPwBusy(false); }
   };
@@ -813,7 +813,7 @@ function SettingsPanel({ me, setMe, onLogout }: { me: Me | null; setMe: (v: Me |
                     {pwBusy ? 'Checking…' : 'Verify OTP'}
                   </button>
                 )}
-                {otpStep==='reset' && <div className="shrink-0 px-3 py-2 rounded-xl bg-[#0d5d3a]/10 text-[#0d5d3a] text-xs font-semibold">✓ Verified</div>}
+                {otpStep==='reset' && <div className="shrink-0 px-3 py-2 rounded-xl bg-[#0d5d3a]/10 text-[#0d5d3a] text-xs font-semibold"> Verified</div>}
               </div>
             </div>
           )}
@@ -1115,11 +1115,11 @@ function MySessionsPanel() {
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, paddingBottom: 12, borderBottom: '2px solid var(--dash-border)' }}>
         <button onClick={() => setSessionTab('upcoming')}
           className={`zen-tab-pill ${sessionTab === 'upcoming' ? 'active' : ''}`}>
-          📅 Upcoming
+           Upcoming
         </button>
         <button onClick={() => setSessionTab('past')}
           className={`zen-tab-pill ${sessionTab === 'past' ? 'active' : ''}`}>
-          📜 Past Sessions
+           Past Sessions
         </button>
       </div>
 
@@ -1138,7 +1138,7 @@ function MySessionsPanel() {
                   <div key={s._id} className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm p-5 flex flex-col">
                     <div className="mb-3">
                       <span className="text-[10px] font-black uppercase tracking-wider bg-red-50 dark:bg-red-500/10 text-red-500 px-2 py-0.5 rounded-md">
-                        🔴 {formatCountdown(new Date(s.date))}
+                         {formatCountdown(new Date(s.date))}
                       </span>
                       <h4 className="font-bold text-[#0a2617] dark:text-white mt-2 text-base">{s.therapistName}</h4>
                     </div>

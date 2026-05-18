@@ -420,10 +420,10 @@ export default function ResourceHub() {
             onChange={v => setTypeFilter(v)}
             options={[
               { value: 'all',   label: 'All Types' },
-              { value: 'video', label: '🎬 Video' },
-              { value: 'audio', label: '🎵 Audio' },
-              { value: 'image', label: '🖼️ Image' },
-              { value: 'link',  label: '🔗 Link' },
+              { value: 'video', label: ' Video' },
+              { value: 'audio', label: ' Audio' },
+              { value: 'image', label: '️ Image' },
+              { value: 'link',  label: ' Link' },
             ]}
           />
           <Dropdown
@@ -491,7 +491,7 @@ export default function ResourceHub() {
         {/* ── ALL RESOURCES ── */}
         {!loading && resources.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="text-5xl mb-4">📚</div>
+            <div className="text-5xl mb-4"></div>
             <div className="text-lg font-bold text-[#0a2617] dark:text-white mb-1" style={{ fontFamily: 'Syne, sans-serif' }}>
               No resources yet
             </div>

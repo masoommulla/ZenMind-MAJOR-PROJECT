@@ -10,17 +10,17 @@ interface Props {
 }
 
 const GOALS = [
-  { id: 'reduce_anxiety',   icon: '😌', label: 'Reduce Anxiety',        desc: 'Calm racing thoughts & worry' },
-  { id: 'better_sleep',     icon: '😴', label: 'Sleep Better',           desc: 'Build a healthy sleep routine' },
-  { id: 'boost_mood',       icon: '☀️', label: 'Improve My Mood',        desc: 'Feel more positive day-to-day' },
-  { id: 'manage_stress',    icon: '🧘', label: 'Manage Stress',          desc: 'Handle pressure more calmly' },
-  { id: 'build_confidence', icon: '💪', label: 'Build Confidence',       desc: 'Strengthen self-belief' },
+  { id: 'reduce_anxiety',   icon: '', label: 'Reduce Anxiety',        desc: 'Calm racing thoughts & worry' },
+  { id: 'better_sleep',     icon: '', label: 'Sleep Better',           desc: 'Build a healthy sleep routine' },
+  { id: 'boost_mood',       icon: '️', label: 'Improve My Mood',        desc: 'Feel more positive day-to-day' },
+  { id: 'manage_stress',    icon: '', label: 'Manage Stress',          desc: 'Handle pressure more calmly' },
+  { id: 'build_confidence', icon: '', label: 'Build Confidence',       desc: 'Strengthen self-belief' },
   { id: 'therapy',          icon: '🩺', label: 'Talk to a Therapist',    desc: 'Professional 1-on-1 support' },
-  { id: 'mindfulness',      icon: '🌿', label: 'Practice Mindfulness',   desc: 'Stay present & grounded' },
-  { id: 'social',           icon: '🤝', label: 'Improve Relationships',  desc: 'Connect better with others' },
+  { id: 'mindfulness',      icon: '', label: 'Practice Mindfulness',   desc: 'Stay present & grounded' },
+  { id: 'social',           icon: '', label: 'Improve Relationships',  desc: 'Connect better with others' },
 ];
 
-const MOODS = ['😞','😕','😐','😊','😄'];
+const MOODS = ['','','','',''];
 const STRESS = ['Very Low','Low','Moderate','High','Very High'];
 
 const FEATURES = [
@@ -174,7 +174,7 @@ function StepMood({ mood, stress, onMood, onStress, onNext, onBack }: {
 
         <div className="bg-[#f0fbf4] rounded-2xl p-4 border border-[#0d5d3a]/10">
           <p className="text-xs text-[#4a7c5d] leading-relaxed">
-            🔒 <strong className="text-[#0a2617]">Private:</strong> This is only used to personalise your dashboard. It's never shared with anyone.
+             <strong className="text-[#0a2617]">Private:</strong> This is only used to personalise your dashboard. It's never shared with anyone.
           </p>
         </div>
       </div>

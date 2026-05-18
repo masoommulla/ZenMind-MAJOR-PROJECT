@@ -36,16 +36,16 @@ type ProgressData = {
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  anxiety:       '😰 Anxiety',
-  depression:    '💙 Depression',
-  stress:        '😤 Stress',
-  exam_pressure: '📚 Exam Pressure',
-  bullying:      '🛡️ Bullying',
-  loneliness:    '🌙 Loneliness',
-  family_issues: '🏠 Family',
-  self_esteem:   '💪 Self-Esteem',
-  trauma:        '🌿 Trauma',
-  other:         '💬 Other',
+  anxiety:       ' Anxiety',
+  depression:    ' Depression',
+  stress:        ' Stress',
+  exam_pressure: ' Exam Pressure',
+  bullying:      '️ Bullying',
+  loneliness:    ' Loneliness',
+  family_issues: ' Family',
+  self_esteem:   ' Self-Esteem',
+  trauma:        ' Trauma',
+  other:         ' Other',
 };
 
 const CATEGORY_COLORS_PIE = [
@@ -276,7 +276,7 @@ export default function ZenProgressDashboard() {
           className="flex flex-col items-center justify-center py-20 text-center"
         >
           <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#0d5d3a] to-[#10b981] flex items-center justify-center text-white text-4xl mb-6 shadow-xl">
-            📊
+            
           </div>
           <h3 className="text-xl font-bold text-[#0a2617] dark:text-white mb-2" style={{ fontFamily: 'Syne,sans-serif' }}>
             No data yet
@@ -307,9 +307,9 @@ export default function ZenProgressDashboard() {
               label="Avg Mood Score"
               value={data?.summary.avgMood != null ? `${data.summary.avgMood}/10` : '—'}
               sub={data?.summary.avgMood != null
-                ? data.summary.avgMood >= 7 ? '😊 Doing great!'
-                : data.summary.avgMood >= 4 ? '🙂 Getting there'
-                : '💙 Keep going'
+                ? data.summary.avgMood >= 7 ? ' Doing great!'
+                : data.summary.avgMood >= 4 ? ' Getting there'
+                : ' Keep going'
                 : 'Log a mood to start'}
               icon={<Heart className="w-5 h-5" />}
               color="bg-gradient-to-br from-rose-500 to-pink-400"

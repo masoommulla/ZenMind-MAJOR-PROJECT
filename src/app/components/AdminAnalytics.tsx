@@ -144,7 +144,7 @@ export default function AdminAnalytics() {
 
       {/* ── Row 1: KPI Cards ── */}
       <div>
-        <SectionTitle>📊 Platform Health</SectionTitle>
+        <SectionTitle> Platform Health</SectionTitle>
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4">
           <KpiCard label="Total Users"        value={fmt(overview?.totalUsers)}           icon={<Users className="w-5 h-5" />} />
           <KpiCard label="Active This Week"   value={fmt(overview?.activeThisWeek)}        icon={<TrendingUp className="w-5 h-5" />} color="#7c3aed" />
@@ -170,7 +170,7 @@ export default function AdminAnalytics() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* User Growth */}
         <Card>
-          <SectionTitle>📈 User Growth (12 months)</SectionTitle>
+          <SectionTitle> User Growth (12 months)</SectionTitle>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={growth}>
               <CartesianGrid strokeDasharray="3 3" stroke="#0d5d3a11" />
@@ -185,7 +185,7 @@ export default function AdminAnalytics() {
 
         {/* Session Booking Trends */}
         <Card>
-          <SectionTitle>📅 Session Bookings (30 days)</SectionTitle>
+          <SectionTitle> Session Bookings (30 days)</SectionTitle>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={trendSparse}>
               <CartesianGrid strokeDasharray="3 3" stroke="#0d5d3a11" />
@@ -199,7 +199,7 @@ export default function AdminAnalytics() {
 
         {/* Mood Distribution */}
         <Card>
-          <SectionTitle>🧠 Journal Mood Distribution</SectionTitle>
+          <SectionTitle> Journal Mood Distribution</SectionTitle>
           {moodDist?.total === 0 ? (
             <p className="text-sm text-[#4a7c5d] py-8 text-center">No AI-tagged journal entries yet.</p>
           ) : (
@@ -239,7 +239,7 @@ export default function AdminAnalytics() {
 
         {/* Feature Engagement */}
         <Card>
-          <SectionTitle>🔥 Feature Engagement</SectionTitle>
+          <SectionTitle> Feature Engagement</SectionTitle>
           {engagement.length === 0 ? (
             <p className="text-sm text-[#4a7c5d] py-8 text-center">No engagement data yet.</p>
           ) : (
@@ -258,7 +258,7 @@ export default function AdminAnalytics() {
 
       {/* ── Row 3: Therapist Leaderboard ── */}
       <div>
-        <SectionTitle>🏆 Therapist Leaderboard</SectionTitle>
+        <SectionTitle> Therapist Leaderboard</SectionTitle>
         <Card>
           {leaderboard.length === 0 ? (
             <p className="text-sm text-[#4a7c5d] py-6 text-center">No completed sessions yet.</p>
@@ -293,7 +293,7 @@ export default function AdminAnalytics() {
                       <td className="py-3 px-3">
                         {t.avgRating != null ? (
                           <span className="flex items-center gap-1 text-amber-500 font-bold text-xs">
-                            ★ {t.avgRating} <span className="text-[#4a7c5d] dark:text-gray-400 font-normal">({t.ratingCount})</span>
+                             {t.avgRating} <span className="text-[#4a7c5d] dark:text-gray-400 font-normal">({t.ratingCount})</span>
                           </span>
                         ) : <span className="text-gray-400 text-xs">No ratings</span>}
                       </td>
@@ -311,7 +311,7 @@ export default function AdminAnalytics() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Top Resources */}
           <Card>
-            <SectionTitle>📹 Top Resources</SectionTitle>
+            <SectionTitle> Top Resources</SectionTitle>
             {(content.topResources || []).length === 0 ? (
               <p className="text-sm text-[#4a7c5d] py-4 text-center">No data yet.</p>
             ) : (
@@ -334,7 +334,7 @@ export default function AdminAnalytics() {
 
           {/* Top Programs */}
           <Card>
-            <SectionTitle>🧘 Top Programs</SectionTitle>
+            <SectionTitle> Top Programs</SectionTitle>
             {(content.topPrograms || []).length === 0 ? (
               <p className="text-sm text-[#4a7c5d] py-4 text-center">No data yet.</p>
             ) : (
@@ -355,7 +355,7 @@ export default function AdminAnalytics() {
 
           {/* Top Reading Lists */}
           <Card>
-            <SectionTitle>📚 Top Reading Lists</SectionTitle>
+            <SectionTitle> Top Reading Lists</SectionTitle>
             {(content.topReadingLists || []).length === 0 ? (
               <p className="text-sm text-[#4a7c5d] py-4 text-center">No data yet.</p>
             ) : (
@@ -379,7 +379,7 @@ export default function AdminAnalytics() {
       {/* ── Row 5: Crisis Trend ── */}
       {content?.crisisWeekly?.length > 0 && (
         <div>
-          <SectionTitle>🆘 Crisis Events — Weekly Trend (anonymised)</SectionTitle>
+          <SectionTitle> Crisis Events — Weekly Trend (anonymised)</SectionTitle>
           <Card>
             <ResponsiveContainer width="100%" height={160}>
               <BarChart data={content.crisisWeekly}>

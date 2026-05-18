@@ -15,16 +15,16 @@ type Story = {
 };
 
 const CATEGORIES = [
-  { key: 'all',           label: 'All Stories',   emoji: '💫' },
-  { key: 'anxiety',       label: 'Anxiety',       emoji: '😰' },
-  { key: 'depression',    label: 'Depression',    emoji: '💙' },
-  { key: 'stress',        label: 'Stress',        emoji: '😤' },
-  { key: 'exam_pressure', label: 'Exam Pressure', emoji: '📚' },
-  { key: 'bullying',      label: 'Bullying',      emoji: '🛡️' },
-  { key: 'loneliness',    label: 'Loneliness',    emoji: '🌙' },
-  { key: 'family_issues', label: 'Family',        emoji: '🏠' },
-  { key: 'self_esteem',   label: 'Self-Esteem',   emoji: '💪' },
-  { key: 'trauma',        label: 'Trauma',        emoji: '🌿' },
+  { key: 'all',           label: 'All Stories',   emoji: '' },
+  { key: 'anxiety',       label: 'Anxiety',       emoji: '' },
+  { key: 'depression',    label: 'Depression',    emoji: '' },
+  { key: 'stress',        label: 'Stress',        emoji: '' },
+  { key: 'exam_pressure', label: 'Exam Pressure', emoji: '' },
+  { key: 'bullying',      label: 'Bullying',      emoji: '️' },
+  { key: 'loneliness',    label: 'Loneliness',    emoji: '' },
+  { key: 'family_issues', label: 'Family',        emoji: '' },
+  { key: 'self_esteem',   label: 'Self-Esteem',   emoji: '' },
+  { key: 'trauma',        label: 'Trauma',        emoji: '' },
 ];
 
 
@@ -125,13 +125,13 @@ function SubmitModal({ onClose, onSubmitted }: { onClose: () => void; onSubmitte
             Your story could help someone else
           </div>
           <div className="text-sm text-white/70 mt-1">
-            Stories go live after admin review. You remain safe and private. 💚
+            Stories go live after admin review. You remain safe and private. 
           </div>
         </div>
 
         {done ? (
           <div className="flex flex-col items-center py-12 text-center px-6">
-            <div className="text-5xl mb-4">🌿</div>
+            <div className="text-5xl mb-4"></div>
             <div className="text-lg font-bold text-[#0d5d3a] dark:text-[#10b981]">Thank you for sharing!</div>
             <div className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-1">
               Your story is under review and will appear once approved.
@@ -179,7 +179,7 @@ function SubmitModal({ onClose, onSubmitted }: { onClose: () => void; onSubmitte
                   <span className="text-xs text-[#4a7c5d] dark:text-gray-400">Post anonymously</span>
                 </label>
                 <span className={`text-[10px] font-semibold ${text.length < 30 ? 'text-red-400' : 'text-[#10b981]'}`}>
-                  {text.length < 30 ? `${30 - text.length} more chars needed` : '✓ Ready'}
+                  {text.length < 30 ? `${30 - text.length} more chars needed` : ' Ready'}
                 </span>
               </div>
             </div>
@@ -261,7 +261,7 @@ export default function CommunityWall() {
           </div>
         ) : stories.length === 0 ? (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20">
-            <div className="text-5xl mb-4">🌿</div>
+            <div className="text-5xl mb-4"></div>
             <div className="text-lg font-bold text-[#0a2617] dark:text-white mb-1">No stories yet in this category</div>
             <div className="text-sm text-[#4a7c5d] dark:text-gray-400">Be the first to share yours!</div>
           </motion.div>

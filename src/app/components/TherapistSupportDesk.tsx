@@ -92,7 +92,7 @@ export default function TherapistSupportDesk() {
     setTSubmitting(true);
     try {
       await apiFetch('/therapist/tickets', { method: 'POST', body: JSON.stringify({ category: tCategory, subject: tSubject, message: tMessage }) });
-      setMsg({ text: '✅ Ticket submitted! Admin will respond shortly.', ok: true });
+      setMsg({ text: ' Ticket submitted! Admin will respond shortly.', ok: true });
       setTSubject(''); setTMessage(''); setTCategory('profile_update');
       setShowTicketForm(false);
       load();
@@ -105,7 +105,7 @@ export default function TherapistSupportDesk() {
     setRSubmitting(true);
     try {
       await apiFetch('/therapist/reports', { method: 'POST', body: JSON.stringify({ reportType: rType, urgency: rUrgency, involvedUserEmail: rUserEmail, involvedUserName: rUserName, sessionReference: rSession, description: rDesc }) });
-      setMsg({ text: '✅ Report submitted successfully.', ok: true });
+      setMsg({ text: ' Report submitted successfully.', ok: true });
       setRType('misbehaviour'); setRUrgency('normal'); setRUserEmail(''); setRUserName(''); setRSession(''); setRDesc('');
       setShowReportForm(false);
       load();
@@ -192,7 +192,7 @@ export default function TherapistSupportDesk() {
           {(['tickets','reports'] as const).map(t => (
             <button key={t} onClick={() => setActiveTab(t)}
               className={`px-4 py-2 rounded-xl text-sm font-bold transition capitalize ${activeTab === t ? 'bg-[#0d5d3a] text-white shadow-sm' : 'text-[#4a7c5d] dark:text-gray-400 hover:bg-[#0d5d3a]/10'}`}>
-              {t === 'tickets' ? '🎫 My Tickets' : '🚨 Incident Reports'}
+              {t === 'tickets' ? ' My Tickets' : ' Incident Reports'}
             </button>
           ))}
         </div>
@@ -342,7 +342,7 @@ export default function TherapistSupportDesk() {
                 </div>
                 <button onClick={submitReport} disabled={rSubmitting}
                   className="w-full py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-black text-sm transition shadow-md disabled:opacity-60">
-                  {rSubmitting ? 'Submitting…' : '🚨 Submit Report'}
+                  {rSubmitting ? 'Submitting…' : ' Submit Report'}
                 </button>
               </div>
             </motion.div>

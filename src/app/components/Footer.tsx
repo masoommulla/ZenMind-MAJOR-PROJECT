@@ -118,7 +118,7 @@ export default function Footer({
           <div className="flex flex-col md:flex-row justify-between items-center gap-3">
             <div className="flex flex-col md:flex-row items-center gap-4">
               <p className="text-white/60 text-xs sm:text-sm">
-                © 2026 ZenMind. All rights reserved.
+                 2026 ZenMind. All rights reserved.
               </p>
               {onTherapistLoginTrigger && (
                 <button onClick={onTherapistLoginTrigger} className="text-xs sm:text-sm text-white/50 hover:text-white transition">

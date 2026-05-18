@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -1100,7 +1100,7 @@ function CrisisMonitorWidget() {
 
           ) : (
 
-            <p className="text-sm text-[#4a7c5d] dark:text-gray-400 font-medium">No events this week 🌿</p>
+            <p className="text-sm text-[#4a7c5d] dark:text-gray-400 font-medium">No events this week </p>
 
           )}
 
@@ -1214,7 +1214,7 @@ function CrisisMonitorWidget() {
 
           <p className="text-xs text-amber-700 dark:text-amber-300 font-semibold leading-relaxed">
 
-            ⚠️ When a crisis keyword is detected, Zeni AI <strong>automatically</strong> skips the standard AI response and delivers a warm, empathetic reply followed by Indian crisis helpline numbers and a direct "Talk to a Therapist Now" button. No admin action is required per event.
+            ️ When a crisis keyword is detected, Zeni AI <strong>automatically</strong> skips the standard AI response and delivers a warm, empathetic reply followed by Indian crisis helpline numbers and a direct "Talk to a Therapist Now" button. No admin action is required per event.
 
           </p>
 
@@ -1302,7 +1302,7 @@ function NotificationBroadcastWidget() {
 
       const r = await apiFetch<any>('/admin/notifications/broadcast', { method: 'POST', body: JSON.stringify(payload) });
 
-      toast(`✅ Sent to ${r.sent} user${r.sent !== 1 ? 's' : ''}`);
+      toast(` Sent to ${r.sent} user${r.sent !== 1 ? 's' : ''}`);
 
       setTitle(''); setBody(''); setActionTab(''); setTargetUserId('');
 
@@ -1322,15 +1322,15 @@ function NotificationBroadcastWidget() {
 
     { value: 'therapy', label: '🩺 Therapy Hub' },
 
-    { value: 'sessions', label: '📅 My Sessions' },
+    { value: 'sessions', label: ' My Sessions' },
 
-    { value: 'programs', label: 'ðŸ‹ï¸ Wellness Programs' },
+    { value: 'programs', label: '️️ Wellness Programs' },
 
-    { value: 'reading', label: '📚 Reading Lists' },
+    { value: 'reading', label: ' Reading Lists' },
 
-    { value: 'goals', label: '🎯 My Goals' },
+    { value: 'goals', label: ' My Goals' },
 
-    { value: 'aichat', label: '🤖 AI Chat' },
+    { value: 'aichat', label: ' AI Chat' },
 
   ];
 
@@ -1565,23 +1565,26 @@ function NotificationBroadcastWidget() {
                   <p className="text-sm font-bold text-[#0a2617] dark:text-gray-100 truncate">{n.title}</p>
 
                   <p className="text-[10px] text-[#4a7c5d] dark:text-gray-500 mt-0.5 font-mono">
-
-                    user:{n.userHash}… Â· {new Date(n.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-
+                    user:{n.userHash}… · {new Date(n.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </p>
-
                 </div>
-
-                {n.actionTab && (
-
-                  <span className="text-[9px] font-bold text-[#0d5d3a] dark:text-[#10b981] bg-[#0d5d3a]/08 dark:bg-[#0d5d3a]/20 px-2 py-1 rounded-lg whitespace-nowrap flex-shrink-0">
-
-                    → {n.actionTab}
-
-                  </span>
-
-                )}
-
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {n.actionTab && (
+                    <span className="text-[9px] font-bold text-[#0d5d3a] dark:text-[#10b981] bg-[#0d5d3a]/08 dark:bg-[#0d5d3a]/20 px-2 py-1 rounded-lg whitespace-nowrap">
+                      → {n.actionTab}
+                    </span>
+                  )}
+                  <button onClick={async () => {
+                    if (confirm('Delete this notification?')) {
+                      try {
+                        await apiFetch(`/admin/notifications/recent/${n._id}`, { method: 'DELETE' });
+                        loadRecent();
+                      } catch(e:any) { toast(e.message, false); }
+                    }
+                  }} className="text-red-500 hover:text-red-600 transition" title="Delete Notification">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
 
             ))}
@@ -1712,7 +1715,7 @@ function ContentManagement() {
 
       }
 
-      setMsg({ text: approved ? '✅ Story approved and is now live.' : 'ðŸ—‘ï¸ Story rejected and removed.', ok: approved });
+      setMsg({ text: approved ? ' Story approved and is now live.' : '️ Story rejected and removed.', ok: approved });
 
     } catch (e: any) { setMsg({ text: e.message || 'Failed', ok: false }); }
 
@@ -1742,7 +1745,7 @@ function ContentManagement() {
 
       setSelectedIds(new Set());
 
-      setMsg({ text: `✅ ${ids.length} stories approved.`, ok: true });
+      setMsg({ text: ` ${ids.length} stories approved.`, ok: true });
 
     } catch (e: any) { setMsg({ text: e.message || 'Bulk approve failed', ok: false }); }
 
@@ -1766,7 +1769,7 @@ function ContentManagement() {
 
       setSelectedIds(new Set());
 
-      setMsg({ text: `ðŸ—‘ï¸ ${ids.length} stories rejected.`, ok: true });
+      setMsg({ text: `️ ${ids.length} stories rejected.`, ok: true });
 
     } catch (e: any) { setMsg({ text: e.message || 'Bulk reject failed', ok: false }); }
 
@@ -1787,13 +1790,9 @@ function ContentManagement() {
 
 
   const CATEGORY_LABELS: Record<string, string> = {
-
-    anxiety: 'ðŸ˜° Anxiety', depression: 'ðŸ’™ Depression', stress: 'ðŸ˜¤ Stress',
-
-    exam_pressure: '📚 Exam Pressure', bullying: 'ðŸ›¡ï¸ Bullying', loneliness: '🌙 Loneliness',
-
-    family_issues: 'ðŸ  Family', self_esteem: 'ðŸ’ª Self-Esteem', trauma: '🌿 Trauma', other: '💬 Other',
-
+    anxiety: 'Anxiety', depression: 'Depression', stress: 'Stress',
+    exam_pressure: 'Exam Pressure', bullying: 'Bullying', loneliness: 'Loneliness',
+    family_issues: 'Family', self_esteem: 'Self-Esteem', trauma: 'Trauma', other: 'Other',
   };
 
 
@@ -1886,7 +1885,7 @@ function ContentManagement() {
 
             <div className="text-sm font-bold text-[#0a2617] dark:text-gray-100">
 
-              {pending.length === 0 ? '🎉 All clear — no stories pending review' : `${pending.length} stor${pending.length !== 1 ? 'ies' : 'y'} awaiting review`}
+              {pending.length === 0 ? ' All clear — no stories pending review' : `${pending.length} stor${pending.length !== 1 ? 'ies' : 'y'} awaiting review`}
 
             </div>
 
@@ -1932,7 +1931,7 @@ function ContentManagement() {
 
             <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
 
-              <div className="text-5xl mb-4">🌿</div>
+              <div className="text-5xl mb-4"></div>
 
               <div className="text-lg font-bold text-[#0a2617] dark:text-white mb-1">No pending stories</div>
 
@@ -2066,7 +2065,7 @@ function ContentManagement() {
 
                     <span className="flex items-center gap-1"><Clock size={11}/>{new Date(s.createdAt).toLocaleString()}</span>
 
-                    <span className="text-[#10b981] font-bold">â¤ï¸ {s.likes || 0}</span>
+                    <span className="text-[#10b981] font-bold">️ {s.likes || 0}</span>
 
                   </div>
 
@@ -2150,11 +2149,11 @@ function ContentManagement() {
 
 
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ────────────────────────────────────────────────────────────────────────────────────────────────── 
 
    ADMIN RESOURCES PANEL
 
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+────────────────────────────────────────────────────────────────────────────────────────────────── */
 
 type ResType = 'video' | 'audio' | 'image' | 'link';
 
@@ -2330,7 +2329,7 @@ function AdminResourcesPanel() {
 
       });
 
-      setMsg({ text: '✅ Resource added successfully!', ok: true });
+      setMsg({ text: ' Resource added successfully!', ok: true });
 
       resetForm(); setShowForm(false); load();
 
@@ -2500,13 +2499,10 @@ function AdminResourcesPanel() {
 
                   className="w-full px-4 py-2.5 rounded-xl border border-[#0d5d3a]/15 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 dark:focus:ring-[#1a8a5a]/50">
 
-                  <option value="video">ðŸŽ¬ Video</option>
-
-                  <option value="audio">ðŸŽµ Audio</option>
-
-                  <option value="image">ðŸ–¼ï¸ Image</option>
-
-                  <option value="link">ðŸ”— Link / Article</option>
+                  <option value="video">Video</option>
+                  <option value="audio">Audio</option>
+                  <option value="image">Image</option>
+                  <option value="link">Link / Article</option>
 
                 </select>
 
@@ -2574,7 +2570,7 @@ function AdminResourcesPanel() {
 
                   className="w-full text-sm text-[#0a2617] dark:text-white file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#0d5d3a] file:text-white file:font-bold file:cursor-pointer" />
 
-                {fileData && <p className="text-[10px] text-[#0d5d3a] dark:text-[#10b981] mt-1 font-semibold">✓ File loaded ({fileMime})</p>}
+                {fileData && <p className="text-[10px] text-[#0d5d3a] dark:text-[#10b981] mt-1 font-semibold"> File loaded ({fileMime})</p>}
 
               </label>
 
@@ -2594,7 +2590,7 @@ function AdminResourcesPanel() {
 
                   className="w-full text-sm text-[#0a2617] dark:text-white file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#f0fbf4] dark:file:bg-[#0d5d3a]/20 file:text-[#0d5d3a] dark:file:text-[#10b981] file:font-bold file:cursor-pointer" />
 
-                {thumbData && <p className="text-[10px] text-[#0d5d3a] dark:text-[#10b981] mt-1 font-semibold">✓ Thumbnail loaded</p>}
+                {thumbData && <p className="text-[10px] text-[#0d5d3a] dark:text-[#10b981] mt-1 font-semibold"> Thumbnail loaded</p>}
 
               </label>
 
@@ -2672,7 +2668,7 @@ function AdminResourcesPanel() {
 
         <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
 
-          <div className="text-5xl mb-4">📚</div>
+          <div className="text-5xl mb-4"></div>
 
           <div className="text-lg font-bold text-[#0a2617] dark:text-white mb-1">No resources yet</div>
 
@@ -2861,19 +2857,26 @@ function SupportManagement() {
 
 
   const toggleStatus = async (id: string) => {
-
     try {
-
       await apiFetch(`/admin/support/${id}/resolve`, { method: 'PUT' });
-
       await loadData();
-
     } catch (e: any) {
-
       setMsg({ text: e.message || 'Failed to update ticket', ok: false });
-
     }
+  };
 
+  const deleteSingleTicket = async (id: string) => {
+    if (!confirm('Delete this ticket?')) return;
+    try {
+      await apiFetch('/admin/support/bulk-delete', { 
+        method: 'POST', 
+        body: JSON.stringify({ ids: [id] }) 
+      });
+      setMsg({ text: 'Ticket deleted successfully.', ok: true });
+      await loadData();
+    } catch (e: any) {
+      setMsg({ text: e.message || 'Failed to delete ticket', ok: false });
+    }
   };
 
 
@@ -3137,19 +3140,15 @@ function SupportManagement() {
                   </div>
 
                   <div className="col-span-2 flex justify-end gap-2 items-center">
-
+                    <button onClick={() => deleteSingleTicket(t._id)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition" title="Delete Ticket">
+                      <Trash2 size={16} />
+                    </button>
                     <button onClick={() => setViewingTicket(t)} className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition" title="View Details">
-
                       <Eye size={16} />
-
                     </button>
-
                     <button onClick={() => toggleStatus(t._id)} className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-xs font-bold transition">
-
                       {t.status === 'pending' ? 'Mark Resolved' : 'Mark Pending'}
-
                     </button>
-
                   </div>
 
                 </div>
@@ -3258,13 +3257,7 @@ function SupportManagement() {
 
 
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-   PEER CIRCLES MANAGEMENT
-
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
-const CIRCLE_ICONS = ['💬','ðŸ§ ','💚','🌿','🌙','🔥','🎯','🌈','ðŸ¤','⚡','ðŸ•Šï¸','🌸'];
+const CIRCLE_ICONS = ['C', 'P', 'S', 'H', 'M', 'F', 'T', 'R', 'G', 'L', 'D', 'B'];
 
 const CIRCLE_CATS  = ['general','anxiety','depression','trauma','relationships','teen','stress','grief'];
 
@@ -3304,7 +3297,7 @@ function PeerCirclesManagement() {
 
   const [category, setCategory] = useState('general');
 
-  const [icon, setIcon]         = useState('💬');
+  const [icon, setIcon]         = useState('');
 
   const [gradFrom, setGradFrom] = useState('#0d5d3a');
 
@@ -3331,8 +3324,6 @@ function PeerCirclesManagement() {
   const openMessages = async (c:any) => {
 
     setViewCircle(c); setViewMsgs([]); setMsgsLoading(true);
-
-    // FIX: use admin-auth route instead of user-auth /circles/:id/messages
 
     try { const r = await apiFetch<any>(`/circles/admin/${c._id}/messages?limit=100`); setViewMsgs(r.messages||[]); }
 
@@ -3456,9 +3447,9 @@ function PeerCirclesManagement() {
 
       })});
 
-      setMsg({text:'✅ Circle created!',ok:true});
+      setMsg({text:' Circle created!',ok:true});
 
-      setName(''); setDesc(''); setCategory('general'); setIcon('💬');
+      setName(''); setDesc(''); setCategory('general'); setIcon('');
 
       setShowForm(false); load();
 
@@ -3498,7 +3489,7 @@ function PeerCirclesManagement() {
 
           <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>Peer Support Circles</h2>
 
-          <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-0.5">{circles.length} circles Â· create, enable/disable, moderate messages</p>
+          <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-0.5">{circles.length} circles · create, enable/disable, moderate messages</p>
 
         </div>
 
@@ -3642,7 +3633,7 @@ function PeerCirclesManagement() {
 
                   style={{background:`linear-gradient(135deg,${c.gradientFrom||'#0d5d3a'},${c.gradientTo||'#1a8a5a'})`}}>
 
-                  {c.icon||'💬'}
+                  {c.icon||''}
 
                 </div>
 
@@ -3650,7 +3641,7 @@ function PeerCirclesManagement() {
 
                   <div className="font-black text-[#0a2617] dark:text-white text-sm">{c.name}</div>
 
-                  <div className="text-[10px] text-[#4a7c5d] dark:text-gray-400 capitalize mt-0.5">{c.category} Â· {c.memberCount||0} members Â· {c.messageCount||0} msgs</div>
+                  <div className="text-[10px] text-[#4a7c5d] dark:text-gray-400 capitalize mt-0.5">{c.category} · {c.memberCount||0} members · {c.messageCount||0} msgs</div>
 
                 </div>
 
@@ -3676,7 +3667,7 @@ function PeerCirclesManagement() {
 
             <span className={`text-[10px] font-bold px-2 py-1 rounded-full w-fit ${c.isActive?'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400':'bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-500'}`}>
 
-              {c.isActive?'â— Active':'○ Disabled'}
+              {c.isActive?'● Active':'○ Disabled'}
 
             </span>
 
@@ -3708,7 +3699,7 @@ function PeerCirclesManagement() {
 
           <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
 
-            <div className="text-5xl mb-3">💬</div>
+            <div className="text-5xl mb-3"></div>
 
             <div className="font-bold text-[#0a2617] dark:text-white mb-1">No circles yet</div>
 
@@ -3744,7 +3735,7 @@ function PeerCirclesManagement() {
 
                   </h3>
 
-                  <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-0.5">Hover a message and click ðŸ—‘ï¸ to moderate</p>
+                  <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-0.5">Hover a message and click ️ to moderate</p>
 
                 </div>
 
@@ -3854,7 +3845,11 @@ function PeerCirclesManagement() {
 
               className="bg-white dark:bg-[#111111] rounded-2xl w-full max-w-sm p-6 shadow-2xl border border-[#0d5d3a]/15 dark:border-white/10">
 
-              <h3 className="font-black text-[#0a2617] dark:text-white mb-1" style={{fontFamily:'Syne,sans-serif'}}>â³ Timed Suspension</h3>
+              <h3 className="font-black text-[#0a2617] dark:text-white mb-1 flex items-center gap-2" style={{fontFamily:'Syne,sans-serif'}}>
+
+                <Clock size={16} className="text-purple-500" /> Timed Suspension
+
+              </h3>
 
               <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mb-5">Suspending <strong className="text-[#0a2617] dark:text-white">{suspendTarget.name}</strong>. They will be auto-unsuspended after the set duration.</p>
 
@@ -3926,26 +3921,19 @@ function PeerCirclesManagement() {
 
 
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ────────────────────────────────────────────────────────────────────────────────────────────────── 
 
    QUIZ QUESTIONS MANAGEMENT
 
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+────────────────────────────────────────────────────────────────────────────────────────────────── */
 
 const DEFAULT_QUIZ_QUESTIONS = [
-
-  { id:'concern',    emoji:'ðŸ’­', question:"What's been weighing on you lately?",   options:['Anxiety & Stress','Depression & Low Mood','Relationship Issues','Trauma & PTSD','Teen / Youth Support',"I'm not sure yet"] },
-
-  { id:'situation',  emoji:'ðŸªž', question:'How would you describe your situation?', options:['I need someone to talk to','I want structured therapy',"I'm in crisis, need help now",'Just exploring my options'] },
-
-  { id:'format',     emoji:'ðŸ–¥ï¸', question:'Session format preference?',             options:['Online — from home','In-person at clinic','Either works for me'] },
-
-  { id:'budget',     emoji:'💰', question:"What's your budget per session?",        options:['Under â‚¹500','â‚¹500 – â‚¹1,000','â‚¹1,000+','No preference'] },
-
-  { id:'language',   emoji:'ðŸŒ', question:'Language preference?',                   options:['English','Hindi','Both are fine','No preference'] },
-
-  { id:'experience', emoji:'🎓', question:'Experience level preference?',           options:['New but passionate (1–3 yrs)','Experienced (3–5 yrs)','Highly seasoned (5+ yrs)',"Doesn't matter"] },
-
+  { id:'concern',    question:"What's been weighing on you lately?",   options:['Anxiety & Stress','Depression & Low Mood','Relationship Issues','Trauma & PTSD','Teen / Youth Support',"I'm not sure yet"] },
+  { id:'situation',  question:'How would you describe your situation?', options:['I need someone to talk to','I want structured therapy',"I'm in crisis, need help now",'Just exploring my options'] },
+  { id:'format',     question:'Session format preference?',             options:['Online — from home','In-person at clinic','Either works for me'] },
+  { id:'budget',     question:"What's your budget per session?",        options:['Under ₹500','₹500 – ₹1,000','₹1,000+','No preference'] },
+  { id:'language',   question:'Language preference?',                   options:['English','Hindi','Both are fine','No preference'] },
+  { id:'experience', question:'Experience level preference?',           options:['New but passionate (1–3 yrs)','Experienced (3–5 yrs)','Highly seasoned (5+ yrs)',"Doesn't matter"] },
 ];
 
 
@@ -4019,11 +4007,7 @@ function QuizManagement() {
               <div className="flex-1 min-w-0">
 
                 <div className="flex items-center gap-2 mb-2">
-
-                  <span className="text-xl">{q.emoji}</span>
-
                   <span className="font-bold text-[#0a2617] dark:text-white text-sm">{q.question}</span>
-
                 </div>
 
                 <div className="flex flex-wrap gap-1.5">
@@ -4088,23 +4072,11 @@ function QuizManagement() {
 
 
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ────────────────────────────────────────────────────────────────────────────────────────────────── 
 
-/* ─── Profanity detection engine ───────────────────────────────
+   Profanity detection engine 
 
-   Strategy:
-
-   1. Normalize text: collapse spaces, strip punctuation between letters,
-
-      map common leetspeak substitutions (@ → a, 3 → e, 0 → o, $ → s, etc.)
-
-   2. Match against a flat pattern list (plain words) — checked via indexOf
-
-      on the normalized string for broad coverage.
-
-   3. Also run regex patterns for abbreviations and spaced-out variants.
-
-──────────────────────────────────────────────────────────────── */
+────────────────────────────────────────────────────────────────────────────────────────────────── */
 
 
 
@@ -4441,25 +4413,15 @@ function FlaggedContent() {
 
 
       <div className="flex items-center justify-between">
-
         <div>
-
-          <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>ðŸš¨ Flagged Content</h2>
-
+          <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>Flagged Content</h2>
           <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-0.5">
-
             {loading ? 'Scanning…' : `${filtered.length} flagged message${filtered.length!==1?'s':''} detected across all circles`}
-
           </p>
-
         </div>
-
         <button onClick={load} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#0d5d3a]/20 dark:border-white/10 text-sm font-bold text-[#0d5d3a] dark:text-[#10b981] hover:bg-[#0d5d3a]/5 transition">
-
-          â†» Rescan
-
+          <RefreshCw size={16} /> Rescan
         </button>
-
       </div>
 
 
@@ -4476,7 +4438,7 @@ function FlaggedContent() {
 
 
 
-      {loading && <div className="text-center py-20 text-[#4a7c5d] font-bold">ðŸ” Scanning all circle messages…</div>}
+      {loading && <div className="text-center py-20 text-[#4a7c5d] font-bold">Scanning all circle messages…</div>}
 
 
 
@@ -4484,7 +4446,7 @@ function FlaggedContent() {
 
         <div className="flex flex-col items-center justify-center py-24 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
 
-          <div className="text-5xl mb-3">✅</div>
+          <div className="text-5xl mb-3"></div>
 
           <div className="font-bold text-[#0a2617] dark:text-white mb-1">No flagged content</div>
 

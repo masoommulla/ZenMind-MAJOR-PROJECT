@@ -6,7 +6,7 @@ import { apiFetch } from '../api/client';
 const CATS = ['anxiety','stress','sleep','self_esteem','mindfulness','motivation','other'];
 const DIFFS = ['beginner','intermediate','advanced'];
 const EX_TYPES = ['breathing','journaling','meditation','movement','reading','reflection','other'];
-const CAT_EMOJI: Record<string,string> = { anxiety:'🧘', stress:'💆', sleep:'🌙', self_esteem:'✨', mindfulness:'🍃', motivation:'🚀', other:'💬' };
+const CAT_EMOJI: Record<string,string> = { anxiety:'', stress:'', sleep:'', self_esteem:'', mindfulness:'', motivation:'', other:'' };
 const GRADIENTS = [
   ['#7c3aed','#a78bfa'],['#1e40af','#6366f1'],['#0d5d3a','#10b981'],
   ['#b45309','#f59e0b'],['#be123c','#fb7185'],['#065f46','#34d399'],
@@ -61,10 +61,10 @@ export default function WellnessProgramsAdmin() {
     try {
       if (editing) {
         await apiFetch(`/wellness-programs/admin/${editing._id}`, { method:'PUT', body:JSON.stringify(form) });
-        flash('✅ Program updated successfully!');
+        flash(' Program updated successfully!');
       } else {
         await apiFetch('/wellness-programs/admin', { method:'POST', body:JSON.stringify(form) });
-        flash('✅ Program created successfully!');
+        flash(' Program created successfully!');
       }
       setShowForm(false); load();
     } catch(e:any) { flash(e.message||'Failed to save', false); }
@@ -107,9 +107,9 @@ export default function WellnessProgramsAdmin() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label:'Total Programs', val:programs.length, sub:`${programs.filter(p=>p.isPublished).length} published`, icon:'📚' },
-          { label:'Total Enrollments', val:totalEnrollments, sub:'Across all programs', icon:'👥' },
-          { label:'Active Programs', val:programs.filter(p=>p.isPublished).length, sub:`${programs.filter(p=>!p.isPublished).length} drafts`, icon:'✅' },
+          { label:'Total Programs', val:programs.length, sub:`${programs.filter(p=>p.isPublished).length} published`, icon:'' },
+          { label:'Total Enrollments', val:totalEnrollments, sub:'Across all programs', icon:'' },
+          { label:'Active Programs', val:programs.filter(p=>p.isPublished).length, sub:`${programs.filter(p=>!p.isPublished).length} drafts`, icon:'' },
         ].map(s=>(
           <div key={s.label} className="bg-white dark:bg-[#111111] rounded-3xl p-5 border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm">
             <div className="text-2xl mb-1">{s.icon}</div>
@@ -134,7 +134,7 @@ export default function WellnessProgramsAdmin() {
           <div key={p._id} className="bg-white dark:bg-[#111111] rounded-2xl border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm overflow-hidden">
             <div className="flex items-center gap-4 p-5">
               <div className="w-2 self-stretch rounded-full shrink-0" style={{background:`linear-gradient(${p.coverGradientFrom},${p.coverGradientTo})`}}/>
-              <div className="text-2xl">{CAT_EMOJI[p.category]||'💬'}</div>
+              <div className="text-2xl">{CAT_EMOJI[p.category]||''}</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-bold text-[#0a2617] dark:text-white">{p.title}</span>
@@ -182,7 +182,7 @@ export default function WellnessProgramsAdmin() {
         ))}
         {programs.length===0 && (
           <div className="text-center py-16 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/5">
-            <div className="text-4xl mb-3">📚</div>
+            <div className="text-4xl mb-3"></div>
             <div className="font-bold text-[#4a7c5d] dark:text-gray-400">No programs yet. Create your first one!</div>
           </div>
         )}

@@ -704,5 +704,18 @@ router.get('/notifications/recent', requireAdmin, async (req, res) => {
   }
 });
 
+/**
+ * DELETE /admin/notifications/recent/:id
+ * Delete a specific notification by ID
+ */
+router.delete('/notifications/recent/:id', requireAdmin, async (req, res) => {
+  try {
+    await Notification.findByIdAndDelete(req.params.id);
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
 

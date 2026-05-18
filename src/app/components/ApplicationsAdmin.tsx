@@ -141,7 +141,7 @@ export default function ApplicationsAdmin() {
                       <div className="min-w-0">
                         <p className="font-black text-[#0a2617] dark:text-white text-sm truncate" style={{ fontFamily: 'Syne, sans-serif' }}>{app.name}</p>
                         <p className="text-[11px] text-[#4a7c5d] dark:text-gray-400 truncate">{app.email}</p>
-                        <p className="text-[11px] font-bold text-[#0d5d3a] dark:text-[#10b981] truncate mt-0.5">📋 {app.jobTitle || 'Unknown Role'}</p>
+                        <p className="text-[11px] font-bold text-[#0d5d3a] dark:text-[#10b981] truncate mt-0.5"> {app.jobTitle || 'Unknown Role'}</p>
                       </div>
                     </div>
                     {/* Status badge */}

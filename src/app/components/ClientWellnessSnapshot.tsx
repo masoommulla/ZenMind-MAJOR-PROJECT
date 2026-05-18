@@ -181,7 +181,7 @@ export default function ClientWellnessSnapshot({ userId, onClose }: ClientWellne
                         <div key={i} className="flex justify-between items-center bg-[#fbfdfb] dark:bg-[#222] border border-gray-100 dark:border-white/5 p-2 rounded-xl">
                           <div className="text-sm font-semibold text-[#0a2617] dark:text-gray-200 truncate pr-2 flex-1">{g.title}</div>
                           <div className="shrink-0 text-xs font-bold bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 px-2 py-1 rounded-lg flex items-center gap-1">
-                            🔥 {g.currentStreak}
+                             {g.currentStreak}
                           </div>
                         </div>
                       ))}

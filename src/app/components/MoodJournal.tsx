@@ -135,7 +135,7 @@ function InsightsCard({ insights, loading }: { insights: Insights | null; loadin
         </>
       ) : (
         <p className="text-sm text-[#4a7c5d] dark:text-gray-400">
-          Write at least one journal entry this week to get your personalized AI insight. 💚
+          Write at least one journal entry this week to get your personalized AI insight. 
         </p>
       )}
     </div>

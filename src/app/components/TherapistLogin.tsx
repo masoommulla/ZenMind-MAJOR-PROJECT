@@ -132,7 +132,7 @@ export default function TherapistLogin({ onBackHome, onAuthSuccess }: { onBackHo
             </button>
 
             <button className="doodle-th-btn" type="submit" disabled={loading}>
-              {loading ? '...' : "Let's Go! 🚀"}
+              {loading ? '...' : "Let's Go! "}
             </button>
           </form>
 

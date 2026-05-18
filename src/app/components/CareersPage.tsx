@@ -79,7 +79,7 @@ export default function CareersPage({ onClose }: { onClose: () => void }) {
                 <div className="text-center py-20 text-[#4a7c5d] dark:text-gray-400 font-semibold">Loading positions...</div>
               ) : filtered.length === 0 ? (
                 <div className="text-center py-20">
-                  <div className="text-5xl mb-4">🌿</div>
+                  <div className="text-5xl mb-4"></div>
                   <div className="text-xl font-black text-[#0a2617] dark:text-white mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>No open positions</div>
                   <p className="text-[#4a7c5d] dark:text-gray-400">Check back soon — we're always growing!</p>
                 </div>
@@ -126,7 +126,7 @@ function JobCard({ job, index, featured, onClick }: { job: any; index: number; f
             {job.department && (
               <span className="text-xs font-black px-2.5 py-0.5 rounded-full text-white" style={{ background: color }}>{job.department}</span>
             )}
-            {featured && <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">⭐ Featured</span>}
+            {featured && <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400"> Featured</span>}
             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${job.status === 'active' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-white/10 text-gray-500'}`}>
               {job.status === 'active' ? 'Open' : 'Closed'}
             </span>
@@ -186,7 +186,7 @@ function JobDetail({ job, onBack, applying, setApplying }: { job: any; onBack: (
 
       {/* Job Header */}
       <div className="rounded-3xl p-6 sm:p-8 text-white mb-6 relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}>
-        <div className="absolute inset-0 opacity-10 text-[200px] flex items-center justify-end pr-8 leading-none">💼</div>
+        <div className="absolute inset-0 opacity-10 text-[200px] flex items-center justify-end pr-8 leading-none"></div>
         <div className="relative z-10">
           {job.department && <span className="text-xs font-black uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full">{job.department}</span>}
           <h1 className="text-2xl sm:text-3xl font-black mt-3 mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>{job.title}</h1>
@@ -194,7 +194,7 @@ function JobDetail({ job, onBack, applying, setApplying }: { job: any; onBack: (
             {job.location && <span className="flex items-center gap-1"><MapPin size={13} />{job.location}</span>}
             {job.employmentType && <span className="flex items-center gap-1"><Briefcase size={13} />{job.employmentType}</span>}
             {job.experience && <span className="flex items-center gap-1"><Clock size={13} />{job.experience}</span>}
-            {job.salary && <span>💰 {job.salary}</span>}
+            {job.salary && <span> {job.salary}</span>}
           </div>
         </div>
       </div>
@@ -214,7 +214,7 @@ function JobDetail({ job, onBack, applying, setApplying }: { job: any; onBack: (
             <Section title="Requirements"><ul className="space-y-2">{job.requirements.map((r: string, i: number) => <li key={i} className="flex items-start gap-2 text-sm text-[#4a7c5d] dark:text-gray-400"><span className="text-[#0d5d3a] dark:text-[#10b981] mt-0.5">•</span>{r}</li>)}</ul></Section>
           )}
           {(job.benefits || []).length > 0 && (
-            <Section title="Benefits"><ul className="space-y-2">{job.benefits.map((b: string, i: number) => <li key={i} className="flex items-start gap-2 text-sm text-[#4a7c5d] dark:text-gray-400"><span className="text-green-500 mt-0.5">✓</span>{b}</li>)}</ul></Section>
+            <Section title="Benefits"><ul className="space-y-2">{job.benefits.map((b: string, i: number) => <li key={i} className="flex items-start gap-2 text-sm text-[#4a7c5d] dark:text-gray-400"><span className="text-green-500 mt-0.5"></span>{b}</li>)}</ul></Section>
           )}
         </div>
 
@@ -273,7 +273,7 @@ function JobDetail({ job, onBack, applying, setApplying }: { job: any; onBack: (
                     <span className="text-xs font-bold text-[#4a7c5d] dark:text-gray-400 mb-1 block">Resume (PDF/Doc)</span>
                     <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-[#0d5d3a]/30 dark:border-white/20 cursor-pointer hover:border-[#0d5d3a] transition">
                       <Upload size={14} className="text-[#0d5d3a] dark:text-[#10b981]" />
-                      <span className="text-xs text-[#4a7c5d] dark:text-gray-400">{resumeB64 ? 'File attached ✓' : 'Upload resume'}</span>
+                      <span className="text-xs text-[#4a7c5d] dark:text-gray-400">{resumeB64 ? 'File attached ' : 'Upload resume'}</span>
                       <input type="file" accept=".pdf,.doc,.docx" onChange={handleResume} className="hidden" />
                     </div>
                   </label>

@@ -34,75 +34,69 @@ interface Props {
 const QUESTIONS = [
   {
     id: 'concern',
-    emoji: '💭',
     question: "What's been weighing on you lately?",
     subtitle: 'Choose the one that resonates most with you right now.',
     options: [
-      { label: 'Anxiety & Stress',        emoji: '😰', value: 'anxiety' },
-      { label: 'Depression & Low Mood',   emoji: '😔', value: 'depression' },
-      { label: 'Relationship Issues',     emoji: '💔', value: 'relationship' },
-      { label: 'Trauma & PTSD',           emoji: '🛡️', value: 'trauma' },
-      { label: 'Teen / Youth Support',    emoji: '🌱', value: 'teen' },
-      { label: "I'm not sure yet",        emoji: '🤔', value: 'any' },
+      { label: 'Anxiety & Stress',        value: 'anxiety' },
+      { label: 'Depression & Low Mood',   value: 'depression' },
+      { label: 'Relationship Issues',     value: 'relationship' },
+      { label: 'Trauma & PTSD',           value: 'trauma' },
+      { label: 'Teen / Youth Support',    value: 'teen' },
+      { label: "I'm not sure yet",        value: 'any' },
     ],
   },
   {
     id: 'situation',
-    emoji: '🪞',
     question: 'How would you describe your situation?',
     subtitle: 'This helps us find the right type of support for you.',
     options: [
-      { label: 'I need someone to talk to',      emoji: '🗣️', value: 'talk' },
-      { label: 'I want structured therapy',       emoji: '📋', value: 'structured' },
-      { label: "I'm in crisis, need help now",   emoji: '🆘', value: 'crisis' },
-      { label: "Just exploring my options",      emoji: '🔍', value: 'exploring' },
+      { label: 'I need someone to talk to',      value: 'talk' },
+      { label: 'I want structured therapy',       value: 'structured' },
+      { label: "I'm in crisis, need help now",   value: 'crisis' },
+      { label: "Just exploring my options",      value: 'exploring' },
     ],
   },
   {
     id: 'format',
-    emoji: '🖥️',
     question: 'Session format preference?',
     subtitle: 'Where are you most comfortable having sessions?',
     options: [
-      { label: 'Online — from home',       emoji: '🏠', value: 'online' },
-      { label: 'In-person at clinic',      emoji: '🏥', value: 'offline' },
-      { label: 'Either works for me',      emoji: '✨', value: 'both' },
+      { label: 'Online — from home',       value: 'online' },
+      { label: 'In-person at clinic',      value: 'offline' },
+      { label: 'Either works for me',      value: 'both' },
     ],
   },
   {
     id: 'budget',
-    emoji: '💰',
     question: "What's your budget per session?",
     subtitle: 'We have great therapists at every price point.',
     options: [
-      { label: 'Under ₹500',      emoji: '💚', value: 'low' },
-      { label: '₹500 – ₹1,000',  emoji: '💛', value: 'mid' },
-      { label: '₹1,000+',        emoji: '💎', value: 'high' },
-      { label: 'No preference',   emoji: '🤷', value: 'any' },
+      { label: 'Under ₹500',      value: 'low' },
+      { label: '₹500 – ₹1,000',  value: 'mid' },
+      { label: '₹1,000+',        value: 'high' },
+      { label: 'No preference',   value: 'any' },
     ],
   },
   {
     id: 'language',
-    emoji: '🌐',
     question: 'Language preference?',
     subtitle: 'Communication is key — choose your comfort language.',
     options: [
-      { label: 'English',          emoji: '🇬🇧', value: 'english' },
-      { label: 'Hindi',            emoji: '🇮🇳', value: 'hindi' },
-      { label: 'Both are fine',    emoji: '🌍', value: 'both' },
-      { label: 'No preference',    emoji: '💬', value: 'any' },
+      { label: 'English',          value: 'english' },
+      { label: 'Hindi',            value: 'hindi' },
+      { label: 'Both are fine',    value: 'both' },
+      { label: 'No preference',    value: 'any' },
     ],
   },
   {
     id: 'experience',
-    emoji: '🎓',
     question: 'Experience level preference?',
     subtitle: "Sometimes fresh perspective, sometimes seasoned wisdom — you decide.",
     options: [
-      { label: 'New but passionate (1–3 yrs)', emoji: '🌟', value: 'new' },
-      { label: 'Experienced (3–5 yrs)',         emoji: '⭐', value: 'mid' },
-      { label: 'Highly seasoned (5+ yrs)',      emoji: '🏆', value: 'senior' },
-      { label: "Doesn't matter",               emoji: '✅', value: 'any' },
+      { label: 'New but passionate (1–3 yrs)', value: 'new' },
+      { label: 'Experienced (3–5 yrs)',         value: 'mid' },
+      { label: 'Highly seasoned (5+ yrs)',      value: 'senior' },
+      { label: "Doesn't matter",               value: 'any' },
     ],
   },
 ];
@@ -283,7 +277,7 @@ export default function TherapistMatchQuiz({ therapists, onClose, onSelectTherap
                   {['Anonymous', '100% Free', 'No Commitment', 'Instant Results'].map(tag => (
                     <span key={tag}
                       className="px-3 py-1.5 bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] rounded-full text-xs font-bold">
-                      ✓ {tag}
+                       {tag}
                     </span>
                   ))}
                 </div>
@@ -329,7 +323,6 @@ export default function TherapistMatchQuiz({ therapists, onClose, onSelectTherap
 
                 {/* Question card — matching Stepper/wellness card style */}
                 <div className="bg-gradient-to-br from-[#f4fbf6] to-white dark:from-[#0d5d3a]/10 dark:to-[#111111] rounded-2xl border border-[#0d5d3a]/12 dark:border-white/8 p-5 sm:p-6 mb-5">
-                  <div className="text-4xl mb-3">{currentQuestion.emoji}</div>
                   <h3 className="text-xl sm:text-2xl font-black text-[#0a2617] dark:text-white mb-2"
                     style={{ fontFamily: 'Syne, sans-serif' }}>
                     {currentQuestion.question}
@@ -352,7 +345,6 @@ export default function TherapistMatchQuiz({ therapists, onClose, onSelectTherap
                           : 'bg-white dark:bg-[#1a1a1a] border-[#0d5d3a]/15 dark:border-white/10 hover:border-[#0d5d3a]/40 dark:hover:border-[#10b981]/40 hover:bg-[#e6f4ea] dark:hover:bg-[#0d5d3a]/15'
                           }`}
                       >
-                        <span className="text-2xl flex-shrink-0">{opt.emoji}</span>
                         <span className={`text-sm font-semibold leading-snug ${selected ? 'text-white' : 'text-[#0a2617] dark:text-white'}`}>
                           {opt.label}
                         </span>
@@ -414,7 +406,7 @@ export default function TherapistMatchQuiz({ therapists, onClose, onSelectTherap
 
                 {matchedTherapists.length === 0 ? (
                   <div className="text-center py-10">
-                    <div className="text-4xl mb-3">😔</div>
+                    <div className="text-4xl mb-3"></div>
                     <p className="text-[#4a7c5d] dark:text-gray-400 font-medium">No therapists available yet.</p>
                     <p className="text-sm text-gray-400 mt-1">Please check back soon as our network grows!</p>
                   </div>
@@ -470,7 +462,7 @@ export default function TherapistMatchQuiz({ therapists, onClose, onSelectTherap
                                 <Star size={11} className="fill-amber-400" /> {t.ratingAverage.toFixed(1)} ({t.ratingCount})
                               </span>
                             ) : (
-                              <span className="text-xs text-[#10b981] font-semibold">✨ New</span>
+                              <span className="text-xs text-[#10b981] font-semibold"> New</span>
                             )}
                           </div>
 

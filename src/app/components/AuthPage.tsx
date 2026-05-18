@@ -179,13 +179,13 @@ export default function AuthPage({ onBackHome, onAuthSuccess }: AuthPageProps) {
             <div className="doodle-card-front">
               {fp.open ? (
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10, width:'100%' }}>
-                  <div className="doodle-title" style={{ fontSize:19 }}>Reset! 🔑</div>
+                  <div className="doodle-title" style={{ fontSize:19 }}>Reset! </div>
 
                   {fp.step === 'phone' && <>
                     <p style={{ fontSize:12, color:'#555', textAlign:'center', margin:0 }}>Enter your registered mobile number</p>
                     <input className="doodle-input" type="tel" placeholder="+91 98765 43210" value={fp.phone} onChange={e => setFp(p => ({...p, phone:e.target.value}))} />
                     <button className="doodle-btn" disabled={!fp.phone.trim() || busy}
-                      onClick={async () => { setBusy(true); setFpMsg(null); try { const { apiFetch } = await import('../api/client'); await apiFetch('/auth/forgot-password', { method:'POST', body:JSON.stringify({ phone:fp.phone }), timeoutMs:30000 }); setOtpSeconds(120); setFp(p => ({...p, step:'verify'})); setFpMsg({ text:'OTP sent ✓', ok:true }); } catch(e:any) { setFpMsg({ text:e.message||'Failed', ok:false }); } finally { setBusy(false); } }}>
+                      onClick={async () => { setBusy(true); setFpMsg(null); try { const { apiFetch } = await import('../api/client'); await apiFetch('/auth/forgot-password', { method:'POST', body:JSON.stringify({ phone:fp.phone }), timeoutMs:30000 }); setOtpSeconds(120); setFp(p => ({...p, step:'verify'})); setFpMsg({ text:'OTP sent ', ok:true }); } catch(e:any) { setFpMsg({ text:e.message||'Failed', ok:false }); } finally { setBusy(false); } }}>
                       {busy ? '...' : 'Send OTP'}
                     </button>
                   </>}
@@ -202,7 +202,7 @@ export default function AuthPage({ onBackHome, onAuthSuccess }: AuthPageProps) {
                       ))}
                     </div>
                     <button className="doodle-btn" disabled={fp.code.length!==6||busy}
-                      onClick={async () => { setBusy(true); setFpMsg(null); try { const { apiFetch } = await import('../api/client'); await apiFetch('/auth/verify-otp', { method:'POST', body:JSON.stringify({ phone:fp.phone, code:fp.code }), timeoutMs:30000 }); setFp(p => ({...p,step:'reset'})); setFpMsg({ text:'Verified ✓', ok:true }); } catch(e:any) { setFpMsg({ text:e.message||'Invalid', ok:false }); } finally { setBusy(false); } }}>
+                      onClick={async () => { setBusy(true); setFpMsg(null); try { const { apiFetch } = await import('../api/client'); await apiFetch('/auth/verify-otp', { method:'POST', body:JSON.stringify({ phone:fp.phone, code:fp.code }), timeoutMs:30000 }); setFp(p => ({...p,step:'reset'})); setFpMsg({ text:'Verified ', ok:true }); } catch(e:any) { setFpMsg({ text:e.message||'Invalid', ok:false }); } finally { setBusy(false); } }}>
                       {busy ? '...' : 'Verify'}
                     </button>
                   </>}

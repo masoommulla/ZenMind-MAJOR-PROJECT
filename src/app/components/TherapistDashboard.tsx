@@ -299,7 +299,7 @@ export default function TherapistDashboard({ onLogout }: { onLogout: () => void 
               <Menu size={20} />
             </button>
             <h1 className="text-lg sm:text-2xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
-            {tab === 'profile' ? 'My Profile' : tab === 'schedule' ? 'Schedule & Availability' : tab === 'chats' ? 'Chats' : tab === 'reading' ? '📚 Reading Lists' : tab === 'support' ? '🛡️ Support & Reports' : 'Booked Sessions'}
+            {tab === 'profile' ? 'My Profile' : tab === 'schedule' ? 'Schedule & Availability' : tab === 'chats' ? 'Chats' : tab === 'reading' ? ' Reading Lists' : tab === 'support' ? '️ Support & Reports' : 'Booked Sessions'}
             </h1>
           </div>
           <ThemeToggle />

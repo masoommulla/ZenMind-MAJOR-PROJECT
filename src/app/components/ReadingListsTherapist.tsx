@@ -5,10 +5,10 @@ import { apiFetch } from '../api/client';
 
 const CATS = ['general','anxiety','depression','trauma','relationships','teen','stress','sleep','self-esteem','mindfulness'];
 const TYPES = ['book','article','video','podcast','tool'];
-const COVER_EMOJIS = ['📚','📖','🧠','💚','🌿','🎯','🌈','✨','🔬','💡','🎓','🌸','🕊️','🌙','⚡'];
-const TYPE_EMOJI: Record<string,string> = { book:'📖', article:'📄', video:'🎬', podcast:'🎧', tool:'🛠️' };
+const COVER_EMOJIS = ['','','','','','','','','','','','','️','',''];
+const TYPE_EMOJI: Record<string,string> = { book:'', article:'', video:'', podcast:'', tool:'️' };
 
-const emptyItem = () => ({ type:'book', title:'', author:'', description:'', url:'', coverEmoji:'📖' });
+const emptyItem = () => ({ type:'book', title:'', author:'', description:'', url:'', coverEmoji:'' });
 
 export default function ReadingListsTherapist() {
   const [lists, setLists]     = useState<any[]>([]);
@@ -23,7 +23,7 @@ export default function ReadingListsTherapist() {
   const [desc, setDesc]         = useState('');
   const [cat, setCat]           = useState('general');
   const [tags, setTags]         = useState('');
-  const [emoji, setEmoji]       = useState('📚');
+  const [emoji, setEmoji]       = useState('');
   const [items, setItems]       = useState<any[]>([emptyItem()]);
   const [saving, setSaving]     = useState(false);
 
@@ -38,14 +38,14 @@ export default function ReadingListsTherapist() {
   const openEdit = (list:any) => {
     setEditing(list);
     setTitle(list.title); setDesc(list.description); setCat(list.category);
-    setTags((list.tags||[]).join(', ')); setEmoji(list.coverEmoji||'📚');
+    setTags((list.tags||[]).join(', ')); setEmoji(list.coverEmoji||'');
     setItems(list.items?.length ? list.items : [emptyItem()]);
     setShowForm(true);
   };
 
   const resetForm = () => {
     setEditing(null); setTitle(''); setDesc(''); setCat('general');
-    setTags(''); setEmoji('📚'); setItems([emptyItem()]); setShowForm(false);
+    setTags(''); setEmoji(''); setItems([emptyItem()]); setShowForm(false);
   };
 
   const addItem = () => setItems(p => [...p, emptyItem()]);
@@ -75,7 +75,7 @@ export default function ReadingListsTherapist() {
           setLists(p => p.map(l => l._id===r2.list._id ? r2.list : l));
         }
       }
-      setMsg({text: publish ? '✅ List published & sent for admin review!' : '✅ Draft saved.', ok:true});
+      setMsg({text: publish ? ' List published & sent for admin review!' : ' Draft saved.', ok:true});
       resetForm();
     } catch(e:any){ setMsg({text:e.message,ok:false}); }
     finally { setSaving(false); }
@@ -110,7 +110,7 @@ export default function ReadingListsTherapist() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>📚 My Reading Lists</h2>
+          <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}> My Reading Lists</h2>
           <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-0.5">Create curated lists for your patients · published lists go for admin review</p>
         </div>
         <button onClick={() => { resetForm(); setShowForm(true); }}
@@ -216,7 +216,7 @@ export default function ReadingListsTherapist() {
           {lists.map(list => (
             <div key={list._id} className="bg-white dark:bg-[#111111] rounded-2xl border border-[#0d5d3a]/12 dark:border-white/8 shadow-sm overflow-hidden">
               <div className="flex items-center gap-4 p-5 cursor-pointer" onClick={()=>setExpanded(expanded===list._id ? null : list._id)}>
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0d5d3a] to-[#10b981] flex items-center justify-center text-2xl shadow-md shrink-0">{list.coverEmoji||'📚'}</div>
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0d5d3a] to-[#10b981] flex items-center justify-center text-2xl shadow-md shrink-0">{list.coverEmoji||''}</div>
                 <div className="flex-1 min-w-0">
                   <div className="font-black text-[#0a2617] dark:text-white text-sm">{list.title}</div>
                   <div className="text-[10px] text-gray-400 mt-0.5">{list.items?.length||0} items · {list.category}</div>
@@ -224,9 +224,9 @@ export default function ReadingListsTherapist() {
                 <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                   {/* Status badges */}
                   {!list.isPublished && <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-gray-100 dark:bg-white/10 text-gray-500">Draft</span>}
-                  {list.isPublished && !list.isApproved && <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">⏳ Pending Review</span>}
-                  {list.isPublished && list.isApproved && <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400">✅ Live</span>}
-                  {list.rejectionReason && <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-red-50 dark:bg-red-500/10 text-red-500">❌ Rejected</span>}
+                  {list.isPublished && !list.isApproved && <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400"> Pending Review</span>}
+                  {list.isPublished && list.isApproved && <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400"> Live</span>}
+                  {list.rejectionReason && <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-red-50 dark:bg-red-500/10 text-red-500"> Rejected</span>}
                   <button onClick={e=>{e.stopPropagation();openEdit(list);}} className="p-2 rounded-lg hover:bg-[#e6f4ea] dark:hover:bg-white/10 text-[#4a7c5d] transition"><Edit3 size={14}/></button>
                   <button onClick={e=>{e.stopPropagation();deleteList(list._id);}} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 text-red-400 transition"><Trash2 size={14}/></button>
                   {expanded===list._id ? <ChevronUp size={16} className="text-gray-400"/> : <ChevronDown size={16} className="text-gray-400"/>}
@@ -242,7 +242,7 @@ export default function ReadingListsTherapist() {
                   )}
                   {(list.items||[]).map((item:any,i:number)=>(
                     <div key={i} className="flex gap-3 items-start p-3 rounded-xl bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/06 dark:border-white/04">
-                      <span className="text-lg">{TYPE_EMOJI[item.type]||'📖'}</span>
+                      <span className="text-lg">{TYPE_EMOJI[item.type]||''}</span>
                       <div>
                         <div className="font-bold text-sm text-[#0a2617] dark:text-white">{item.title}</div>
                         {item.author && <div className="text-[11px] text-[#4a7c5d]">{item.author}</div>}
@@ -257,7 +257,7 @@ export default function ReadingListsTherapist() {
           ))}
           {lists.length===0 && (
             <div className="flex flex-col items-center py-20 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
-              <div className="text-5xl mb-3">📚</div>
+              <div className="text-5xl mb-3"></div>
               <div className="font-bold text-[#0a2617] dark:text-white">No reading lists yet</div>
               <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-1">Click "New List" to create your first curated reading list.</p>
             </div>

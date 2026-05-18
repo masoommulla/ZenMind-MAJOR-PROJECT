@@ -68,7 +68,7 @@ function CrisisCard({ onGoToTherapy }: { onGoToTherapy?: () => void }) {
     >
       {/* Header strip */}
       <div className="bg-gradient-to-r from-rose-500 to-rose-600 px-4 py-3 flex items-center gap-2.5">
-        <span className="text-xl">🆘</span>
+        <span className="text-xl"></span>
         <div>
           <p className="text-white font-bold text-sm leading-tight">You are not alone.</p>
           <p className="text-rose-100 text-xs">Real support is just one call away.</p>
@@ -103,7 +103,7 @@ function CrisisCard({ onGoToTherapy }: { onGoToTherapy?: () => void }) {
             onClick={onGoToTherapy}
             className="mt-1 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] text-white text-sm font-bold hover:from-[#0a4a2e] hover:to-[#0d5d3a] transition-all shadow-md shadow-[#0d5d3a]/20"
           >
-            🌿 Talk to a Therapist Now
+             Talk to a Therapist Now
           </button>
         )}
 
@@ -146,7 +146,7 @@ function MessageBubble({ msg, onStoryYes, onStoryNo, onFeelingGood, onConnectRea
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2 mt-1">
             <button onClick={onStoryYes}
               className="px-5 py-2 bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white text-sm font-bold rounded-xl hover:bg-[#0a4a2e] transition shadow-md">
-              Yes, please 💚
+              Yes, please 
             </button>
             <button onClick={onStoryNo}
               className="px-5 py-2 bg-white dark:bg-[#1a1a1a] text-[#0d5d3a] dark:text-[#10b981] text-sm font-bold rounded-xl border border-[#0d5d3a]/20 dark:border-white/10 hover:bg-[#f0fbf4] dark:hover:bg-white/5 transition">
@@ -160,7 +160,7 @@ function MessageBubble({ msg, onStoryYes, onStoryNo, onFeelingGood, onConnectRea
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2 mt-1 flex-wrap">
             <button onClick={onFeelingGood}
               className="px-5 py-2 bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white text-sm font-bold rounded-xl hover:bg-[#0a4a2e] transition shadow-md">
-              Feeling good 😊
+              Feeling good 
             </button>
             <button onClick={onConnectReal}
               className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition shadow-md">
@@ -174,7 +174,7 @@ function MessageBubble({ msg, onStoryYes, onStoryNo, onFeelingGood, onConnectRea
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="mt-1">
             <button onClick={onGoToTherapy}
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg hover:from-[#0a4a2e] transition">
-              🌿 Go to Therapy Hub
+               Go to Therapy Hub
             </button>
           </motion.div>
         )}
@@ -240,7 +240,7 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
     } catch { /* silent */ }
   }, []);
 
-  const GREETING = "Hey, I'm Zeni 💚 I'm here for you — no judgment, just support. How are you feeling today?";
+  const GREETING = "Hey, I'm Zeni  I'm here for you — no judgment, just support. How are you feeling today?";
 
   useEffect(() => {
     const g: Message = { role: 'assistant', id: uid(), content: GREETING };
@@ -329,7 +329,7 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
         body: JSON.stringify({ score: 8 }),
       }).catch(() => {});
     }
-    handleSend("Feeling good now, thank you 😊");
+    handleSend("Feeling good now, thank you ");
   }, [handleSend, sessionId]);
   const handleConnectReal = useCallback(() => handleSend("I'd like to connect to a real person"), [handleSend]);
   const handleGoToTherapy = useCallback(() => { if (onNavigateToTherapy) onNavigateToTherapy(); }, [onNavigateToTherapy]);
@@ -426,7 +426,7 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#0d5d3a] to-[#10b981] flex items-center justify-center text-white text-xs font-bold">Zi</div>
           <div>
             <div className="text-sm font-bold text-[#0a2617] dark:text-white" style={{ fontFamily: 'Syne,sans-serif' }}>Conversation with Zeni</div>
-            <div className="text-xs text-[#4a7c5d] dark:text-gray-400">Your private, safe space 💚</div>
+            <div className="text-xs text-[#4a7c5d] dark:text-gray-400">Your private, safe space </div>
           </div>
           <div className="ml-auto text-xs text-[#4a7c5d] dark:text-gray-500 bg-[#f0fbf4] dark:bg-white/5 px-2 py-1 rounded-full">{messages.length} message{messages.length !== 1 ? 's' : ''}</div>
         </div>
@@ -478,7 +478,7 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
                 <input id="zen-text-input" value={input} onChange={e => setInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(input); } }}
                   disabled={loading}
-                  placeholder={listening ? 'Listening...' : 'Share how you\'re feeling... ✦˚'}
+                  placeholder={listening ? 'Listening...' : 'Share how you\'re feeling... ˚'}
                   className="zen-chat-textarea"
                   style={{ height: 44, flex: 1 }}
                 />

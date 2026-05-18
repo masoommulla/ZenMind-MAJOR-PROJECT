@@ -43,18 +43,18 @@ function useCountdown() {
 }
 
 const CATEGORY_META: Record<string, { label: string; icon: string; color: string }> = {
-  anxiety:     { label: 'Anxiety',     icon: '🧘', color: '#7c3aed' },
-  stress:      { label: 'Stress',      icon: '💆', color: '#b45309' },
-  sleep:       { label: 'Sleep',       icon: '🌙', color: '#1e40af' },
-  self_esteem: { label: 'Self-Esteem', icon: '✨', color: '#be123c' },
-  mindfulness: { label: 'Mindfulness', icon: '🍃', color: '#0d5d3a' },
-  motivation:  { label: 'Motivation',  icon: '🚀', color: '#065f46' },
-  other:       { label: 'Other',       icon: '💬', color: '#374151' },
+  anxiety:     { label: 'Anxiety',     icon: '', color: '#7c3aed' },
+  stress:      { label: 'Stress',      icon: '', color: '#b45309' },
+  sleep:       { label: 'Sleep',       icon: '', color: '#1e40af' },
+  self_esteem: { label: 'Self-Esteem', icon: '', color: '#be123c' },
+  mindfulness: { label: 'Mindfulness', icon: '', color: '#0d5d3a' },
+  motivation:  { label: 'Motivation',  icon: '', color: '#065f46' },
+  other:       { label: 'Other',       icon: '', color: '#374151' },
 };
 
 const EXERCISE_ICONS: Record<string, string> = {
-  breathing: '🌬️', journaling: '📝', meditation: '🧘', movement: '🏃',
-  reading: '📖', reflection: '🪞', other: '⚡',
+  breathing: '️', journaling: '', meditation: '', movement: '',
+  reading: '', reflection: '🪞', other: '',
 };
 
 export default function WellnessProgramsUser({
@@ -129,7 +129,7 @@ export default function WellnessProgramsUser({
       // Refresh selected with enrollment info
       const detail = await apiFetch<any>(`/wellness-programs/${programId}`);
       setSelected({ ...detail.program, enrollment: detail.enrollment });
-      setMsg({ text: '🎉 Enrolled successfully! Your journey begins today.', ok: true });
+      setMsg({ text: ' Enrolled successfully! Your journey begins today.', ok: true });
       setTimeout(() => setMsg(null), 3000);
     } catch (e: any) {
       setMsg({ text: e.message || 'Failed to enroll', ok: false });
@@ -148,9 +148,9 @@ export default function WellnessProgramsUser({
       await load();
       setSelected((prev: any) => prev ? { ...prev, enrollment: res.enrollment } : prev);
       if (res.enrollment.isCompleted) {
-        setMsg({ text: '🏆 Congratulations! You completed the program!', ok: true });
+        setMsg({ text: ' Congratulations! You completed the program!', ok: true });
       } else {
-        setMsg({ text: `✅ Day ${dayNumber} complete! Keep going!`, ok: true });
+        setMsg({ text: ` Day ${dayNumber} complete! Keep going!`, ok: true });
       }
       setTimeout(() => setMsg(null), 3000);
     } catch (e: any) {
@@ -234,7 +234,7 @@ export default function WellnessProgramsUser({
                 </div>
                 <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
                   <span>{completedSet.size} of {selected.durationDays} days complete</span>
-                  {enr.isCompleted && <span className="text-[#0d5d3a] dark:text-[#10b981] font-bold">🏆 Completed!</span>}
+                  {enr.isCompleted && <span className="text-[#0d5d3a] dark:text-[#10b981] font-bold"> Completed!</span>}
                 </div>
               </div>
             )}
@@ -245,7 +245,7 @@ export default function WellnessProgramsUser({
                 onClick={() => handleEnroll(selected._id)} disabled={enrolling}
                 className="w-full py-4 rounded-2xl font-black text-white text-lg mb-6 shadow-xl disabled:opacity-60 transition"
                 style={{ background: `linear-gradient(135deg, ${selected.coverGradientFrom}, ${selected.coverGradientTo})` }}>
-                {enrolling ? 'Enrolling...' : '🚀 Start This Program — Free'}
+                {enrolling ? 'Enrolling...' : ' Start This Program — Free'}
               </motion.button>
             )}
 
@@ -283,7 +283,7 @@ export default function WellnessProgramsUser({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <span className="font-black text-[#0a2617] dark:text-white text-sm">{step.title}</span>
-                          <span className="text-xs">{EXERCISE_ICONS[step.exerciseType] || '⚡'}</span>
+                          <span className="text-xs">{EXERCISE_ICONS[step.exerciseType] || ''}</span>
                           {isCurrent && !waitingForMidnight && (
                             <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full text-white" style={{ background: selected.coverGradientFrom }}>Today</span>
                           )}
@@ -295,7 +295,7 @@ export default function WellnessProgramsUser({
                           <div className="mt-2 flex items-center gap-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-3 py-2">
                             <Moon size={13} className="text-amber-500 shrink-0" />
                             <div>
-                              <p className="text-xs font-bold text-amber-700 dark:text-amber-400">Come back tomorrow 🌙</p>
+                              <p className="text-xs font-bold text-amber-700 dark:text-amber-400">Come back tomorrow </p>
                               <p className="text-[10px] text-amber-600 dark:text-amber-500">Unlocks in {countdown} (at midnight)</p>
                             </div>
                           </div>
@@ -306,7 +306,7 @@ export default function WellnessProgramsUser({
                             <button onClick={() => handleCompleteDay(selected._id, step.dayNumber)} disabled={completingDay === step.dayNumber}
                               className="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition disabled:opacity-50"
                               style={{ background: selected.coverGradientFrom }}>
-                              {completingDay === step.dayNumber ? 'Saving...' : '✓ Mark Complete'}
+                              {completingDay === step.dayNumber ? 'Saving...' : ' Mark Complete'}
                             </button>
                           )}
                         </div>
@@ -407,7 +407,7 @@ export default function WellnessProgramsUser({
                             ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
                             : 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400'
                         }`}>
-                          {enr.isCompleted ? '🏆 Done' : 'In Progress'}
+                          {enr.isCompleted ? ' Done' : 'In Progress'}
                         </span>
                       )}
                     </div>
@@ -437,7 +437,7 @@ export default function WellnessProgramsUser({
             })}
             {filtered.length === 0 && (
               <div className="col-span-full py-16 text-center">
-                <div className="text-4xl mb-3">🔍</div>
+                <div className="text-4xl mb-3"></div>
                 <div className="font-bold text-[#4a7c5d] dark:text-gray-400">No programs match your filters.</div>
               </div>
             )}
@@ -449,7 +449,7 @@ export default function WellnessProgramsUser({
         <div className="space-y-6">
           {myEnrollments.length === 0 ? (
             <div className="text-center py-16 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/5">
-              <div className="text-5xl mb-4">🌱</div>
+              <div className="text-5xl mb-4"></div>
               <div className="font-bold text-[#0a2617] dark:text-white mb-2">No programs started yet</div>
               <div className="text-sm text-[#4a7c5d] dark:text-gray-400 mb-4">Browse our library and start your wellness journey today.</div>
               <button onClick={() => setTab('browse')} className="px-6 py-2.5 bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white rounded-xl font-bold text-sm hover:bg-[#0a4a2e] transition">
@@ -500,7 +500,7 @@ export default function WellnessProgramsUser({
                           <span className="text-2xl">{meta.icon}</span>
                           <div>
                             <div className="font-bold text-[#0a2617] dark:text-white text-sm">{prog?.title}</div>
-                            <div className="text-xs text-green-700 dark:text-green-400 font-semibold">🏆 Completed {e.completedAt ? new Date(e.completedAt).toLocaleDateString() : ''}</div>
+                            <div className="text-xs text-green-700 dark:text-green-400 font-semibold"> Completed {e.completedAt ? new Date(e.completedAt).toLocaleDateString() : ''}</div>
                           </div>
                         </div>
                       );

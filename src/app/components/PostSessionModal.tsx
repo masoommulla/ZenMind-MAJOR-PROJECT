@@ -25,7 +25,7 @@ interface Props {
   onClose?: () => void;
 }
 
-const MOOD_EMOJIS = ['😞','😟','😕','😐','🙂','😊','😄','😁','🤩','🌟'];
+const MOOD_EMOJIS = ['','','','','','','','','',''];
 const MOOD_LABELS = [
   'Very low','Low','Struggling','Neutral','Okay',
   'Good','Great','Really good','Excellent','Outstanding',
@@ -112,7 +112,7 @@ export default function PostSessionModal({ onClose }: Props) {
             </button>
             <div className="pr-8">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0d5d3a]/10 text-[#0d5d3a] dark:text-[#10b981] text-xs font-bold mb-2">
-                ✨ Session Complete
+                 Session Complete
               </div>
               <h2 className="text-xl font-black text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>
                 How did it go?
@@ -206,7 +206,7 @@ export default function PostSessionModal({ onClose }: Props) {
                 {mood >= 7 && (
                   <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
                     className="bg-[#f0fbf4] dark:bg-[#0d5d3a]/10 rounded-2xl p-3 border border-[#0d5d3a]/15 dark:border-[#0d5d3a]/30 text-sm text-[#0d5d3a] dark:text-[#10b981] font-semibold text-center">
-                    🎉 Great job investing in yourself today!
+                     Great job investing in yourself today!
                   </motion.div>
                 )}
 

@@ -117,7 +117,7 @@ export default function AdminLogin({ onBackHome, onAdminAuthSuccess }: AdminLogi
             <path d="M3 12 C 3 5 10 5 16 5 C 20 5 21 9 18 12 C 15 15 10 13 12 9 C 14 5 22 9 21 16" />
           </svg>
 
-          <div className="doodle-adm-badge">🛡️</div>
+          <div className="doodle-adm-badge">️</div>
           <div className="doodle-adm-title">Admin!</div>
           <p style={{ fontSize:12, color:'#555', textAlign:'center', margin:'-6px 0 4px', fontFamily:'"Comic Sans MS",cursive' }}>
             Secure admin access only
@@ -135,7 +135,7 @@ export default function AdminLogin({ onBackHome, onAdminAuthSuccess }: AdminLogi
             </button>
 
             <button className="doodle-adm-btn" type="submit" disabled={busy}>
-              {busy ? '...' : 'Sign In! 🔐'}
+              {busy ? '...' : 'Sign In! '}
             </button>
           </form>
 

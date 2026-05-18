@@ -3,19 +3,19 @@ import { X, Clock, Bell } from 'lucide-react';
 
 const PAGE_CONTENT: Record<string, { emoji: string; title: string; subtitle: string; desc: string }> = {
   Blog: {
-    emoji: '📝',
+    emoji: '',
     title: 'ZenMind Blog',
     subtitle: 'Insights, stories & mental health resources',
     desc: "We're crafting articles, guides, and personal stories about adolescent mental wellness. Our blog will cover mindfulness, coping strategies, therapist insights, and community stories.",
   },
   Press: {
-    emoji: '📰',
+    emoji: '',
     title: 'Press & Media',
     subtitle: 'ZenMind in the news',
     desc: "Our press room is being prepared. Here you'll find press releases, media assets, coverage links, and contact information for journalists and media partners.",
   },
   Partners: {
-    emoji: '🤝',
+    emoji: '',
     title: 'Partner with ZenMind',
     subtitle: 'Together we make mental health accessible',
     desc: "We partner with schools, colleges, NGOs, and healthcare providers to expand access to mental wellness resources. Partnership opportunities and our partner programme will launch here soon.",
@@ -24,7 +24,7 @@ const PAGE_CONTENT: Record<string, { emoji: string; title: string; subtitle: str
 
 export default function ComingSoonPage({ page, onClose }: { page: string; onClose: () => void }) {
   const content = PAGE_CONTENT[page] || {
-    emoji: '🌿',
+    emoji: '',
     title: page,
     subtitle: 'Coming soon',
     desc: 'This page is under construction. Check back soon for updates!',

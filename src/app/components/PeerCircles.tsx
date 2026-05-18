@@ -152,7 +152,7 @@ function CircleChatRoom({ circle, currentUserId, onBack, onJoin, joining }: {
         ) : messages.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 120, textAlign: 'center' }}>
             <MessageSquare style={{ color: 'rgba(13,93,58,0.3)', width: 32, height: 32, marginBottom: 8 }} />
-            <p style={{ fontSize: 13, color: '#4a7c5d' }}>No messages yet. Be the first to share! 💚</p>
+            <p style={{ fontSize: 13, color: '#4a7c5d' }}>No messages yet. Be the first to share! </p>
           </div>
         ) : (
           messages.map(msg => {
@@ -213,7 +213,7 @@ function CircleChatRoom({ circle, currentUserId, onBack, onJoin, joining }: {
         <div style={{ flexShrink: 0, borderTop: '2px solid var(--dash-border)', background: 'var(--dash-sidebar-bg)', padding: '12px 14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: 'rgba(13,93,58,0.06)', borderRadius: 12, padding: '12px 14px', border: '1.5px solid rgba(13,93,58,0.15)' }}>
             <div>
-              <p style={{ fontSize: 13, fontWeight: 700, color: '#0a2617', marginBottom: 2 }}>👀 You're viewing as a guest</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: '#0a2617', marginBottom: 2 }}> You're viewing as a guest</p>
               <p style={{ fontSize: 11, color: '#4a7c5d' }}>Join this circle to send messages.</p>
             </div>
             <button onClick={() => onJoin(circle._id)} disabled={joining === circle._id}

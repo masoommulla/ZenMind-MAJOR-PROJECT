@@ -195,11 +195,11 @@ const AddStoryForm = ({ onAdd }: { onAdd: (s: any) => void }) => {
               <select value={form.rating}
                 onChange={e => setForm({...form, rating: Number(e.target.value)})}
                 className="zen-story-form-select">
-                <option value={5}>5 Stars ★★★★★</option>
-                <option value={4}>4 Stars ★★★★</option>
-                <option value={3}>3 Stars ★★★</option>
-                <option value={2}>2 Stars ★★</option>
-                <option value={1}>1 Star ★</option>
+                <option value={5}>5 Stars </option>
+                <option value={4}>4 Stars </option>
+                <option value={3}>3 Stars </option>
+                <option value={2}>2 Stars </option>
+                <option value={1}>1 Star </option>
               </select>
             </div>
           </div>
@@ -211,7 +211,7 @@ const AddStoryForm = ({ onAdd }: { onAdd: (s: any) => void }) => {
               className="zen-story-form-textarea" />
           </div>
           <button type="submit" disabled={busy} className="zen-story-form-btn">
-            {busy ? 'Submitting...' : '✦ Submit Story'}
+            {busy ? 'Submitting...' : ' Submit Story'}
           </button>
           {msg && <p style={{ textAlign: 'center', marginTop: 12, fontSize: 13, fontWeight: 700, color: '#6ee7b7' }}>{msg}</p>}
         </form>

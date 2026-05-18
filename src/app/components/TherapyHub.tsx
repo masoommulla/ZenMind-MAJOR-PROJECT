@@ -121,7 +121,7 @@ export default function TherapyHub({ onSessionBooked, onStartChat }: { onSession
               {bookingStatus === 'success' ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <div className="w-16 h-16 bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] rounded-full flex items-center justify-center mb-4">
-                    <span className="text-3xl">✓</span>
+                    <span className="text-3xl"></span>
                   </div>
                   <h3 className="text-xl font-bold text-[#0a2617] dark:text-white mb-2">Session Booked!</h3>
                   <p className="text-[#4a7c5d] dark:text-gray-400">Your session has been confirmed. You will receive an email shortly.</p>
@@ -258,7 +258,7 @@ export default function TherapyHub({ onSessionBooked, onStartChat }: { onSession
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-sm pb-2">
-                    <span className="text-gray-500 flex items-center gap-2"><span className="text-[10px]">🌐</span> Languages</span>
+                    <span className="text-gray-500 flex items-center gap-2"><span className="text-[10px]"></span> Languages</span>
                     <span className="font-bold text-[#0a2617] dark:text-white text-right text-xs">
                       {selectedTherapist.languages ? selectedTherapist.languages.join(', ') : 'English, Hindi'}
                     </span>
@@ -330,7 +330,7 @@ export default function TherapyHub({ onSessionBooked, onStartChat }: { onSession
               <div className="bg-white dark:bg-[#111111] rounded-3xl p-6 sm:p-8 border border-[#0d5d3a]/10 dark:border-white/5 shadow-sm flex flex-col">
                 <div className="flex justify-between items-center mb-6">
                   <h4 className="font-bold text-[#0a2617] dark:text-white flex items-center gap-2">
-                    <span className="text-amber-400 text-lg">⭐</span> Reviews
+                    <span className="text-amber-400 text-lg"></span> Reviews
                   </h4>
                   {selectedTherapist.reviews && selectedTherapist.reviews.length > 3 && (
                     <button onClick={() => setShowAllReviews(true)} className="text-sm font-bold text-[#0d5d3a] dark:text-[#10b981] hover:underline">
@@ -607,7 +607,7 @@ export default function TherapyHub({ onSessionBooked, onStartChat }: { onSession
 
               {filtered.length === 0 && (
                 <div className="col-span-full py-16 text-center">
-                  <div className="text-4xl mb-3">🔍</div>
+                  <div className="text-4xl mb-3"></div>
                   <div className="font-bold text-[#4a7c5d] dark:text-gray-400">No therapists match your filters.</div>
                   <button onClick={() => { setSearch(''); setSpecFilter('All Specializations'); setSessionFilter('All Sessions'); setCityFilter('All Cities'); }}
                     className="mt-3 text-sm text-[#0d5d3a] dark:text-[#10b981] font-bold hover:underline">

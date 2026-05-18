@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle, XCircle, Trash2, BookOpen, X, AlertTriangle, Eye } from 'lucide-react';
 import { apiFetch } from '../api/client';
 
-const TYPE_EMOJI: Record<string,string> = { book:'📖', article:'📄', video:'🎬', podcast:'🎧', tool:'🛠️' };
+const TYPE_EMOJI: Record<string,string> = { book:'', article:'', video:'', podcast:'', tool:'️' };
 
 export default function ReadingListsAdmin() {
   const [lists, setLists]         = useState<any[]>([]);
@@ -33,7 +33,7 @@ export default function ReadingListsAdmin() {
       });
       setLists(p => p.filter(l => l._id !== id));
       setDetail(null); setRejectTarget(null); setRejectReason('');
-      setMsg({ text: approved ? '✅ List approved — now live for users!' : '❌ List rejected.', ok: approved });
+      setMsg({ text: approved ? ' List approved — now live for users!' : ' List rejected.', ok: approved });
       setStats(s => ({
         pending: s.pending - 1,
         approved: approved ? s.approved + 1 : s.approved,
@@ -62,15 +62,15 @@ export default function ReadingListsAdmin() {
       {/* Header + stats */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>📚 Reading Lists Review</h2>
+          <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}> Reading Lists Review</h2>
           <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-0.5">Approve or reject therapist-submitted reading lists</p>
         </div>
         <div className="flex gap-3">
           <div className="px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-sm font-bold border border-amber-200 dark:border-amber-500/20">
-            ⏳ {stats.pending} pending
+             {stats.pending} pending
           </div>
           <div className="px-4 py-2 rounded-xl bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 text-sm font-bold border border-green-200 dark:border-green-500/20">
-            ✅ {stats.approved} approved
+             {stats.approved} approved
           </div>
         </div>
       </div>
@@ -89,7 +89,7 @@ export default function ReadingListsAdmin() {
         <div className="text-center py-16 text-[#4a7c5d] font-bold">Loading…</div>
       ) : lists.length === 0 ? (
         <div className="flex flex-col items-center py-20 bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08">
-          <div className="text-5xl mb-3">✅</div>
+          <div className="text-5xl mb-3"></div>
           <div className="font-bold text-[#0a2617] dark:text-white">No {filter} lists</div>
           <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-1">
             {filter==='pending' ? 'All lists have been reviewed.' : 'No lists in this category.'}
@@ -100,7 +100,7 @@ export default function ReadingListsAdmin() {
           {lists.map(list => (
             <div key={list._id} className="bg-white dark:bg-[#111111] rounded-2xl border border-[#0d5d3a]/12 dark:border-white/8 p-5 shadow-sm">
               <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0d5d3a] to-[#10b981] flex items-center justify-center text-3xl shadow-md shrink-0">{list.coverEmoji||'📚'}</div>
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0d5d3a] to-[#10b981] flex items-center justify-center text-3xl shadow-md shrink-0">{list.coverEmoji||''}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 flex-wrap">
                     <div>
@@ -110,8 +110,8 @@ export default function ReadingListsAdmin() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {list.isApproved
-                        ? <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400">✅ Approved</span>
-                        : <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">⏳ Pending</span>
+                        ? <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400"> Approved</span>
+                        : <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400"> Pending</span>
                       }
                     </div>
                   </div>
@@ -166,7 +166,7 @@ export default function ReadingListsAdmin() {
               onClick={e=>e.stopPropagation()}
               className="bg-white dark:bg-[#111111] rounded-3xl w-full max-w-2xl max-h-[88vh] flex flex-col shadow-2xl border border-[#0d5d3a]/10 dark:border-white/10 overflow-hidden">
               <div className="p-6 border-b border-[#0d5d3a]/10 dark:border-white/10 shrink-0 flex items-start gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0d5d3a] to-[#10b981] flex items-center justify-center text-3xl shadow-md shrink-0">{detail.coverEmoji||'📚'}</div>
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0d5d3a] to-[#10b981] flex items-center justify-center text-3xl shadow-md shrink-0">{detail.coverEmoji||''}</div>
                 <div className="flex-1">
                   <h2 className="font-black text-[#0a2617] dark:text-white" style={{fontFamily:'Syne,sans-serif'}}>{detail.title}</h2>
                   <p className="text-sm text-[#10b981] font-semibold">by {detail.therapistName}</p>
@@ -177,12 +177,12 @@ export default function ReadingListsAdmin() {
               <div className="flex-1 overflow-y-auto p-6 space-y-3">
                 {(detail.items||[]).map((item:any,i:number)=>(
                   <div key={i} className="flex gap-3 p-4 rounded-xl bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/8 dark:border-white/5">
-                    <span className="text-xl shrink-0">{TYPE_EMOJI[item.type]||'📖'}</span>
+                    <span className="text-xl shrink-0">{TYPE_EMOJI[item.type]||''}</span>
                     <div className="flex-1 min-w-0">
                       <div className="font-bold text-sm text-[#0a2617] dark:text-white">{item.title}</div>
                       {item.author && <div className="text-[11px] text-[#4a7c5d]">{item.author}</div>}
                       {item.description && <p className="text-xs text-gray-500 mt-1">{item.description}</p>}
-                      {item.url && <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-[11px] text-[#0d5d3a] hover:underline font-bold">🔗 {item.url.slice(0,60)}</a>}
+                      {item.url && <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-[11px] text-[#0d5d3a] hover:underline font-bold"> {item.url.slice(0,60)}</a>}
                     </div>
                     <span className="text-[10px] text-gray-400 capitalize shrink-0">{item.type}</span>
                   </div>

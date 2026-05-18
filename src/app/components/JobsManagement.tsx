@@ -183,7 +183,7 @@ export default function JobsManagement() {
           <div className="flex flex-wrap gap-6">
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={form.featured} onChange={e => setForm((p: any) => ({ ...p, featured: e.target.checked }))} className="w-4 h-4 accent-[#0d5d3a]" />
-              <span className="text-sm font-bold text-[#0a2617] dark:text-white">⭐ Featured Job</span>
+              <span className="text-sm font-bold text-[#0a2617] dark:text-white"> Featured Job</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={form.status === 'active'} onChange={e => setForm((p: any) => ({ ...p, status: e.target.checked ? 'active' : 'closed' }))} className="w-4 h-4 accent-[#0d5d3a]" />

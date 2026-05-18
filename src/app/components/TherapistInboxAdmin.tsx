@@ -107,7 +107,7 @@ export default function TherapistInboxAdmin() {
     setSuspending(true);
     try {
       await apiFetch(`/admin/therapist-reports/${selected._id}/suspend-user`, { method: 'POST', body: JSON.stringify({ duration: suspendDur }) });
-      toast(`✅ User suspended for ${suspendDur}`);
+      toast(` User suspended for ${suspendDur}`);
       setSelected(null); load();
     } catch (e: any) { toast(e.message, false); }
     finally { setSuspending(false); }
@@ -235,7 +235,7 @@ export default function TherapistInboxAdmin() {
                         </select>
                         <button onClick={suspendUser} disabled={suspending}
                           className="px-5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-black text-sm transition disabled:opacity-60">
-                          {suspending ? 'Suspending…' : '🔒 Suspend'}
+                          {suspending ? 'Suspending…' : ' Suspend'}
                         </button>
                       </div>
                     </div>
@@ -254,7 +254,7 @@ export default function TherapistInboxAdmin() {
           {(['tickets','reports'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-4 py-2 rounded-xl text-sm font-bold transition ${tab === t ? 'bg-[#0d5d3a] text-white shadow-sm' : 'text-[#4a7c5d] dark:text-gray-400 hover:bg-[#0d5d3a]/10'}`}>
-              {t === 'tickets' ? `🎫 Support Tickets (${tickets.length})` : `🚨 Reports (${reports.filter(r => r.urgency === 'critical').length > 0 ? '🔴 ' : ''}${reports.length})`}
+              {t === 'tickets' ? ` Support Tickets (${tickets.length})` : ` Reports (${reports.filter(r => r.urgency === 'critical').length > 0 ? ' ' : ''}${reports.length})`}
             </button>
           ))}
         </div>

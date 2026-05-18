@@ -155,7 +155,7 @@ export default function WeeklyInsightsBanner({ onPreFillChat }: { onPreFillChat?
       <div className="flex-1 overflow-y-auto p-5 bg-[#fbfdfc] dark:bg-[#0a0a0a]">
         {insights.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-4xl mb-3">🌱</div>
+            <div className="text-4xl mb-3"></div>
             <p className="text-sm font-semibold text-[#0a2617] dark:text-white">No insights generated yet.</p>
             <p className="text-xs text-[#4a7c5d] dark:text-gray-400 mt-1 mb-4">Chat with Zeni and track your mood to get your first report.</p>
             <button 
