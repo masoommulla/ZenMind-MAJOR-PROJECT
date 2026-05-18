@@ -69,10 +69,10 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
     <motion.div
       whileHover={{ y: -6 }}
       transition={{ duration: 0.3 }}
-      className="min-w-[82%] sm:min-w-[60%] lg:min-w-[42%] xl:min-w-[36%] snap-start w-full mx-auto"
+      className="min-w-[82%] sm:min-w-[60%] lg:min-w-[42%] xl:min-w-[36%] snap-start w-full mx-auto flex"
     >
       <div
-        className="w-full rounded-xl border border-[#0d5d3a] dark:border-[#10b981] bg-white dark:bg-[#111111] shadow-sm group"
+        className="w-full h-full flex flex-col rounded-xl border border-[#0d5d3a] dark:border-[#10b981] bg-white dark:bg-[#111111] shadow-sm group"
         style={{ padding: '2rem' }}
       >
         {feature.isFirst ? (
