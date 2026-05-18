@@ -15,50 +15,46 @@ export default function HowItWorks() {
       <style>{`
         /* ── Stepper card override — green neumorphic theme ── */
         .zen-stepper-wrap [class*="rounded"] {
-          background: linear-gradient(135deg, #0d5d3a, #1a8a5a, #0a4a2e) !important;
-          border: none !important;
-          box-shadow: 8px 8px 18px rgba(7,29,19,0.55), -8px -8px 18px rgba(26,138,90,0.10), inset 2px 2px 5px rgba(52,211,153,0.30), inset -2px -2px 5px rgba(7,29,19,0.40) !important;
-          background-image: radial-gradient(circle, rgba(52,211,153,0.15) 1px, transparent 1px), radial-gradient(circle, rgba(16,185,129,0.08) 1px, transparent 1px) !important;
-          background-size: 20px 20px !important;
-          background-position: 0 0, 10px 10px !important;
+          background: #ffffff !important;
+          border: 2px solid #0d5d3a !important;
+          box-shadow: 0 4px 12px rgba(13,93,58,0.08) !important;
+          background-image: none !important;
+        }
+        .dark .zen-stepper-wrap [class*="rounded"] {
+          background: #111111 !important;
+          border-color: #10b981 !important;
+          box-shadow: 0 4px 12px rgba(16,185,129,0.08) !important;
         }
         /* Nav prev/next buttons */
         .zen-step-nav-btn {
           cursor: pointer; border-radius: 16px; border: none;
           padding: 2px;
-          background: radial-gradient(circle 80px at 80% -10%, #34d399, #0a2617);
+          background: #0d5d3a;
           position: relative; font-size: 14px; font-weight: 600;
           transition: transform 0.2s ease;
         }
-        .zen-step-nav-btn::after {
-          content: ""; position: absolute; width: 65%; height: 60%;
-          border-radius: 120px; top: 0; right: 0;
-          box-shadow: 0 0 20px rgba(52,211,153,0.25); z-index: -1;
+        .dark .zen-step-nav-btn {
+          background: #10b981;
         }
-        .zen-step-nav-blob {
-          position: absolute; width: 55px; height: 100%; border-radius: 16px;
-          bottom: 0; left: 0;
-          background: radial-gradient(circle 50px at 0% 100%, #10b981, #0d5d3a80, transparent);
-          box-shadow: -8px 8px 24px rgba(16,185,129,0.25);
+        .zen-step-nav-btn::after, .zen-step-nav-blob, .zen-step-nav-inner::before {
+          display: none;
         }
         .zen-step-nav-inner {
-          padding: 10px 22px; border-radius: 14px; color: #fff;
+          padding: 10px 22px; border-radius: 14px; color: #ffffff;
           z-index: 3; position: relative;
-          background: radial-gradient(circle 80px at 80% -50%, #1a8a5a, #071e10);
+          background: #0d5d3a;
           font-weight: 600;
         }
-        .zen-step-nav-inner::before {
-          content: ""; width: 100%; height: 100%; left: 0; top: 0;
-          border-radius: 14px;
-          background: radial-gradient(circle 60px at 0% 100%, rgba(16,185,129,0.12), rgba(13,93,58,0.08), transparent);
-          position: absolute;
+        .dark .zen-step-nav-inner {
+          background: #10b981;
+          color: #064e3b;
         }
         .zen-step-nav-btn:hover { transform: translateY(-2px); }
         .zen-step-nav-btn:active { transform: translateY(1px); }
         /* Step number & text colour inside the dark card */
-        .zen-stepper-wrap .text-\\[\\#0a2617\\] { color: #a7f3d0 !important; }
-        .zen-stepper-wrap .text-\\[\\#4a7c5d\\] { color: rgba(167,243,208,0.65) !important; }
-        .zen-stepper-wrap .dark\\:text-white  { color: #a7f3d0 !important; }
+        .zen-stepper-wrap .text-\\[\\#0a2617\\] { color: #0d5d3a !important; }
+        .zen-stepper-wrap .text-\\[\\#4a7c5d\\] { color: #4a7c5d !important; }
+        .zen-stepper-wrap .dark\\:text-white  { color: #10b981 !important; }
         .zen-stepper-wrap .dark\\:text-gray-400 { color: rgba(167,243,208,0.65) !important; }
       `}</style>
 
@@ -106,27 +102,25 @@ export default function HowItWorks() {
                 <Step key={step.number}>
                   <div className="flex flex-col items-center justify-center py-6 text-center min-h-[220px] sm:min-h-[240px]">
                     <span
-                      className="text-5xl sm:text-6xl opacity-20 mb-4"
+                      className="text-5xl sm:text-6xl opacity-20 mb-4 text-[#0d5d3a] dark:text-[#10b981]"
                       style={{
                         fontFamily: 'Syne, sans-serif', fontWeight: 800,
-                        background: 'linear-gradient(135deg,#34d399,#6ee7b7)',
-                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                       }}
                     >
                       {step.number}
                     </span>
-                    <div style={{
-                      width: 52, height: 52, borderRadius: 14,
-                      background: 'linear-gradient(135deg,#10b981,#34d399)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16,
-                      boxShadow: '3px 3px 8px rgba(7,29,19,0.5),-3px -3px 8px rgba(52,211,153,0.2)',
-                    }}>
-                      <Icon className="w-6 h-6 text-white" />
+                    <div 
+                      className="bg-[#0d5d3a] dark:bg-[#10b981] shadow-md shadow-[#0d5d3a]/20 dark:shadow-none"
+                      style={{
+                        width: 52, height: 52, borderRadius: 14,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16,
+                      }}>
+                      <Icon className="w-6 h-6 text-white dark:text-[#064e3b]" />
                     </div>
-                    <h3 className="text-xl sm:text-2xl mb-3" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, color: '#a7f3d0' }}>
+                    <h3 className="text-xl sm:text-2xl mb-3 text-[#0d5d3a] dark:text-white" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600 }}>
                       {step.title}
                     </h3>
-                    <p className="text-sm sm:text-base leading-relaxed max-w-2xl mx-auto" style={{ color: 'rgba(167,243,208,0.65)' }}>
+                    <p className="text-sm sm:text-base leading-relaxed max-w-2xl mx-auto text-[#4a7c5d] dark:text-gray-400">
                       {step.description}
                     </p>
                   </div>

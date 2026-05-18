@@ -69,23 +69,16 @@ export default function Statistics() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
               whileHover={{ y: -4 }}
+              className="bg-white dark:bg-[#111111] border-2 border-[#0d5d3a] dark:border-[#10b981] shadow-sm flex flex-col items-center justify-center text-center min-h-[130px] transition-transform duration-200"
               style={{
                 padding: '28px 20px',
-                background: 'linear-gradient(135deg, #0d5d3a, #1a8a5a, #0a4a2e)',
-                borderRadius: 20,
-                boxShadow: '8px 8px 18px rgba(7,29,19,0.55), -8px -8px 18px rgba(26,138,90,0.10), inset 2px 2px 5px rgba(52,211,153,0.30), inset -2px -2px 5px rgba(7,29,19,0.40)',
-                backgroundImage: 'radial-gradient(circle, rgba(52,211,153,0.15) 1px, transparent 1px), radial-gradient(circle, rgba(16,185,129,0.08) 1px, transparent 1px)',
-                backgroundSize: '20px 20px',
-                backgroundPosition: '0 0, 10px 10px',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                textAlign: 'center', minHeight: 130, transition: 'transform 0.2s ease',
+                borderRadius: 24,
               }}
             >
               <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, lineHeight: 1, marginBottom: 8 }}>
                 <span
+                  className="text-[#0d5d3a] dark:text-[#10b981]"
                   style={{
-                    background: 'linear-gradient(135deg, #34d399, #6ee7b7)',
-                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                     fontSize: 'clamp(1.6rem, 3.5vw, 2.6rem)',
                     opacity: hasAnimated ? 1 : 0,
                     transform: hasAnimated ? 'translateY(0)' : 'translateY(10px)',
@@ -96,7 +89,7 @@ export default function Statistics() {
                   {stat.value}
                 </span>
               </div>
-              <p style={{ color: 'rgba(167,243,208,0.70)', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <p className="text-[#4a7c5d] dark:text-gray-400" style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {stat.label}
               </p>
             </motion.div>

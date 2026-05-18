@@ -104,75 +104,77 @@ const AddStoryForm = ({ onAdd }: { onAdd: (s: any) => void }) => {
           width: 100%;
           max-width: 520px;
           padding: 28px;
-          background: linear-gradient(135deg, #0d5d3a, #1a8a5a, #0a4a2e);
-          border-radius: 20px;
-          box-shadow:
-            10px 10px 20px rgba(7,29,19,0.55),
-            -10px -10px 20px rgba(26,138,90,0.12),
-            inset 2px 2px 5px rgba(52,211,153,0.35),
-            inset -2px -2px 5px rgba(7,29,19,0.45);
-          background-image:
-            radial-gradient(circle, rgba(52,211,153,0.18) 1px, transparent 1px),
-            radial-gradient(circle, rgba(16,185,129,0.10) 1px, transparent 1px);
-          background-size: 20px 20px;
-          background-position: 0 0, 10px 10px;
+          background: #ffffff;
+          border-radius: 24px;
+          border: 2px solid #0d5d3a;
+          box-shadow: 0 4px 12px rgba(13,93,58,0.08);
+        }
+        .dark .zen-story-form-wrap {
+          background: #111111;
+          border-color: #10b981;
+          box-shadow: 0 4px 12px rgba(16,185,129,0.08);
         }
         .zen-story-form-title {
-          font-size: 20px; font-weight: 800; color: #a7f3d0;
+          font-size: 20px; font-weight: 800; color: #0d5d3a;
           text-transform: uppercase; letter-spacing: 1px;
           margin-bottom: 6px;
           font-family: 'Syne', sans-serif;
         }
+        .dark .zen-story-form-title { color: #10b981; }
         .zen-story-form-subtitle {
-          font-size: 13px; color: rgba(167,243,208,0.7); margin-bottom: 20px;
+          font-size: 13px; color: #4a7c5d; margin-bottom: 20px;
         }
         .zen-story-form-group { margin-bottom: 14px; }
         .zen-story-form-label {
-          display: block; color: #6ee7b7; font-size: 11px;
+          display: block; color: #0d5d3a; font-size: 11px;
           font-weight: 700; margin-bottom: 7px;
           text-transform: uppercase; letter-spacing: 0.5px;
         }
+        .dark .zen-story-form-label { color: rgba(167,243,208,0.7); }
         .zen-story-form-input, .zen-story-form-select, .zen-story-form-textarea {
-          width: 100%; padding: 12px 14px; border: none;
-          background: linear-gradient(135deg, #1a8a5a, #0d5d3a);
-          border-radius: 12px; font-size: 14px; color: #d1fae5;
+          width: 100%; padding: 12px 14px; border: 1px solid rgba(13,93,58,0.2);
+          background: #f8fdf9;
+          border-radius: 12px; font-size: 14px; color: #0a2617;
           font-weight: 500;
-          box-shadow:
-            4px 4px 10px rgba(7,29,19,0.55),
-            -4px -4px 10px rgba(52,211,153,0.2),
-            inset 2px 2px 4px rgba(7,29,19,0.4),
-            inset -2px -2px 4px rgba(52,211,153,0.3);
-          transition: box-shadow 0.3s ease, background 0.3s ease;
+          transition: border-color 0.3s ease, box-shadow 0.3s ease;
           outline: none; box-sizing: border-box;
         }
+        .dark .zen-story-form-input, .dark .zen-story-form-select, .dark .zen-story-form-textarea {
+          background: rgba(16,185,129,0.05);
+          border-color: rgba(16,185,129,0.2);
+          color: #ffffff;
+        }
         .zen-story-form-input::placeholder, .zen-story-form-textarea::placeholder {
+          color: rgba(13,93,58,0.4);
+        }
+        .dark .zen-story-form-input::placeholder, .dark .zen-story-form-textarea::placeholder {
           color: rgba(167,243,208,0.45);
         }
         .zen-story-form-input:focus, .zen-story-form-select:focus, .zen-story-form-textarea:focus {
-          background: linear-gradient(135deg, #1a8a5a, #0d5d3a);
-          box-shadow:
-            3px 3px 8px rgba(7,29,19,0.6),
-            -3px -3px 8px rgba(52,211,153,0.25),
-            inset 3px 3px 7px rgba(7,29,19,0.5),
-            inset -3px -3px 7px rgba(52,211,153,0.35);
+          border-color: #0d5d3a;
+          box-shadow: 0 0 0 2px rgba(13,93,58,0.2);
+        }
+        .dark .zen-story-form-input:focus, .dark .zen-story-form-select:focus, .dark .zen-story-form-textarea:focus {
+          border-color: #10b981;
+          box-shadow: 0 0 0 2px rgba(16,185,129,0.2);
         }
         .zen-story-form-textarea { height: 90px; resize: none; }
-        .zen-story-form-select option { background: #0d5d3a; color: #d1fae5; }
+        .zen-story-form-select option { background: #ffffff; color: #0a2617; }
+        .dark .zen-story-form-select option { background: #111111; color: #ffffff; }
         .zen-story-form-btn {
           width: 100%; padding: 13px;
-          background: linear-gradient(135deg, #10b981, #34d399, #6ee7b7);
+          background: #0d5d3a;
           border: none; border-radius: 12px;
-          color: #064e3b; font-size: 14px; font-weight: 800;
+          color: #ffffff; font-size: 14px; font-weight: 800;
           letter-spacing: 0.8px; text-transform: uppercase;
           cursor: pointer; margin-top: 12px;
-          box-shadow:
-            8px 8px 16px rgba(7,29,19,0.5),
-            -8px -8px 16px rgba(52,211,153,0.25),
-            inset 2px 2px 5px rgba(110,231,183,0.4),
-            inset -2px -2px 5px rgba(7,29,19,0.4);
-          transition: transform 0.25s ease, box-shadow 0.25s ease;
+          transition: transform 0.25s ease, opacity 0.25s ease;
         }
-        .zen-story-form-btn:hover { transform: translateY(-2px); }
+        .dark .zen-story-form-btn {
+          background: #10b981;
+          color: #064e3b;
+        }
+        .zen-story-form-btn:hover { transform: translateY(-2px); opacity: 0.9; }
         .zen-story-form-btn:active { transform: translateY(1px); }
         .zen-story-form-btn:disabled { opacity: 0.6; cursor: not-allowed; }
       `}</style>

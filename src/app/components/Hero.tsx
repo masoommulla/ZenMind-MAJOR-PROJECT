@@ -65,10 +65,10 @@ export default function Hero({ onGetStarted }: HeroProps) {
   };
 
   return (
-    <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-white dark:bg-[#050505] pt-14 sm:pt-16 transition-colors duration-300">
+    <section className="relative min-h-[90vh] lg:min-h-[70vh] flex items-center justify-center overflow-hidden bg-white dark:bg-[#050505] pt-14 sm:pt-16 transition-colors duration-300">
       <div className="absolute inset-y-0 right-0 hidden lg:block w-1/2 z-0 overflow-hidden">
         <video
-          className="absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover pointer-events-none opacity-100 dark:opacity-70"
+          className="absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover pointer-events-none opacity-100 dark:opacity-70 grayscale-[40%]"
           style={{
             transform: 'translateZ(0)',
             backfaceVisibility: 'hidden',
@@ -120,7 +120,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
 
             <motion.h1
               variants={itemVariants}
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#0a2617] dark:text-white leading-tight max-w-none lg:max-w-[22ch]"
+              className="text-4xl sm:text-5xl md:text-5xl lg:text-6xl text-[#0a2617] dark:text-white leading-tight max-w-none lg:max-w-[22ch]"
               style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800 }}
             >
               Empowering{' '}

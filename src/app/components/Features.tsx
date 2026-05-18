@@ -123,7 +123,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
               style={{ transform: 'translateZ(0)', willChange: 'transform' }}
             />
             <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-black/30 to-transparent rounded-b-xl pointer-events-none" />
-            <div className="h-full w-px absolute left-1/2 top-0 z-10 bg-gradient-to-b from-transparent via-[#10b981]/50 to-transparent animate-[move_4s_linear_infinite] pointer-events-none" />
+
           </div>
         )}
 
