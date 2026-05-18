@@ -119,7 +119,7 @@ function JobCard({ job, index, featured, onClick }: { job: any; index: number; f
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06 }}
       onClick={onClick} whileHover={{ y: -3, boxShadow: '0 12px 32px rgba(13,93,58,0.12)' }}
-      className={`cursor-pointer bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl border-2 p-5 sm:p-6 transition-all ${featured ? 'border-amber-300 dark:border-amber-500/40' : 'border-[#0d5d3a]/10 dark:border-white/10 hover:border-[#0d5d3a]/30'}`}>
+      className={`cursor-pointer bg-white dark:bg-[#111111] rounded-2xl sm:rounded-3xl border-2 p-5 sm:p-6 transition-all ${featured ? 'border-amber-300 dark:border-amber-500/40' : 'border-[#0d5d3a] dark:border-[#10b981] hover:border-[#0d5d3a]/70'}`}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -131,7 +131,7 @@ function JobCard({ job, index, featured, onClick }: { job: any; index: number; f
               {job.status === 'active' ? 'Open' : 'Closed'}
             </span>
           </div>
-          <h3 className="text-lg font-black text-[#0a2617] dark:text-white mb-1" style={{ fontFamily: 'Syne, sans-serif' }}>{job.title}</h3>
+          <h3 className="text-lg font-black text-[#0d5d3a] dark:text-[#10b981] mb-1" style={{ fontFamily: 'Syne, sans-serif' }}>{job.title}</h3>
           <div className="flex flex-wrap gap-3 text-xs text-[#4a7c5d] dark:text-gray-400 font-semibold mb-3">
             {job.location && <span className="flex items-center gap-1"><MapPin size={11} />{job.location}</span>}
             {job.employmentType && <span className="flex items-center gap-1"><Briefcase size={11} />{job.employmentType}</span>}

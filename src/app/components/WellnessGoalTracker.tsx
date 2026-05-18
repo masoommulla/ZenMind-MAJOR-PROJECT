@@ -117,6 +117,7 @@ function GoalCard({ goal, onToggle, onDelete, toggling }: {
   );
 }
 
+
 /* ── Push Notification Hook ── */
 function usePushNotifications() {
   const [enabled, setEnabled]   = useState(false);

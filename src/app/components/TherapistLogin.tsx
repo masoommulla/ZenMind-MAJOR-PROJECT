@@ -1,121 +1,146 @@
 import { useState } from 'react';
-import { motion } from 'motion/react';
-import { ArrowLeft, Stethoscope, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { apiFetch } from '../api/client';
+import logo from '../../../asset/logo.png';
 
-export default function TherapistLogin({ onBackHome, onAuthSuccess }: { onBackHome: () => void, onAuthSuccess: () => void }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const DOODLE_CSS = `
+  .doodle-th-wrapper {
+    --ink: #323232; --paper: #fff9e6; --bg-color: #ffffff;
+    --primary-btn: #ff6b6b; --primary-btn-hover: #ff5252;
+    --input-focus: #2d8cf0; --border-width: 2px; --shadow-offset: 4px;
+    --sketch-r1: 8px 24px 8px 24px / 24px 8px 24px 8px;
+    --sketch-r2: 24px 8px 24px 8px / 8px 24px 8px 24px;
+    --sketch-rbtn: 16px 5px 16px 5px / 5px 16px 5px 16px;
+    font-family: "Comic Sans MS","Chalkboard SE","Gochi Hand",cursive;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; position: relative;
+  }
+  .doodle-th-card {
+    width: 310px;
+    border: var(--border-width) solid var(--ink);
+    border-radius: var(--sketch-r1);
+    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--ink);
+    background-color: var(--paper);
+    background-image: repeating-linear-gradient(transparent,transparent 28px,rgba(0,0,0,.06) 28px,rgba(0,0,0,.06) 30px);
+    background-position: 0 15px;
+    padding: 28px 24px;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    position: relative;
+  }
+  .doodle-th-title {
+    font-size: 22px; font-weight: 900; color: var(--ink);
+    text-transform: uppercase; letter-spacing: 1px;
+    transform: rotate(-2deg); text-shadow: 1px 1px 0 rgba(0,0,0,.1);
+    display: inline-block; margin-bottom: 4px;
+  }
+  .doodle-th-input {
+    width: 262px; height: 40px; padding: 5px 14px; box-sizing: border-box;
+    font-family: inherit; font-size: 14px; font-weight: 600; color: var(--ink);
+    background: var(--bg-color); border: var(--border-width) solid var(--ink);
+    border-radius: var(--sketch-r1); box-shadow: 3px 3px 0 var(--ink);
+    outline: none; transition: all .2s ease;
+  }
+  .doodle-th-input::placeholder { color: #666; opacity: .8; }
+  .doodle-th-input:hover { transform: translateY(-2px); box-shadow: 4px 4px 0 var(--ink); }
+  .doodle-th-input:focus { border-color: var(--input-focus); border-radius: var(--sketch-r2); background: #fffdf5; box-shadow: 4px 4px 0 var(--ink); }
+  .doodle-th-btn {
+    margin-top: 6px; width: 150px; height: 42px;
+    font-family: inherit; font-size: 16px; font-weight: 900; letter-spacing: 1px;
+    color: var(--ink); background: var(--primary-btn);
+    border: var(--border-width) solid var(--ink); border-radius: var(--sketch-rbtn);
+    box-shadow: 4px 4px 0 var(--ink); cursor: pointer; transition: all .15s ease;
+    transform: rotate(-1deg);
+  }
+  .doodle-th-btn:hover { background: var(--primary-btn-hover); transform: translateY(-2px) rotate(-2deg); box-shadow: 5px 5px 0 var(--ink); }
+  .doodle-th-btn:active { transform: translate(3px,3px) rotate(0deg); box-shadow: 0 0 0 var(--ink); }
+  .doodle-th-btn:disabled { opacity: .6; cursor: not-allowed; }
+  .doodle-th-svg { position: absolute; z-index: -1; pointer-events: none; }
+  .doodle-th-star { top: -22px; left: -30px; width: 44px; height: 44px; animation: dfl-star 4s ease-in-out infinite; }
+  .doodle-th-sparkle { bottom: -18px; right: -22px; width: 36px; height: 36px; animation: dfl-sparkle 4s ease-in-out infinite 1s; }
+  .doodle-th-swirl { top: 28px; right: -28px; width: 30px; height: 30px; animation: dfl-swirl 4s ease-in-out infinite 2s; }
+  .doodle-th-badge {
+    width: 54px; height: 54px; border-radius: 50%;
+    border: 2px solid var(--ink); background: white;
+    box-shadow: 3px 3px 0 var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; margin-bottom: 2px;
+  }
+`;
+
+export default function TherapistLogin({ onBackHome, onAuthSuccess }: { onBackHome: () => void; onAuthSuccess: () => void }) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError]     = useState('');
+  const [showPw, setShowPw]   = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError('Please enter both email and password.');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
+    const f = new FormData(e.currentTarget);
+    const email = String(f.get('email') || '');
+    const password = String(f.get('password') || '');
+    if (!email || !password) { setError('Please fill in both fields.'); return; }
+    setLoading(true); setError('');
     try {
-      await apiFetch('/therapist/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-      });
+      await apiFetch('/therapist/login', { method: 'POST', body: JSON.stringify({ email, password }) });
       onAuthSuccess();
     } catch (err: any) {
       setError(err.message || 'Invalid credentials or account suspended.');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#050505] flex flex-col transition-colors duration-300">
-      <header className="p-6">
-        <button
-          onClick={onBackHome}
-          className="flex items-center gap-2 text-[#4a7c5d] dark:text-gray-400 hover:text-[#0d5d3a] dark:hover:text-white transition font-medium"
-        >
-          <ArrowLeft size={20} /> Back to Home
-        </button>
-      </header>
+    <section style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'20px 16px', background:'linear-gradient(135deg,#fff9e6 0%,#e6f0ff 100%)' }}>
+      <style>{DOODLE_CSS}</style>
 
-      <main className="flex-1 flex flex-col items-center justify-center p-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md bg-[#fbfdfb] dark:bg-[#111111] border border-[#0d5d3a]/20 dark:border-white/10 rounded-3xl p-8 sm:p-10 shadow-xl"
-        >
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-[#0d5d3a]/10 dark:bg-[#10b981]/10 rounded-full flex items-center justify-center mb-4">
-              <Stethoscope className="w-8 h-8 text-[#0d5d3a] dark:text-[#10b981]" />
-            </div>
-            <h1 className="text-2xl font-bold text-[#0a2617] dark:text-white" style={{ fontFamily: 'Syne, sans-serif' }}>
-              Therapist Portal
-            </h1>
-            <p className="text-sm text-[#4a7c5d] dark:text-gray-400 mt-2 text-center">
-              Sign in to manage your schedule, sessions, and connect with clients.
-            </p>
-          </div>
+      <button onClick={onBackHome} style={{ position:'fixed', top:16, left:16, zIndex:200, fontFamily:'"Comic Sans MS",cursive', fontSize:13, fontWeight:700, color:'#323232', background:'white', border:'2px solid #323232', borderRadius:'8px 20px 8px 20px/20px 8px 20px 8px', padding:'6px 14px', cursor:'pointer', boxShadow:'3px 3px 0 #323232' }}>
+        ← Home
+      </button>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-              <p className="text-sm text-red-700 dark:text-red-400 font-medium">{error}</p>
-            </div>
-          )}
+      <div className="doodle-th-wrapper">
+        {/* Logo + label */}
+        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:18 }}>
+          <img src={logo} alt="ZenMind" style={{ width:28, height:28, borderRadius:'50%', objectFit:'cover', border:'2px solid #323232' }} />
+          <span style={{ fontFamily:'"Comic Sans MS",cursive', fontWeight:900, fontSize:15, color:'#323232' }}>ZenMind</span>
+        </div>
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-sm font-semibold text-[#0a2617] dark:text-gray-300 mb-1.5">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/20 dark:border-white/10 rounded-xl px-4 py-3 text-[#0a2617] dark:text-white outline-none focus:border-[#0d5d3a] dark:focus:border-[#10b981] transition"
-                placeholder="doctor@zenmind.com"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-[#0a2617] dark:text-gray-300 mb-1.5">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/20 dark:border-white/10 rounded-xl px-4 py-3 text-[#0a2617] dark:text-white outline-none focus:border-[#0d5d3a] dark:focus:border-[#10b981] transition"
-                placeholder="••••••••"
-                required
-              />
-            </div>
+        {/* Card */}
+        <div className="doodle-th-card">
+          {/* SVG decorations */}
+          <svg className="doodle-th-svg doodle-th-star" viewBox="0 0 24 24" fill="#ffd166" stroke="#323232" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          <svg className="doodle-th-svg doodle-th-sparkle" viewBox="0 0 24 24" fill="#06d6a0" stroke="#323232" strokeWidth="1.5">
+            <path d="M12 2 Q12 12 22 12 Q12 12 12 22 Q12 12 2 12 Q12 12 12 2 Z" />
+          </svg>
+          <svg className="doodle-th-svg doodle-th-swirl" viewBox="0 0 24 24" fill="none" stroke="#323232" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M3 12 C 3 5 10 5 16 5 C 20 5 21 9 18 12 C 15 15 10 13 12 9 C 14 5 22 9 21 16" />
+          </svg>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#0a4a2e] dark:hover:bg-[#10b981] transition disabled:opacity-70 mt-2"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <ShieldCheck size={20} /> Secure Login
-                </>
-              )}
+          <div className="doodle-th-badge">🩺</div>
+          <div className="doodle-th-title">Therapist!</div>
+          <p style={{ fontSize:12, color:'#555', textAlign:'center', margin:'-6px 0 4px', fontFamily:'"Comic Sans MS",cursive' }}>
+            Sign in to your portal
+          </p>
+
+          <form style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:12, width:'100%' }} onSubmit={handleLogin}>
+            <input className="doodle-th-input" name="email" type="email" placeholder="Email address" required />
+            <input className="doodle-th-input" name="password" type={showPw ? 'text' : 'password'} placeholder="Password" required />
+
+            {error && <p style={{ fontSize:11, color:'#e53e3e', fontWeight:700, textAlign:'center', maxWidth:260, margin:'-4px 0', fontFamily:'inherit' }}>{error}</p>}
+
+            <button type="button" style={{ fontSize:11, color:'#4a7c5d', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', textDecoration:'underline', marginTop:-6 }}
+              onClick={() => setShowPw(s => !s)}>
+              {showPw ? 'Hide' : 'Show'} password
+            </button>
+
+            <button className="doodle-th-btn" type="submit" disabled={loading}>
+              {loading ? '...' : "Let's Go! 🚀"}
             </button>
           </form>
-          
-          <p className="text-center text-xs text-[#4a7c5d] dark:text-gray-500 mt-8">
-            Note: Accounts are issued strictly by ZenMind Administrators. If you cannot access your account, please contact support.
+
+          <p style={{ fontSize:11, color:'#888', textAlign:'center', marginTop:4, fontFamily:'"Comic Sans MS",cursive', lineHeight:1.5 }}>
+            Accounts issued by ZenMind Admin only.
           </p>
-        </motion.div>
-      </main>
-    </div>
+        </div>
+      </div>
+    </section>
   );
 }

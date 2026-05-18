@@ -337,29 +337,25 @@ export default function WellnessProgramsUser({
       )}
 
       {/* ── STICKY CONTROLS ── */}
-      <div className="flex-shrink-0 sticky top-0 z-10 bg-[#f7fbf8] dark:bg-[#050505] border-b border-[#0d5d3a]/8 dark:border-white/5 px-4 sm:px-6 pt-4 pb-3">
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Tabs */}
-          <div className="flex gap-1 p-1 bg-white dark:bg-[#111111] rounded-xl border border-[#0d5d3a]/10 dark:border-white/10">
-            {(['browse', 'my'] as const).map(t => (
-              <button key={t} onClick={() => setTab(t)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${tab === t ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:text-[#0a2617] dark:hover:text-white'}`}>
-                {t === 'browse' ? <><Search size={12}/> Browse All</> : <><BookOpen size={12}/> My Programs ({myEnrollments.length})</>}
-              </button>
-            ))}
+      <div className="zen-controls-bar" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {(['browse', 'my'] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`zen-tab-pill ${tab === t ? 'active' : ''}`}>
+              {t === 'browse' ? <><Search size={12} /> Browse All</> : <><BookOpen size={12} /> My Programs ({myEnrollments.length})</>}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 20, background: 'rgba(13,93,58,0.07)', border: '1.5px solid rgba(13,93,58,0.15)', fontSize: 11 }}>
+            <Zap size={12} style={{ color: '#0d5d3a' }} />
+            <span style={{ fontWeight: 700, color: '#0a2617' }}>{programs.length}</span>
+            <span style={{ color: '#4a7c5d' }}>Available</span>
           </div>
-          {/* Stats badges */}
-          <div className="flex items-center gap-2 ml-auto">
-            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm">
-              <Zap size={13} className="text-[#0d5d3a] dark:text-[#10b981]" />
-              <span className="text-xs font-bold text-[#0a2617] dark:text-white">{programs.length}</span>
-              <span className="text-[10px] text-[#4a7c5d] dark:text-gray-400">Available</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm">
-              <TrendingUp size={13} className="text-[#10b981]" />
-              <span className="text-xs font-bold text-[#0a2617] dark:text-white">{myEnrollments.length}</span>
-              <span className="text-[10px] text-[#4a7c5d] dark:text-gray-400">Enrolled</span>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 20, background: 'rgba(16,185,129,0.07)', border: '1.5px solid rgba(16,185,129,0.18)', fontSize: 11 }}>
+            <TrendingUp size={12} style={{ color: '#10b981' }} />
+            <span style={{ fontWeight: 700, color: '#0a2617' }}>{myEnrollments.length}</span>
+            <span style={{ color: '#4a7c5d' }}>Enrolled</span>
           </div>
         </div>
       </div>
@@ -395,39 +391,45 @@ export default function WellnessProgramsUser({
               const enr = p.enrollment;
               const pct = enr ? Math.round(((enr.completedDays?.length || 0) / p.durationDays) * 100) : 0;
               return (
-                <motion.div key={p._id} whileHover={{ y: -4, boxShadow: '0 16px 40px rgba(0,0,0,0.12)' }}
+                <motion.div key={p._id}
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                   onClick={() => openProgram(p)}
-                  className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/5 shadow-sm cursor-pointer overflow-hidden transition-all">
-                  {/* Gradient top strip */}
-                  <div className="h-2" style={{ background: `linear-gradient(90deg, ${p.coverGradientFrom}, ${p.coverGradientTo})` }} />
-                  <div className="p-6">
+                  className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col overflow-hidden"
+                >
+                  {/* Gradient header strip */}
+                  <div style={{ height: 6, background: `linear-gradient(90deg, ${p.coverGradientFrom}, ${p.coverGradientTo})` }} />
+                  <div className="p-5 flex flex-col flex-1">
                     <div className="flex items-start justify-between mb-3">
-                      <div className="text-3xl">{meta.icon}</div>
+                      <span style={{ fontSize: 30 }}>{meta.icon}</span>
                       {enr && (
-                        <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${enr.isCompleted ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' : 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400'}`}>
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                          enr.isCompleted
+                            ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                            : 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400'
+                        }`}>
                           {enr.isCompleted ? '🏆 Done' : 'In Progress'}
                         </span>
                       )}
                     </div>
-                    <h3 className="font-black text-[#0a2617] dark:text-white text-base leading-snug mb-1">{p.title}</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">{p.description}</p>
-
+                    <h3 className="font-bold text-[#0a2617] dark:text-white text-sm leading-snug mb-2"
+                      style={{ fontFamily: 'Syne, sans-serif' }}>{p.title}</h3>
+                    <p className="text-xs text-[#4a7c5d] dark:text-gray-400 leading-relaxed mb-3 flex-1 line-clamp-2">{p.description}</p>
                     {enr && (
-                      <div className="mb-4">
-                        <div className="h-1.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${p.coverGradientFrom}, ${p.coverGradientTo})` }} />
+                      <div className="mb-3">
+                        <div className="h-1.5 bg-[#0d5d3a]/10 dark:bg-white/10 rounded-full overflow-hidden">
+                          <div style={{ width: `${pct}%`, background: `linear-gradient(90deg,${p.coverGradientFrom},${p.coverGradientTo})` }}
+                            className="h-full rounded-full transition-all duration-700" />
                         </div>
-                        <div className="text-[10px] text-gray-400 mt-1">{pct}% complete</div>
+                        <div className="text-[10px] text-[#4a7c5d] dark:text-gray-500 mt-1">{pct}% complete</div>
                       </div>
                     )}
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-3 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                    <div className="flex items-center justify-between mt-auto">
+                      <div className="flex gap-3 text-[10px] text-[#4a7c5d] dark:text-gray-400 font-medium">
                         <span className="flex items-center gap-1"><Clock size={10} /> {p.durationDays}d</span>
                         <span className="capitalize">{p.difficulty}</span>
                         <span>{p.enrollmentCount || 0} enrolled</span>
                       </div>
-                      <ChevronRight size={16} className="text-[#0d5d3a] dark:text-[#10b981]" />
+                      <ChevronRight size={14} className="text-[#0d5d3a] dark:text-[#10b981]" />
                     </div>
                   </div>
                 </motion.div>
@@ -466,18 +468,20 @@ export default function WellnessProgramsUser({
                       const meta = CATEGORY_META[prog?.category] || CATEGORY_META.other;
                       return (
                         <div key={e._id} onClick={() => prog && openProgram(prog)}
-                          className="bg-white dark:bg-[#111111] rounded-2xl border border-[#0d5d3a]/10 dark:border-white/5 p-5 cursor-pointer hover:shadow-md transition">
-                          <div className="flex items-center gap-3 mb-3">
-                            <span className="text-2xl">{meta.icon}</span>
-                            <div>
-                              <div className="font-bold text-[#0a2617] dark:text-white text-sm">{prog?.title || 'Program'}</div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400">Day {e.currentDay} of {prog?.durationDays}</div>
+                          className="bg-white dark:bg-[#111111] rounded-2xl border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden">
+                          <div style={{ height: 4, background: `linear-gradient(90deg, ${prog?.coverGradientFrom || '#0d5d3a'}, ${prog?.coverGradientTo || '#10b981'})` }} />
+                          <div className="p-4 flex items-center gap-3">
+                            <span style={{ fontSize: 22 }}>{meta.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-bold text-[#0a2617] dark:text-white text-xs truncate">{prog?.title || 'Program'}</div>
+                              <div className="text-[10px] text-[#4a7c5d] dark:text-gray-400">Day {e.currentDay} of {prog?.durationDays}</div>
+                              <div className="h-1.5 bg-[#0d5d3a]/10 rounded-full overflow-hidden mt-2">
+                                <div style={{ width: `${pct}%`, background: `linear-gradient(90deg,${prog?.coverGradientFrom||'#0d5d3a'},${prog?.coverGradientTo||'#10b981'})` }}
+                                  className="h-full rounded-full" />
+                              </div>
                             </div>
+                            <span className="text-[10px] font-bold text-[#0d5d3a] dark:text-[#10b981] shrink-0">{pct}%</span>
                           </div>
-                          <div className="h-2 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
-                            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${prog?.coverGradientFrom || '#0d5d3a'}, ${prog?.coverGradientTo || '#10b981'})` }} />
-                          </div>
-                          <div className="text-[10px] text-gray-400 mt-1">{pct}% complete</div>
                         </div>
                       );
                     })}

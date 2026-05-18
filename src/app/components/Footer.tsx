@@ -75,39 +75,28 @@ export default function Footer({
                   {links.map((link) => (
                     <li key={link} className="min-w-0">
                       {category === 'Product' && onProductLinkClick ? (
-                        <button
-                          onClick={() => onProductLinkClick(link)}
-                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block text-left break-words w-full leading-snug"
-                        >
+                        <button onClick={() => onProductLinkClick(link)}
+                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block text-left break-words w-full leading-snug">
                           {link}
                         </button>
                       ) : category === 'Support' && onSupportLinkClick ? (
-                        <button
-                          onClick={() => onSupportLinkClick(link)}
-                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block text-left break-words w-full leading-snug"
-                        >
+                        <button onClick={() => onSupportLinkClick(link)}
+                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block text-left break-words w-full leading-snug">
                           {link}
                         </button>
                       ) : category === 'Company' && onCompanyLinkClick ? (
-                        <button
-                          onClick={() => onCompanyLinkClick(link)}
-                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block text-left break-words w-full leading-snug"
-                        >
+                        <button onClick={() => onCompanyLinkClick(link)}
+                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block text-left break-words w-full leading-snug">
                           {link}
                         </button>
                       ) : category === 'Resources' && onResourcesLinkClick ? (
-                        <button
-                          onClick={() => onResourcesLinkClick(link)}
-                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block text-left break-words w-full leading-snug"
-                        >
+                        <button onClick={() => onResourcesLinkClick(link)}
+                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block text-left break-words w-full leading-snug">
                           {link}
                         </button>
                       ) : (
-                        <motion.a
-                          href="#"
-                          whileHover={{ x: 3 }}
-                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block break-words leading-snug"
-                        >
+                        <motion.a href="#" whileHover={{ x: 3 }}
+                          className="text-white/70 hover:text-white transition-colors text-[11px] sm:text-sm block break-words leading-snug">
                           {link}
                         </motion.a>
                       )}

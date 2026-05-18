@@ -463,25 +463,49 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
           <div ref={chatEndRef} />
         </div>
 
-        <div className="flex-shrink-0 border-t border-[#0d5d3a]/08 dark:border-white/08 px-4 sm:px-5 py-4">
-          <div className="flex gap-2 items-center">
-            {SR && (
-              <button id="zen-mic-btn" onMouseDown={startListening} onMouseUp={stopListening} onTouchStart={startListening} onTouchEnd={stopListening} disabled={loading}
-                className={`flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 ${listening ? 'bg-red-500 text-white scale-110 shadow-lg shadow-red-500/30' : 'bg-[#f0fbf4] dark:bg-[#1a1a1a] text-[#0d5d3a] dark:text-[#10b981] border border-[#0d5d3a]/15 dark:border-white/10'}`}>
-                {listening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-              </button>
-            )}
-            <input id="zen-text-input" value={input} onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(input); } }}
-              disabled={loading}
-              placeholder={listening ? 'Listening...' : 'Talk to Zeni...'}
-              className="flex-1 bg-[#f7fbf8] dark:bg-[#1a1a1a] border border-[#0d5d3a]/12 dark:border-white/10 rounded-2xl px-4 py-3 text-sm text-[#0a2617] dark:text-white placeholder:text-[#4a7c5d]/50 outline-none focus:ring-2 focus:ring-[#0d5d3a]/20 dark:focus:ring-[#1a8a5a]/30 transition disabled:opacity-60" />
-            <button id="zen-send-btn" onClick={() => handleSend(input)} disabled={!input.trim() || loading}
-              className="flex-shrink-0 w-11 h-11 rounded-2xl bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] text-white flex items-center justify-center shadow-lg shadow-[#0d5d3a]/20 disabled:opacity-50 hover:scale-105 active:scale-95 transition-all">
-              <Send className="w-4 h-4" />
-            </button>
+        <div className="flex-shrink-0 px-4 sm:px-5 py-4">
+          <div className="zen-chat-box">
+            <div className="zen-chat-inner">
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                {SR && (
+                  <button id="zen-mic-btn" onMouseDown={startListening} onMouseUp={stopListening} onTouchStart={startListening} onTouchEnd={stopListening} disabled={loading}
+                    style={{ flexShrink: 0, marginLeft: 8, color: listening ? '#ff4444' : 'rgba(167,243,208,0.5)', background: 'transparent', border: 'none', cursor: 'pointer', transition: 'color 0.3s', display: 'flex' }}
+                    title="Hold to speak"
+                  >
+                    {listening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                  </button>
+                )}
+                <input id="zen-text-input" value={input} onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(input); } }}
+                  disabled={loading}
+                  placeholder={listening ? 'Listening...' : 'Share how you\'re feeling... ✦˚'}
+                  className="zen-chat-textarea"
+                  style={{ height: 44, flex: 1 }}
+                />
+              </div>
+              <div className="zen-chat-options">
+                <div className="zen-chat-btns">
+                  <button title="Attach" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width={18} height={18} viewBox="0 0 24 24"><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8v8a5 5 0 1 0 10 0V6.5a3.5 3.5 0 1 0-7 0V15a2 2 0 0 0 4 0V8" /></svg>
+                  </button>
+                  <button title="Language" type="button">
+                    <svg viewBox="0 0 24 24" height={18} width={18} xmlns="http://www.w3.org/2000/svg"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10m-2.29-2.333A17.9 17.9 0 0 1 8.027 13H4.062a8.01 8.01 0 0 0 5.648 6.667M10.03 13c.151 2.439.848 4.73 1.97 6.752A15.9 15.9 0 0 0 13.97 13zm9.908 0h-3.965a17.9 17.9 0 0 1-1.683 6.667A8.01 8.01 0 0 0 19.938 13M4.062 11h3.965A17.9 17.9 0 0 1 9.71 4.333A8.01 8.01 0 0 0 4.062 11m5.969 0h3.938A15.9 15.9 0 0 0 12 4.248A15.9 15.9 0 0 0 10.03 11m4.259-6.667A17.9 17.9 0 0 1 15.973 11h3.965a8.01 8.01 0 0 0-5.648-6.667" fill="currentColor" /></svg>
+                  </button>
+                </div>
+                <button id="zen-send-btn" className="zen-chat-submit" onClick={() => handleSend(input)} disabled={!input.trim() || loading} title="Send">
+                  <i>
+                    <svg viewBox="0 0 512 512" width={16} height={16}><path fill="currentColor" d="M473 39.05a24 24 0 0 0-25.5-5.46L47.47 185h-.08a24 24 0 0 0 1 45.16l.41.13l137.3 58.63a16 16 0 0 0 15.54-3.59L422 80a7.07 7.07 0 0 1 10 10L226.66 310.26a16 16 0 0 0-3.59 15.54l58.65 137.38c.06.2.12.38.19.57c3.2 9.27 11.3 15.81 21.09 16.25h1a24.63 24.63 0 0 0 23-15.46L478.39 64.62A24 24 0 0 0 473 39.05" /></svg>
+                  </i>
+                </button>
+              </div>
+            </div>
           </div>
-          <p className="text-center text-[10px] text-[#4a7c5d]/50 dark:text-gray-600 mt-2">
+          <div className="zen-chat-tags">
+            <span onClick={() => handleSend('How can I manage my anxiety?')}>Anxiety Help</span>
+            <span onClick={() => handleSend('Tell me a story')}>Story Mode</span>
+            <span onClick={() => handleSend('I want to talk to a therapist')}>Talk to Therapist</span>
+          </div>
+          <p className="text-center text-[10px] text-gray-600 mt-1">
             Zeni is an AI companion, not a substitute for professional therapy. In crisis? iCall: 9152987821
           </p>
         </div>

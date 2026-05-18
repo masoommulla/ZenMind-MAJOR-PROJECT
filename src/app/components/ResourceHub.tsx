@@ -251,7 +251,13 @@ function ResourceCard({
   onOpen: (r: Resource) => void;
 }) {
   const isExternal = resource.type === 'link';
-  const canPlay    = !isExternal;
+
+  const blobColors: Record<ResourceType, string> = {
+    video: 'radial-gradient(circle, #10b981, #0d5d3a)',
+    audio: 'radial-gradient(circle, #8b5cf6, #6d28d9)',
+    image: 'radial-gradient(circle, #3b82f6, #1d4ed8)',
+    link:  'radial-gradient(circle, #f59e0b, #b45309)',
+  };
 
   const handleAction = () => {
     if (isExternal) {
@@ -263,61 +269,71 @@ function ResourceCard({
   };
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="group flex flex-col rounded-3xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-[#0d5d3a]/10 dark:hover:shadow-black/40 transition-all duration-300 hover:-translate-y-0.5"
+    <motion.div layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+      className="zen-resource-card"
+      style={{ position: 'relative', borderRadius: 14, zIndex: 1, overflow: 'hidden',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        minHeight: 220, cursor: 'pointer',
+      }}
+      onClick={handleAction}
     >
-      {/* Thumbnail */}
-      <div className="relative w-full overflow-hidden" style={{ paddingTop: '56.25%' }}>
-        <CardThumbnail r={resource} />
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-          {canPlay && (
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center">
-              <Play className="w-6 h-6 text-white fill-white ml-0.5" />
-            </div>
-          )}
-        </div>
-        {/* Type badge */}
-        <div className={`absolute top-2.5 left-2.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold backdrop-blur-sm ${typeColor(resource.type)}`}>
-          <TypeIcon t={resource.type} className="w-3 h-3" />
-          {typeLabel(resource.type)}
-        </div>
-        {/* Favourite button */}
-        <button
-          onClick={e => { e.stopPropagation(); onToggleFav(resource._id); }}
-          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition"
-        >
-          <Heart className={`w-4 h-4 transition-colors ${isFav ? 'fill-red-500 text-red-500' : 'text-white'}`} />
-        </button>
-      </div>
+      {/* Bouncing blob */}
+      <div style={{
+        position: 'absolute', zIndex: 1, top: '50%', left: '50%',
+        width: 140, height: 140, borderRadius: '50%',
+        background: blobColors[resource.type],
+        opacity: 0.9, filter: 'blur(14px)',
+        animation: 'zen-blob-bounce 5s infinite ease',
+      }} />
 
-      {/* Body */}
-      <div className="flex-1 flex flex-col p-3.5">
-        <h3 className="text-[#0a2617] dark:text-gray-100 font-bold text-sm leading-snug line-clamp-2 mb-1.5" style={{ fontFamily: 'Syne, sans-serif' }}>
+      {/* Frosted glass panel */}
+      <div className="zen-resource-glass" style={{
+        position: 'absolute', top: 5, left: 5,
+        width: 'calc(100% - 10px)', height: 'calc(100% - 10px)',
+        zIndex: 2, backdropFilter: 'blur(24px)', borderRadius: 10,
+        overflow: 'hidden',
+        display: 'flex', flexDirection: 'column', padding: '14px 12px',
+      }}>
+        {/* Top row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${typeColor(resource.type)}`}>
+            <TypeIcon t={resource.type} className="w-3 h-3" /> {typeLabel(resource.type)}
+          </span>
+          <button onClick={e => { e.stopPropagation(); onToggleFav(resource._id); }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}>
+            <Heart className={`zen-rcard-heart w-4 h-4 ${isFav ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+          </button>
+        </div>
+
+        {/* Title */}
+        <h3 className="zen-rcard-title" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, color: '#0a2617',
+          lineHeight: 1.35, marginBottom: 6, flex: 1,
+          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
           {resource.title}
         </h3>
-        {resource.description && (
-          <p className="text-[#4a7c5d] dark:text-gray-400 text-xs leading-relaxed line-clamp-2 mb-2 flex-1">
-            {resource.description}
-          </p>
-        )}
+
+        {/* Tags */}
         {resource.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 8 }}>
             {resource.tags.slice(0, 3).map(tag => (
-              <span key={tag} className="px-1.5 py-0.5 rounded-full bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] text-[10px] font-semibold">
-                {tag}
-              </span>
+              <span key={tag} className="zen-rcard-tag px-1.5 py-0.5 rounded-full bg-[#f0fbf4] text-[#0d5d3a] text-[9px] font-semibold">{tag}</span>
             ))}
           </div>
         )}
-        <button
-          onClick={handleAction}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white text-xs font-bold hover:bg-[#0a4a2e] dark:hover:bg-[#10b981] transition shadow-md shadow-[#0d5d3a]/20 dark:shadow-[#1a8a5a]/20"
-        >
-          {isExternal ? <><ExternalLink className="w-3.5 h-3.5" /> Open Link</> : <><Play className="w-3.5 h-3.5 fill-white" /> {resource.type === 'image' ? 'View' : 'Play'}</>}
+
+        {/* Views */}
+        <div className="zen-rcard-views" style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4a7c5d', fontSize: 11, marginBottom: 8 }}>
+          <Eye className="w-3 h-3" /> {resource.views || 0} views
+        </div>
+
+        {/* Action button */}
+        <button onClick={e => { e.stopPropagation(); handleAction(); }}
+          style={{ width: '100%', padding: '6px 0', borderRadius: 6,
+            background: 'linear-gradient(135deg, #0d5d3a, #1a8a5a)', color: '#fff',
+            border: 'none', fontWeight: 700, fontSize: 11, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+          }}>
+          {isExternal ? <><ExternalLink className="w-3 h-3" /> Open Link</> : <><Play className="w-3 h-3 fill-white" /> {resource.type === 'image' ? 'View' : 'Play'}</>}
         </button>
       </div>
     </motion.div>

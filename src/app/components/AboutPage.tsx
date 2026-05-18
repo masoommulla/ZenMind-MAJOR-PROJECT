@@ -84,10 +84,17 @@ export default function AboutPage({ onClose }: { onClose: () => void }) {
                 { num: '98%',  label: 'Report feeling heard' },
                 { num: '1K+',  label: 'Licensed therapists' },
                 { num: '24/7', label: 'Always available' },
-              ].map(s => (
-                <div key={s.label} className="bg-gradient-to-br from-[#f8fdf9] to-[#e8f5e9] dark:from-[#111111] dark:to-[#1a1a1a] rounded-3xl p-6 border border-[#0d5d3a]/10 dark:border-white/10">
-                  <div className="text-3xl sm:text-4xl font-black text-[#0d5d3a] dark:text-[#10b981] mb-1" style={{ fontFamily: 'Syne, sans-serif' }}>{s.num}</div>
-                  <div className="text-xs sm:text-sm text-[#4a7c5d] dark:text-gray-400 font-semibold">{s.label}</div>
+              ].map((s, i) => (
+                <div key={s.label} className="zen-3d-parent">
+                  <div className="zen-3d-card">
+                    <div className="zen-3d-badge">
+                      <span className="zen-3d-badge-label">{['01','02','03','04'][i]}</span>
+                    </div>
+                    <div className="zen-3d-content">
+                      <div className="zen-3d-title" style={{ fontSize: 22 }}>{s.num}</div>
+                      <div className="zen-3d-desc">{s.label}</div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </motion.div>
@@ -131,12 +138,16 @@ export default function AboutPage({ onClose }: { onClose: () => void }) {
               const Icon = v.icon;
               return (
                 <motion.div key={v.title} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                  className="bg-gradient-to-br from-[#f8fdf9] to-[#e8f5e9] dark:from-[#111111] dark:to-[#1a1a1a] rounded-3xl p-6 border border-[#0d5d3a]/10 dark:border-white/10">
-                  <div className="w-11 h-11 rounded-2xl bg-[#0d5d3a] dark:bg-[#1a8a5a] flex items-center justify-center mb-4">
-                    <Icon size={20} className="text-white" />
+                  className="zen-3d-parent">
+                  <div className="zen-3d-card">
+                    <div className="zen-3d-badge">
+                      <Icon size={18} color="#10b981" />
+                    </div>
+                    <div className="zen-3d-content">
+                      <div className="zen-3d-title">{v.title}</div>
+                      <div className="zen-3d-desc">{v.desc}</div>
+                    </div>
                   </div>
-                  <h3 className="font-black text-[#0a2617] dark:text-white mb-2 text-base" style={{ fontFamily: 'Syne, sans-serif' }}>{v.title}</h3>
-                  <p className="text-[#4a7c5d] dark:text-gray-400 text-sm leading-relaxed">{v.desc}</p>
                 </motion.div>
               );
             })}
@@ -162,7 +173,7 @@ function TeamCard({ member, index }: { member: any; index: number }) {
       viewport={{ once: true }}
       transition={{ delay: index * 0.1, duration: 0.6 }}
       whileHover={{ y: -6, boxShadow: '0 24px 48px rgba(13,93,58,0.15)' }}
-      className="bg-white dark:bg-[#111111] rounded-3xl overflow-hidden border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm transition-all group"
+      className="bg-white dark:bg-[#111111] rounded-3xl overflow-hidden border-2 border-[#0d5d3a] dark:border-[#10b981] shadow-sm transition-all group"
     >
       {/* Photo */}
       <div className="relative h-64 sm:h-72 bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] dark:from-[#1a2a1f] dark:to-[#0d1a10] overflow-hidden">
@@ -203,7 +214,7 @@ function TeamCard({ member, index }: { member: any; index: number }) {
       <div className="p-6">
         <div className="flex items-start justify-between mb-1">
           <div>
-            <h3 className="font-black text-[#0a2617] dark:text-white text-lg" style={{ fontFamily: 'Syne, sans-serif' }}>{member.name}</h3>
+            <h3 className="font-black text-[#0d5d3a] dark:text-[#10b981] text-lg" style={{ fontFamily: 'Syne, sans-serif' }}>{member.name}</h3>
             <p className="text-[#0d5d3a] dark:text-[#10b981] font-bold text-sm">{member.role}</p>
           </div>
           {member.profileLink && (

@@ -98,34 +98,123 @@ const AddStoryForm = ({ onAdd }: { onAdd: (s: any) => void }) => {
   };
 
   return (
-    <form onSubmit={submit} className="mt-20 max-w-2xl mx-auto bg-gradient-to-br from-white to-[#f8fdf9] dark:from-[#111111] dark:to-[#1a1a1a] rounded-[2rem] p-6 sm:p-10 border border-[#0d5d3a]/15 dark:border-white/10 shadow-xl shadow-[#0d5d3a]/5 relative overflow-hidden text-left">
-      <div className="absolute top-0 right-0 p-6 opacity-[0.03] dark:opacity-10 pointer-events-none"><Quote size={120} /></div>
-      <h3 className="text-2xl sm:text-3xl font-bold text-[#0a2617] dark:text-white mb-3 relative z-10" style={{ fontFamily: 'Syne, sans-serif' }}>Share Your Journey</h3>
-      <p className="text-[#4a7c5d] dark:text-gray-400 text-sm sm:text-base mb-8 relative z-10 max-w-md">Your story could be the light someone else needs right now. Share your experience with ZenMind.</p>
-      
-      <div className="space-y-5 relative z-10">
-        <div className="flex gap-4 flex-wrap sm:flex-nowrap">
-          <label className="flex-1 block">
-            <span className="text-sm font-bold text-[#0a2617] dark:text-gray-300 mb-2 block">First Name or Initial</span>
-            <input required type="text" value={form.author} onChange={e => setForm({...form, author: e.target.value})} placeholder="e.g. Alex, 16" className="w-full bg-white dark:bg-[#222222] border border-[#0d5d3a]/20 dark:border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 text-[#0a2617] dark:text-white transition-shadow" />
-          </label>
-          <label className="w-full sm:w-36 block">
-            <span className="text-sm font-bold text-[#0a2617] dark:text-gray-300 mb-2 block">Rating</span>
-            <select value={form.rating} onChange={e => setForm({...form, rating: Number(e.target.value)})} className="w-full bg-white dark:bg-[#222222] border border-[#0d5d3a]/20 dark:border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 text-[#0a2617] dark:text-white transition-shadow">
-              <option value={5}>5 Stars</option><option value={4}>4 Stars</option><option value={3}>3 Stars</option><option value={2}>2 Stars</option><option value={1}>1 Star</option>
-            </select>
-          </label>
-        </div>
-        <label className="block">
-          <span className="text-sm font-bold text-[#0a2617] dark:text-gray-300 mb-2 block">Your Story</span>
-          <textarea required value={form.story} onChange={e => setForm({...form, story: e.target.value})} placeholder="How has ZenMind helped you?" className="w-full min-h-[120px] resize-y bg-white dark:bg-[#222222] border border-[#0d5d3a]/20 dark:border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 text-[#0a2617] dark:text-white transition-shadow" />
-        </label>
-        <button type="submit" disabled={busy} className="w-full py-3.5 mt-2 rounded-xl bg-[#0d5d3a] dark:bg-[#10b981] text-white font-black uppercase tracking-widest shadow-lg shadow-[#0d5d3a]/20 disabled:opacity-70 hover:bg-[#0a4a2e] transition-all hover:-translate-y-0.5">
-          {busy ? 'Submitting...' : 'Submit Story'}
-        </button>
-        {msg && <p className="text-center text-sm font-bold mt-4 text-[#0d5d3a] dark:text-[#10b981]">{msg}</p>}
+    <div className="mt-20 max-w-2xl mx-auto flex justify-center">
+      <style>{`
+        .zen-story-form-wrap {
+          width: 100%;
+          max-width: 520px;
+          padding: 28px;
+          background: linear-gradient(135deg, #0d5d3a, #1a8a5a, #0a4a2e);
+          border-radius: 20px;
+          box-shadow:
+            10px 10px 20px rgba(7,29,19,0.55),
+            -10px -10px 20px rgba(26,138,90,0.12),
+            inset 2px 2px 5px rgba(52,211,153,0.35),
+            inset -2px -2px 5px rgba(7,29,19,0.45);
+          background-image:
+            radial-gradient(circle, rgba(52,211,153,0.18) 1px, transparent 1px),
+            radial-gradient(circle, rgba(16,185,129,0.10) 1px, transparent 1px);
+          background-size: 20px 20px;
+          background-position: 0 0, 10px 10px;
+        }
+        .zen-story-form-title {
+          font-size: 20px; font-weight: 800; color: #a7f3d0;
+          text-transform: uppercase; letter-spacing: 1px;
+          margin-bottom: 6px;
+          font-family: 'Syne', sans-serif;
+        }
+        .zen-story-form-subtitle {
+          font-size: 13px; color: rgba(167,243,208,0.7); margin-bottom: 20px;
+        }
+        .zen-story-form-group { margin-bottom: 14px; }
+        .zen-story-form-label {
+          display: block; color: #6ee7b7; font-size: 11px;
+          font-weight: 700; margin-bottom: 7px;
+          text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .zen-story-form-input, .zen-story-form-select, .zen-story-form-textarea {
+          width: 100%; padding: 12px 14px; border: none;
+          background: linear-gradient(135deg, #1a8a5a, #0d5d3a);
+          border-radius: 12px; font-size: 14px; color: #d1fae5;
+          font-weight: 500;
+          box-shadow:
+            4px 4px 10px rgba(7,29,19,0.55),
+            -4px -4px 10px rgba(52,211,153,0.2),
+            inset 2px 2px 4px rgba(7,29,19,0.4),
+            inset -2px -2px 4px rgba(52,211,153,0.3);
+          transition: box-shadow 0.3s ease, background 0.3s ease;
+          outline: none; box-sizing: border-box;
+        }
+        .zen-story-form-input::placeholder, .zen-story-form-textarea::placeholder {
+          color: rgba(167,243,208,0.45);
+        }
+        .zen-story-form-input:focus, .zen-story-form-select:focus, .zen-story-form-textarea:focus {
+          background: linear-gradient(135deg, #1a8a5a, #0d5d3a);
+          box-shadow:
+            3px 3px 8px rgba(7,29,19,0.6),
+            -3px -3px 8px rgba(52,211,153,0.25),
+            inset 3px 3px 7px rgba(7,29,19,0.5),
+            inset -3px -3px 7px rgba(52,211,153,0.35);
+        }
+        .zen-story-form-textarea { height: 90px; resize: none; }
+        .zen-story-form-select option { background: #0d5d3a; color: #d1fae5; }
+        .zen-story-form-btn {
+          width: 100%; padding: 13px;
+          background: linear-gradient(135deg, #10b981, #34d399, #6ee7b7);
+          border: none; border-radius: 12px;
+          color: #064e3b; font-size: 14px; font-weight: 800;
+          letter-spacing: 0.8px; text-transform: uppercase;
+          cursor: pointer; margin-top: 12px;
+          box-shadow:
+            8px 8px 16px rgba(7,29,19,0.5),
+            -8px -8px 16px rgba(52,211,153,0.25),
+            inset 2px 2px 5px rgba(110,231,183,0.4),
+            inset -2px -2px 5px rgba(7,29,19,0.4);
+          transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .zen-story-form-btn:hover { transform: translateY(-2px); }
+        .zen-story-form-btn:active { transform: translateY(1px); }
+        .zen-story-form-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+      `}</style>
+      <div className="zen-story-form-wrap">
+        <div className="zen-story-form-title">Share Your Journey</div>
+        <div className="zen-story-form-subtitle">Your story could be the light someone else needs right now.</div>
+        <form onSubmit={submit}>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <div className="zen-story-form-group" style={{ flex: 1, minWidth: 140 }}>
+              <label className="zen-story-form-label">First Name or Initial</label>
+              <input required type="text" value={form.author}
+                onChange={e => setForm({...form, author: e.target.value})}
+                placeholder="e.g. Alex, 16"
+                className="zen-story-form-input" />
+            </div>
+            <div className="zen-story-form-group" style={{ width: 130 }}>
+              <label className="zen-story-form-label">Rating</label>
+              <select value={form.rating}
+                onChange={e => setForm({...form, rating: Number(e.target.value)})}
+                className="zen-story-form-select">
+                <option value={5}>5 Stars ★★★★★</option>
+                <option value={4}>4 Stars ★★★★</option>
+                <option value={3}>3 Stars ★★★</option>
+                <option value={2}>2 Stars ★★</option>
+                <option value={1}>1 Star ★</option>
+              </select>
+            </div>
+          </div>
+          <div className="zen-story-form-group">
+            <label className="zen-story-form-label">Your Story</label>
+            <textarea required value={form.story}
+              onChange={e => setForm({...form, story: e.target.value})}
+              placeholder="How has ZenMind helped you?"
+              className="zen-story-form-textarea" />
+          </div>
+          <button type="submit" disabled={busy} className="zen-story-form-btn">
+            {busy ? 'Submitting...' : '✦ Submit Story'}
+          </button>
+          {msg && <p style={{ textAlign: 'center', marginTop: 12, fontSize: 13, fontWeight: 700, color: '#6ee7b7' }}>{msg}</p>}
+        </form>
       </div>
-    </form>
+    </div>
   );
 };
 
@@ -155,7 +244,7 @@ export default function StorySection() {
   }));
 
   return (
-    <section id="stories" className="py-16 sm:py-20 lg:py-28 bg-white dark:bg-[#050505] transition-colors duration-300 relative overflow-hidden">
+    <section id="stories" className="py-8 sm:py-10 lg:py-14 bg-white dark:bg-[#050505] transition-colors duration-300 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] dark:from-[#10b981] dark:to-[#059669] rounded-full blur-[120px] opacity-20 dark:opacity-10 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">

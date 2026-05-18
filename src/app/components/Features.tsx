@@ -67,41 +67,72 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
 
   return (
     <motion.div
-      whileHover={{ y: -6, boxShadow: '0 20px 40px rgba(13, 93, 58, 0.2)' }}
+      whileHover={{ y: -6 }}
       transition={{ duration: 0.3 }}
-      className="h-[24rem] sm:h-[25rem] lg:h-[26rem] min-w-[82%] sm:min-w-[60%] lg:min-w-[42%] xl:min-w-[36%] snap-start"
+      className="min-w-[82%] sm:min-w-[60%] lg:min-w-[42%] xl:min-w-[36%] snap-start w-full mx-auto"
     >
       <div
-        className={`group relative flex h-full items-end overflow-hidden rounded-3xl border border-white/20 p-6 sm:p-8 ${feature.isFirst ? 'justify-end text-right' : ''}`}
+        className="w-full rounded-xl border border-[#0d5d3a] dark:border-[#10b981] bg-white dark:bg-[#111111] shadow-sm group"
+        style={{ padding: '2rem' }}
       >
-        <video
-          ref={videoRef}
-          className={`absolute inset-0 h-full w-full object-cover ${feature.isFirst ? 'object-right' : 'object-center'}`}
-          src={feature.video}
-          muted
-          loop
-          playsInline
-          preload="none"
-          style={{ transform: 'translateZ(0)', willChange: 'transform' }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/65" />
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: 'easeOut', delay: index * 0.08 }}
-          viewport={{ once: true, amount: 0.35 }}
-          className="relative z-10 max-w-xl"
-        >
-          <div className="mb-4 sm:mb-6 inline-flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-md">
-            <Icon className="h-7 w-7 sm:h-8 sm:w-8 text-white" />
+        {feature.isFirst ? (
+          /* ── AI Chatbot card — full height matching others ── */
+          <div className="zen-chat-container" style={{ minHeight: '18rem' }}>
+            <div className="zen-chat-box">
+              <div className="zen-chat-inner">
+                <div style={{ position: 'relative', display: 'flex' }}>
+                  <textarea className="zen-chat-textarea" placeholder="Share how you're feeling... ✦˚" style={{ height: 90 }} />
+                </div>
+                <div className="zen-chat-options">
+                  <div className="zen-chat-btns">
+                    <button title="Attach">
+                      <svg xmlns="http://www.w3.org/2000/svg" width={20} height={20} viewBox="0 0 24 24"><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8v8a5 5 0 1 0 10 0V6.5a3.5 3.5 0 1 0-7 0V15a2 2 0 0 0 4 0V8" /></svg>
+                    </button>
+                    <button title="Add">
+                      <svg viewBox="0 0 24 24" height={20} width={20} xmlns="http://www.w3.org/2000/svg"><path d="M4 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zm0 10a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zm10 0a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1zm0-8h6m-3-3v6" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" stroke="currentColor" fill="none" /></svg>
+                    </button>
+                    <button title="Language">
+                      <svg viewBox="0 0 24 24" height={20} width={20} xmlns="http://www.w3.org/2000/svg"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10m-2.29-2.333A17.9 17.9 0 0 1 8.027 13H4.062a8.01 8.01 0 0 0 5.648 6.667M10.03 13c.151 2.439.848 4.73 1.97 6.752A15.9 15.9 0 0 0 13.97 13zm9.908 0h-3.965a17.9 17.9 0 0 1-1.683 6.667A8.01 8.01 0 0 0 19.938 13M4.062 11h3.965A17.9 17.9 0 0 1 9.71 4.333A8.01 8.01 0 0 0 4.062 11m5.969 0h3.938A15.9 15.9 0 0 0 12 4.248A15.9 15.9 0 0 0 10.03 11m4.259-6.667A17.9 17.9 0 0 1 15.973 11h3.965a8.01 8.01 0 0 0-5.648-6.667" fill="currentColor" /></svg>
+                    </button>
+                  </div>
+                  <button className="zen-chat-submit" title="Send">
+                    <i>
+                      <svg viewBox="0 0 512 512" width={18} height={18}><path fill="currentColor" d="M473 39.05a24 24 0 0 0-25.5-5.46L47.47 185h-.08a24 24 0 0 0 1 45.16l.41.13l137.3 58.63a16 16 0 0 0 15.54-3.59L422 80a7.07 7.07 0 0 1 10 10L226.66 310.26a16 16 0 0 0-3.59 15.54l58.65 137.38c.06.2.12.38.19.57c3.2 9.27 11.3 15.81 21.09 16.25h1a24.63 24.63 0 0 0 23-15.46L478.39 64.62A24 24 0 0 0 473 39.05" /></svg>
+                    </i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="zen-chat-tags">
+              <span>Mood Check</span>
+              <span>Talk to Zeni</span>
+              <span>More</span>
+            </div>
           </div>
-          <h3 className="mb-3 sm:mb-4 text-2xl sm:text-3xl text-white" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600 }}>
-            {feature.title}
-          </h3>
-          <p className="text-base sm:text-lg text-white/90 leading-relaxed">
-            {feature.description}
-          </p>
-        </motion.div>
+        ) : (
+          /* ── Standard card: clean video, no mask ── */
+          <div className="h-[15rem] md:h-[18rem] rounded-xl overflow-hidden relative bg-neutral-900">
+            <video
+              ref={videoRef}
+              className="absolute inset-0 h-full w-full object-cover rounded-xl"
+              src={feature.video}
+              muted
+              loop
+              playsInline
+              preload="none"
+              style={{ transform: 'translateZ(0)', willChange: 'transform' }}
+            />
+            <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-black/30 to-transparent rounded-b-xl pointer-events-none" />
+            <div className="h-full w-px absolute left-1/2 top-0 z-10 bg-gradient-to-b from-transparent via-[#10b981]/50 to-transparent animate-[move_4s_linear_infinite] pointer-events-none" />
+          </div>
+        )}
+
+        <p className="text-lg font-semibold text-[#0d5d3a] dark:text-[#10b981] py-2" style={{ fontFamily: 'Syne, sans-serif' }}>
+          {feature.title}
+        </p>
+        <p className="text-sm font-normal text-[#4a7c5d] dark:text-gray-400 max-w-sm">
+          {feature.description}
+        </p>
       </div>
     </motion.div>
   );
@@ -119,7 +150,7 @@ export default function Features() {
   }, []);
 
   return (
-    <section id="features" ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-white dark:bg-[#050505] transition-colors duration-300 relative overflow-hidden">
+    <section id="features" ref={sectionRef} className="py-8 sm:py-10 lg:py-12 bg-white dark:bg-[#050505] transition-colors duration-300 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#e8f5e9] dark:bg-[#10b981] rounded-full blur-3xl opacity-50 dark:opacity-10" />
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#c8e6c9] dark:bg-[#059669] rounded-full blur-3xl opacity-30 dark:opacity-10" />
 

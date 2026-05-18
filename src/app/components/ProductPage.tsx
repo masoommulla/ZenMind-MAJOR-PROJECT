@@ -58,45 +58,81 @@ const SupportForm = ({ type, title, subtitle }: { type: 'contact' | 'report'; ti
     }
   };
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%', height: 44, borderRadius: 5, border: '2px solid #fefefe',
+    background: '#111', boxShadow: '4px 4px #fefefe',
+    fontSize: 14, fontWeight: 600, color: '#fefefe', padding: '5px 12px', outline: 'none',
+  };
+  const labelStyle: React.CSSProperties = { color: '#7e7e7e', fontSize: 12, fontWeight: 600, marginBottom: 4, display: 'block' };
+
   return (
-    <div className="max-w-3xl mx-auto py-10">
+    <div className="max-w-2xl mx-auto py-10">
       <div className="text-center mb-10">
         <h2 className="text-4xl sm:text-5xl font-black text-[#0a2617] dark:text-white mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>{title}</h2>
         <p className="text-[#4a7c5d] dark:text-gray-400 text-lg">{subtitle}</p>
       </div>
 
-      <form onSubmit={submit} className="bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 sm:p-10 shadow-sm space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <label className="block">
-            <span className="text-sm font-bold text-[#0a2617] dark:text-gray-300 mb-2 block">Full Name</span>
-            <input required type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Jane Doe" className="w-full bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 text-[#0a2617] dark:text-white" />
+      <form onSubmit={submit} style={{
+        background: '#111', padding: '28px 32px', display: 'flex', flexDirection: 'column',
+        gap: 18, borderRadius: 5, border: '2px solid #fefefe', boxShadow: '4px 4px #fefefe',
+      }}>
+        <div style={{ color: '#fefefe', fontWeight: 900, fontSize: 20, marginBottom: 8 }}>
+          {type === 'contact' ? 'Get in Touch,' : 'Report an Issue,'}
+          <br /><span style={{ color: '#7e7e7e', fontWeight: 600, fontSize: 15 }}>fill out the form below</span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <label>
+            <span style={labelStyle}>Full Name</span>
+            <input required type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})}
+              placeholder="Jane Doe" style={inputStyle} onFocus={e => (e.target.style.borderColor = '#2d8cf0')} onBlur={e => (e.target.style.borderColor = '#fefefe')} />
           </label>
-          <label className="block">
-            <span className="text-sm font-bold text-[#0a2617] dark:text-gray-300 mb-2 block">Email Address</span>
-            <input required type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="jane@example.com" className="w-full bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 text-[#0a2617] dark:text-white" />
+          <label>
+            <span style={labelStyle}>Email Address</span>
+            <input required type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})}
+              placeholder="jane@example.com" style={inputStyle} onFocus={e => (e.target.style.borderColor = '#2d8cf0')} onBlur={e => (e.target.style.borderColor = '#fefefe')} />
           </label>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <label className="block">
-            <span className="text-sm font-bold text-[#0a2617] dark:text-gray-300 mb-2 block">Mobile Number</span>
-            <input required type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+91 9876543210" className="w-full bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 text-[#0a2617] dark:text-white" />
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <label>
+            <span style={labelStyle}>Mobile Number</span>
+            <input required type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
+              placeholder="+91 9876543210" style={inputStyle} onFocus={e => (e.target.style.borderColor = '#2d8cf0')} onBlur={e => (e.target.style.borderColor = '#fefefe')} />
           </label>
-          <label className="block">
-            <span className="text-sm font-bold text-[#0a2617] dark:text-gray-300 mb-2 block">Subject</span>
-            <input required type="text" value={form.subject} onChange={e => setForm({...form, subject: e.target.value})} placeholder={type === 'report' ? "Bug issue or broken link" : "How can we help?"} className="w-full bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 text-[#0a2617] dark:text-white" />
+          <label>
+            <span style={labelStyle}>Subject</span>
+            <input required type="text" value={form.subject} onChange={e => setForm({...form, subject: e.target.value})}
+              placeholder={type === 'report' ? "Bug or broken link" : "How can we help?"} style={inputStyle} onFocus={e => (e.target.style.borderColor = '#2d8cf0')} onBlur={e => (e.target.style.borderColor = '#fefefe')} />
           </label>
         </div>
-        <label className="block">
-          <span className="text-sm font-bold text-[#0a2617] dark:text-gray-300 mb-2 block">Message Details</span>
-          <textarea required value={form.body} onChange={e => setForm({...form, body: e.target.value})} placeholder={type === 'report' ? "Please describe the issue in detail..." : "Write your message here..."} className="w-full min-h-[150px] resize-y bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#0d5d3a]/30 text-[#0a2617] dark:text-white" />
+
+        <label>
+          <span style={labelStyle}>Message Details</span>
+          <textarea required value={form.body} onChange={e => setForm({...form, body: e.target.value})}
+            placeholder={type === 'report' ? "Describe the issue in detail..." : "Write your message here..."}
+            rows={4}
+            style={{ ...inputStyle, height: 'auto', resize: 'vertical', paddingTop: 10, paddingBottom: 10 }}
+            onFocus={e => (e.target.style.borderColor = '#2d8cf0')} onBlur={e => (e.target.style.borderColor = '#fefefe')} />
         </label>
-        
-        <button type="submit" disabled={busy} className="w-full py-4 rounded-xl bg-[#0d5d3a] dark:bg-[#10b981] text-white font-bold uppercase tracking-widest shadow-lg shadow-[#0d5d3a]/20 disabled:opacity-70 hover:bg-[#0a4a2e] dark:hover:bg-[#059669] transition flex justify-center items-center gap-2">
-          {busy ? 'Submitting...' : <><Send size={18} /> Submit {type === 'report' ? 'Report' : 'Message'}</>}
+
+        <button type="submit" disabled={busy} style={{
+          marginTop: 8, width: 140, height: 42, borderRadius: 5,
+          border: '2px solid #fefefe', background: '#111', boxShadow: '4px 4px #fefefe',
+          fontSize: 15, fontWeight: 600, color: '#fefefe', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          transition: 'all 0.15s ease', opacity: busy ? 0.6 : 1,
+        }}
+          onMouseDown={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none'; (e.currentTarget as HTMLButtonElement).style.transform = 'translate(3px,3px)'; }}
+          onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = '4px 4px #fefefe'; (e.currentTarget as HTMLButtonElement).style.transform = 'none'; }}
+        >
+          <Send size={15} /> {busy ? 'Sending...' : `Submit ${type === 'report' ? 'Report' : 'Message'}`}
         </button>
 
         {msg && (
-          <div className={`p-4 rounded-xl font-bold text-center text-sm ${msg.ok ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200'}`}>
+          <div style={{ padding: '10px 14px', borderRadius: 5, fontWeight: 700, fontSize: 13,
+            border: `1px solid ${msg.ok ? '#10b981' : '#ef4444'}`,
+            color: msg.ok ? '#10b981' : '#ef4444', background: 'transparent' }}>
             {msg.text}
           </div>
         )}

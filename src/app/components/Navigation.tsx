@@ -112,25 +112,62 @@ export default function Navigation({ onGetStarted, onAdminLoginTrigger, onTherap
               />
             </div>
 
-            {/* Desktop CTA buttons */}
             <div className="hidden sm:flex items-center gap-3">
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
+              <button
                 onClick={onTherapistLoginTrigger}
-                className="flex items-center gap-2 px-4 py-2.5 border border-[#0d5d3a] dark:border-[#10b981] text-[#0d5d3a] dark:text-[#10b981] rounded-full font-semibold text-sm whitespace-nowrap hover:bg-[#0d5d3a]/5 transition-colors"
+                className="zen-blob-btn"
               >
-                Therapist Login
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.04, boxShadow: '0 8px 24px rgba(13,93,58,0.25)' }}
-                whileTap={{ scale: 0.96 }}
-                onClick={onGetStarted}
-                className="flex items-center gap-2 px-5 py-2.5 bg-[#0d5d3a] dark:bg-[#10b981] text-white dark:text-[#050505] rounded-full font-semibold text-sm shadow-md whitespace-nowrap"
-              >
-                Get Started
-              </motion.button>
+                <div className="zen-blob" />
+                <div className="zen-blob-inner">Therapist Login</div>
+              </button>
             </div>
+
+            {/* Get Started — pinned to the far right end */}
+            <button
+              onClick={onGetStarted}
+              className="hidden sm:block ml-auto"
+              style={{
+                fontFamily: '"Gochi Hand", cursive',
+                fontSize: '15px',
+                cursor: 'pointer',
+                border: 'none',
+                borderRadius: '5px',
+                background: '#5cdb95',
+                boxShadow: '0 2px 0 #494a4b',
+                transform: 'rotate(5deg)',
+                transformOrigin: 'center',
+                padding: '0 0 3px 0',
+                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseDown={e => {
+                (e.currentTarget as HTMLButtonElement).style.transform = 'rotate(5deg) translateY(5px)';
+                (e.currentTarget as HTMLButtonElement).style.paddingBottom = '0';
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
+              }}
+              onMouseUp={e => {
+                (e.currentTarget as HTMLButtonElement).style.transform = 'rotate(5deg)';
+                (e.currentTarget as HTMLButtonElement).style.paddingBottom = '3px';
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 2px 0 #494a4b';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.transform = 'rotate(5deg)';
+                (e.currentTarget as HTMLButtonElement).style.paddingBottom = '3px';
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 2px 0 #494a4b';
+              }}
+            >
+              <span style={{
+                background: '#f1f5f8',
+                display: 'block',
+                padding: '0.5rem 1rem',
+                borderRadius: '5px',
+                border: '2px solid #494a4b',
+                fontWeight: 600,
+                color: '#494a4b',
+              }}>
+                Get Started
+              </span>
+            </button>
 
             {/* Mobile: invisible spacer so logo stays flush left;
                 StaggeredMenu renders its own toggle button in top-right */}

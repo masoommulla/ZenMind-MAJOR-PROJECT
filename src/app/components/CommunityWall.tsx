@@ -40,6 +40,8 @@ const CATEGORY_GRADIENT: Record<string, string> = {
   other:         'from-[#0d5d3a]/10 to-[#10b981]/05',
 };
 
+
+
 function StoryCard({ story, onLike, onOpen }: { story: Story; onLike: (id: string) => void; onOpen: (s: Story) => void }) {
   const cat = CATEGORIES.find(c => c.key === story.category);
   const grad = CATEGORY_GRADIENT[story.category] || CATEGORY_GRADIENT.other;
@@ -52,20 +54,15 @@ function StoryCard({ story, onLike, onOpen }: { story: Story; onLike: (id: strin
       animate={{ opacity: 1, y: 0 }}
       className={`relative rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08 bg-gradient-to-br ${grad} bg-white dark:bg-[#111111] p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full`}
     >
-      {/* Category badge */}
       {cat && cat.key !== 'all' && (
         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 dark:bg-white/10 border border-[#0d5d3a]/08 dark:border-white/10 text-xs font-semibold text-[#0d5d3a] dark:text-[#10b981] mb-3 w-fit">
           <span>{cat.emoji}</span>
           <span>{cat.label}</span>
         </div>
       )}
-
-      {/* Story text */}
       <p className="text-sm text-[#0a2617] dark:text-gray-200 leading-relaxed mb-3 flex-1">
-        "{truncated ? story.story.slice(0, MAX_CHARS) + '…' : story.story}"
+        &quot;{truncated ? story.story.slice(0, MAX_CHARS) + '…' : story.story}&quot;
       </p>
-
-      {/* Footer */}
       <div className="flex items-center justify-between mt-auto">
         <div className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-500">
           — {story.isAnonymous ? 'Anonymous' : story.author}
@@ -248,26 +245,20 @@ export default function CommunityWall() {
   return (
     <div className="flex flex-col h-full">
       {/* ── STICKY CONTROLS ── */}
-      <div className="flex-shrink-0 sticky top-0 z-10 bg-[#f7fbf8] dark:bg-[#050505] border-b border-[#0d5d3a]/8 dark:border-white/5 px-4 sm:px-6 pt-3 pb-3 space-y-2">
-        {/* Category pills + Share button */}
-        <div className="flex items-center gap-2">
-          <div className="flex gap-2 overflow-x-auto pb-0.5 flex-1 scrollbar-none">
-            {CATEGORIES.map(c => (
-              <button key={c.key} onClick={() => setCategory(c.key)}
-                className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-2xl text-xs font-semibold border transition-all ${
-                  category === c.key
-                    ? 'bg-[#0d5d3a] text-white border-[#0d5d3a] shadow-md'
-                    : 'bg-white dark:bg-[#111111] text-[#4a7c5d] dark:text-gray-400 border-[#0d5d3a]/10 dark:border-white/08 hover:border-[#0d5d3a]/40 hover:bg-[#f0fbf4] dark:hover:bg-white/5'
-                }`}>
-                {c.emoji} {c.label}
-              </button>
-            ))}
-          </div>
-          <button onClick={() => setShowSubmit(true)}
-            className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] text-white text-xs font-bold shadow-lg hover:from-[#0a4a2e] transition">
-            <Share2 className="w-3.5 h-3.5" /> Share Story
-          </button>
+      <div className="zen-controls-bar" style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 6, flex: 1, overflowX: 'auto', paddingBottom: 2 }} className="scrollbar-none">
+          {CATEGORIES.map(c => (
+            <button key={c.key} onClick={() => setCategory(c.key)}
+              className={`zen-tab-pill flex-shrink-0 ${category === c.key ? 'active' : ''}`}
+              style={{ padding: '5px 12px', fontSize: 11 }}>
+              {c.emoji} {c.label}
+            </button>
+          ))}
         </div>
+        <button onClick={() => setShowSubmit(true)}
+          style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, border: 'none', background: 'linear-gradient(135deg,#0d5d3a,#1a8a5a)', color: 'white', fontSize: 12, fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(13,93,58,0.3)' }}>
+          <Share2 className="w-3.5 h-3.5" /> Share Story
+        </button>
       </div>
 
       {/* ── SCROLLABLE CARDS ── */}

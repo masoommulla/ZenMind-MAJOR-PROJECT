@@ -43,6 +43,12 @@ type Me = {
 
 type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources' | 'journal' | 'circles' | 'goals' | 'reading' | 'programs';
 
+const TAB_ICONS: Record<TabKey, string> = {
+  aichat: '🤖', therapy: '🩺', settings: '⚙️', sessions: '📅', chat: '💬',
+  progress: '📊', community: '🌿', resources: '📚', journal: '📓',
+  circles: '👥', goals: '🎯', reading: '📖', programs: '💪',
+};
+
 const NAV_ITEMS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'aichat',     label: 'AI Chat',           icon: <MessageCircle className="w-5 h-5 flex-shrink-0" /> },
   { key: 'therapy',    label: 'Therapy Hub',        icon: <Stethoscope   className="w-5 h-5 flex-shrink-0" /> },
@@ -136,7 +142,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
     : 'ZM';
 
   return (
-    <div className="h-screen overflow-hidden bg-[#f7fbf8] dark:bg-[#050505] flex transition-colors duration-300">
+    <div className="h-screen overflow-hidden flex transition-colors duration-300" style={{ background: 'var(--dash-bg)' }}>
 
       {/* Mobile overlay */}
       {mobileOpen && (
@@ -151,9 +157,9 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed left-0 top-0 h-full w-64 bg-white dark:bg-[#111111] border-r border-[#0d5d3a]/10 dark:border-white/10 z-40 md:hidden shadow-xl flex flex-col"
+            className="fixed left-0 top-0 h-full w-64 z-40 md:hidden shadow-xl flex flex-col" style={{ background: 'var(--dash-sidebar-bg)', borderRight: '2px solid var(--dash-border)' } as React.CSSProperties}
           >
-            <div className="flex items-center p-3 border-b border-[#0d5d3a]/10 dark:border-white/10 min-h-[56px]">
+            <div className="flex items-center p-3 min-h-[56px]" style={{ borderBottom: '1px solid var(--dash-border)' }}>
               {avatarUrl
                 ? <img src={avatarUrl} alt="P" className="w-8 h-8 rounded-full object-cover ring-2 ring-[#0d5d3a]/20 dark:ring-white/20 flex-shrink-0" />
                 : <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">{initials}</div>
@@ -169,12 +175,19 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
             <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
               {NAV_ITEMS.map(({ key, label, icon }) => (
                 <button key={key} type="button" onClick={() => { navigateToTab(key); }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl border transition-all ${
-                    tab === key
-                      ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white border-[#0d5d3a] dark:border-[#1a8a5a] zen-nav-active'
-                      : 'bg-white dark:bg-transparent text-[#0a2617] dark:text-gray-300 border-transparent hover:bg-[#f3fbf6] dark:hover:bg-white/5'
-                  }`}>
-                  <span className={tab === key ? 'text-white' : 'text-[#0d5d3a] dark:text-[#10b981]'}>{icon}</span>
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-all"
+                  style={tab === key ? {
+                    background: 'var(--dash-nav-active-bg)', color: '#fff',
+                    border: '2px solid var(--dash-nav-active-border)',
+                    boxShadow: 'var(--dash-nav-active-shadow)', fontWeight: 800,
+                  } : {
+                    background: 'transparent', border: '2px solid transparent',
+                    color: 'var(--dash-ink)',
+                  } as React.CSSProperties}
+                  onMouseEnter={e => { if (tab !== key) (e.currentTarget as HTMLElement).style.background = 'var(--dash-nav-hover)'; }}
+                  onMouseLeave={e => { if (tab !== key) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                >
+                  <span>{icon}</span>
                   <span className="text-sm font-semibold">{label}</span>
                 </button>
               ))}
@@ -207,10 +220,10 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
         </button>
 
         {/* Sidebar inner */}
-        <div className="zen-sidebar h-full overflow-hidden overflow-y-auto bg-white dark:bg-[#111111] border-r border-[#0d5d3a]/10 dark:border-white/10 flex flex-col">
+        <div className="zen-sidebar h-full overflow-hidden overflow-y-auto flex flex-col" style={{ background: 'var(--dash-sidebar-bg)', borderRight: '2px solid var(--dash-border)' }}>
 
           {/* Header */}
-          <div className="flex items-center p-3 border-b border-[#0d5d3a]/10 dark:border-white/10 min-h-[64px]">
+          <div className="flex items-center p-3 min-h-[64px]" style={{ borderBottom: '2px solid var(--dash-border)' }}>
             {/* Avatar â€” fixed size and position in both states */}
             {avatarUrl ? (
               <img src={avatarUrl} alt="Profile"
@@ -233,13 +246,19 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
           <nav className="flex-1 p-2 space-y-1">
             {NAV_ITEMS.map(({ key, label, icon }) => (
               <button key={key} type="button" onClick={() => navigateToTab(key)} title={collapsed ? label : undefined}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl border transition-all ${
-                  tab === key
-                    ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white border-[#0d5d3a] dark:border-[#1a8a5a] zen-nav-active'
-                    : 'bg-white dark:bg-transparent text-[#0a2617] dark:text-gray-300 border-transparent hover:bg-[#f3fbf6] dark:hover:bg-white/5 dark:hover:border-white/10'
-                } ${collapsed ? 'justify-center' : ''}`}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-all ${collapsed ? 'justify-center' : ''}`}
+                style={tab === key ? {
+                  background: 'var(--dash-nav-active-bg)', color: '#fff',
+                  border: '2px solid var(--dash-nav-active-border)',
+                  boxShadow: 'var(--dash-nav-active-shadow)', fontWeight: 800,
+                } : {
+                  background: 'transparent', border: '2px solid transparent',
+                  color: 'var(--dash-ink)',
+                } as React.CSSProperties}
+                onMouseEnter={e => { if (tab !== key) (e.currentTarget as HTMLElement).style.background = 'var(--dash-nav-hover)'; }}
+                onMouseLeave={e => { if (tab !== key) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
               >
-                <span className={tab === key ? 'text-white' : 'text-[#0d5d3a] dark:text-[#10b981]'}>{icon}</span>
+                <span>{icon}</span>
                 {!collapsed && <span className="text-sm font-semibold whitespace-nowrap overflow-hidden">{label}</span>}
               </button>
             ))}
@@ -270,40 +289,46 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
 
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <header className="zen-header flex-shrink-0 bg-white/80 dark:bg-[#050505]/80 backdrop-blur border-b border-[#0d5d3a]/10 dark:border-white/10 z-10">
-          <div className="px-3 sm:px-5 py-2 flex items-center justify-between gap-2">
-            <div className="flex-1 flex flex-row items-center gap-2 sm:gap-4 min-w-0">
-              {/* Desktop Welcome (hidden on mobile) */}
-              <div className="hidden md:block flex-shrink-0">
-                <div className="text-[#0a2617] dark:text-gray-100 text-sm font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
-                  {loading ? 'Loading…' : `Hi, ${me?.name?.split(' ')[0] || 'there'}!`}
-                </div>
+        <header className="zen-header flex-shrink-0 backdrop-blur z-10" style={{ background: 'var(--dash-header-bg)', borderBottom: '2px solid var(--dash-border)' }}>
+          <div className="px-3 sm:px-5 py-3 flex items-center justify-between gap-2">
+            <div className="flex-1 flex flex-row items-center gap-3 min-w-0">
+
+              {/* Greeting pill — desktop only */}
+              <div className="hidden md:flex flex-shrink-0 items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'rgba(13,93,58,0.08)', border: '1.5px solid rgba(13,93,58,0.14)' }}>
+                {avatarUrl
+                  ? <img src={avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                  : <div className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold flex-shrink-0" style={{ background: 'linear-gradient(135deg,#0d5d3a,#1a8a5a)' }}>{initials}</div>
+                }
+                <span className="text-xs font-bold" style={{ color: '#0d5d3a' }}>
+                  {loading ? 'Loading…' : `Hi, ${me?.name?.split(' ')[0] || 'there'}! 👋`}
+                </span>
               </div>
 
-              {/* Divider — desktop only, select tabs */}
-              {(tab === 'sessions' || tab === 'therapy' || tab === 'aichat') && (
-                <div className="hidden md:block w-px h-7 bg-gray-200 dark:bg-gray-800" />
-              )}
+              {/* Vertical divider */}
+              <div className="hidden md:block w-px h-8" style={{ background: 'var(--dash-border)' }} />
 
-              {/* Current tab title */}
+              {/* Tab title with emoji */}
               <div className="min-w-0">
-                <div className="text-[#0a2617] dark:text-gray-100 text-sm sm:text-base font-bold truncate" style={{ fontFamily: 'Syne, sans-serif' }}>
-                  {tab === 'sessions'  ? 'My Sessions' :
-                   tab === 'therapy'   ? 'Therapy Hub' :
-                   tab === 'chat'      ? 'Chat' :
-                   tab === 'aichat'    ? 'AI Chat' :
-                   tab === 'progress'  ? 'My Progress' :
-                   tab === 'community' ? 'Community' :
-                   tab === 'resources' ? 'Resources' :
-                   tab === 'reading'   ? 'Reading Lists' :
-                   tab === 'journal'   ? 'Mood Journal' :
-                   tab === 'circles'   ? 'Peer Circles' :
-                   tab === 'goals'     ? 'My Goals' :
-                   tab === 'programs'  ? 'Wellness Programs' :
-                   tab === 'settings'  ? 'Settings' :
-                   loading ? 'Loading…' : `Welcome, ${me?.name?.split(' ')[0] || 'there'}!`}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-base leading-none">{TAB_ICONS[tab] || '✨'}</span>
+                  <span className="zen-dash-header-title truncate">
+                    {tab === 'sessions'  ? 'My Sessions' :
+                     tab === 'therapy'   ? 'Therapy Hub' :
+                     tab === 'chat'      ? 'Chat' :
+                     tab === 'aichat'    ? 'AI Chat' :
+                     tab === 'progress'  ? 'My Progress' :
+                     tab === 'community' ? 'Community' :
+                     tab === 'resources' ? 'Resources' :
+                     tab === 'reading'   ? 'Reading Lists' :
+                     tab === 'journal'   ? 'Mood Journal' :
+                     tab === 'circles'   ? 'Peer Circles' :
+                     tab === 'goals'     ? 'My Goals' :
+                     tab === 'programs'  ? 'Wellness Programs' :
+                     tab === 'settings'  ? 'Settings' :
+                     loading ? 'Loading…' : `Welcome, ${me?.name?.split(' ')[0] || 'there'}!`}
+                  </span>
                 </div>
-                <div className="text-[10px] text-[#4a7c5d] dark:text-gray-400 hidden sm:block truncate">
+                <div className="zen-dash-header-sub hidden sm:block truncate">
                   {tab === 'sessions'  ? 'Manage your therapy appointments' :
                    tab === 'therapy'   ? 'Connect with verified professionals' :
                    tab === 'chat'      ? 'Real-time messaging with your therapist' :
@@ -321,15 +346,13 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
                 </div>
               </div>
             </div>
+
             <div className="flex items-center gap-2 flex-shrink-0">
               <ThemeToggle />
               <NotificationCenter onNavigate={(tab) => navigateToTab(tab as TabKey)} />
-              {/* Mobile hamburger */}
-              <button
-                type="button"
-                onClick={() => setMobileOpen(true)}
-                className="md:hidden p-2 rounded-xl border border-[#0d5d3a]/15 text-[#0d5d3a] dark:border-white/10 dark:text-gray-300 hover:bg-[#f0fbf4] dark:hover:bg-white/10 transition"
-              >
+              <button type="button" onClick={() => setMobileOpen(true)}
+                className="md:hidden p-2 rounded-xl transition"
+                style={{ border: '2px solid var(--dash-border)', color: '#0d5d3a' }}>
                 <Menu className="w-5 h-5" />
               </button>
             </div>
@@ -1032,17 +1055,17 @@ function MySessionsPanel() {
   if (loading) return <div className="p-8 text-center text-[#4a7c5d] font-bold">Loading your sessions...</div>;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto px-4 sm:px-6 py-6 pb-20">
-      
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto px-4 sm:px-6 py-4 pb-20">
+
       {/* Sub Tabs */}
-      <div className="flex border-b border-[#0d5d3a]/10 dark:border-white/10 mb-8 overflow-x-auto hide-scrollbar">
+      <div style={{ display: 'flex', gap: 8, marginBottom: 24, paddingBottom: 12, borderBottom: '2px solid var(--dash-border)' }}>
         <button onClick={() => setSessionTab('upcoming')}
-          className={`whitespace-nowrap px-6 py-3 font-bold text-sm border-b-2 transition ${sessionTab === 'upcoming' ? 'border-[#0d5d3a] text-[#0d5d3a] dark:border-[#10b981] dark:text-[#10b981]' : 'border-transparent text-[#4a7c5d] hover:text-[#0a2617] dark:text-gray-400 dark:hover:text-white'}`}>
-          Upcoming Sessions
+          className={`zen-tab-pill ${sessionTab === 'upcoming' ? 'active' : ''}`}>
+          📅 Upcoming
         </button>
         <button onClick={() => setSessionTab('past')}
-          className={`whitespace-nowrap px-6 py-3 font-bold text-sm border-b-2 transition ${sessionTab === 'past' ? 'border-[#0d5d3a] text-[#0d5d3a] dark:border-[#10b981] dark:text-[#10b981]' : 'border-transparent text-[#4a7c5d] hover:text-[#0a2617] dark:text-gray-400 dark:hover:text-white'}`}>
-          Past Sessions
+          className={`zen-tab-pill ${sessionTab === 'past' ? 'active' : ''}`}>
+          📜 Past Sessions
         </button>
       </div>
 
@@ -1052,99 +1075,86 @@ function MySessionsPanel() {
         <>
           {/* TODAY */}
           {today.length > 0 && (
-        <div className="mb-10">
-          <h3 className="font-bold text-[#0a2617] dark:text-white mb-4 flex items-center gap-2 text-lg">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Today's Sessions
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {today.map(s => (
-              <div key={s._id} className="bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
-                <div className="absolute -right-4 -top-4 opacity-10"><Stethoscope size={100} /></div>
-                <div className="relative z-10">
-                  <div className="text-xs font-bold bg-white/20 px-3 py-1 rounded-full inline-block mb-4 backdrop-blur-sm">
-                    {formatCountdown(new Date(s.date))}
+            <div className="mb-10">
+              <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#0a2617', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse 2s infinite' }} /> Today's Sessions
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {today.map(s => (
+                  <div key={s._id} className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm p-5 flex flex-col">
+                    <div className="mb-3">
+                      <span className="text-[10px] font-black uppercase tracking-wider bg-red-50 dark:bg-red-500/10 text-red-500 px-2 py-0.5 rounded-md">
+                        🔴 {formatCountdown(new Date(s.date))}
+                      </span>
+                      <h4 className="font-bold text-[#0a2617] dark:text-white mt-2 text-base">{s.therapistName}</h4>
+                    </div>
+                    <div className="flex flex-col gap-1 text-xs text-[#4a7c5d] dark:text-gray-400 mb-4">
+                      <div className="flex items-center gap-2"><Clock size={12}/> {new Date(s.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
+                      <div className="flex items-center gap-2"><IndianRupee size={12}/> {s.amountPaid} Paid</div>
+                    </div>
+                    <div className="flex gap-2 mt-auto">
+                      <button disabled={!isJoinable(new Date(s.date))} onClick={() => setActiveVideoSession(s._id)}
+                        className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                          isJoinable(new Date(s.date))
+                            ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white hover:bg-[#0a4a2e] shadow-md'
+                            : 'bg-[#0d5d3a]/10 text-[#0d5d3a] opacity-60 cursor-not-allowed'
+                        }`}>
+                        {isJoinable(new Date(s.date)) ? 'Join Call' : 'Wait...'}
+                      </button>
+                      <button onClick={() => setCancelSessionId(s._id)}
+                        className="px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-500/20 transition border border-red-100 dark:border-red-500/20">
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                  <h4 className="font-black text-xl mb-1">{s.therapistName}</h4>
-                  <div className="flex items-center gap-2 text-white/80 text-sm font-medium mb-1">
-                    <Clock size={14} /> {new Date(s.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                  <div className="flex items-center gap-2 text-white/80 text-sm font-medium mb-4">
-                    <IndianRupee size={14} /> {s.amountPaid} Paid
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button 
-                      disabled={!isJoinable(new Date(s.date))}
-                      onClick={() => setActiveVideoSession(s._id)}
-                      className="flex-1 py-2.5 rounded-xl font-bold bg-white text-[#0d5d3a] shadow-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                    >
-                      {isJoinable(new Date(s.date)) ? 'Join Call' : 'Wait...'}
-                    </button>
-                    <button 
-                      onClick={() => setCancelSessionId(s._id)}
-                      className="px-4 py-2.5 rounded-xl font-bold bg-red-500 text-white shadow-md hover:bg-red-600 transition"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            </div>
+          )}
 
-      {/* UPCOMING */}
-      <div className="mb-10">
-        <h3 className="font-bold text-[#0a2617] dark:text-white mb-4 flex items-center gap-2 text-lg">
-          Upcoming Sessions
-        </h3>
-        {upcoming.length === 0 ? (
-          <div className="bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/5 rounded-3xl p-8 text-center">
-            <Calendar className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-            <p className="text-[#4a7c5d] dark:text-gray-400 font-medium">No upcoming sessions scheduled.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {upcoming.map(s => (
-              <div key={s._id} className="bg-white dark:bg-[#111111] border border-[#0d5d3a]/20 dark:border-white/10 rounded-3xl p-6 shadow-sm hover:shadow-md transition">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="text-xs font-bold text-[#0d5d3a] dark:text-[#10b981] bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 px-3 py-1 rounded-full">
-                    {formatCountdown(new Date(s.date))}
-                  </div>
-                </div>
-                <h4 className="font-bold text-[#0a2617] dark:text-white text-lg mb-2">{s.therapistName}</h4>
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-[#4a7c5d] dark:text-gray-400 text-sm font-medium">
-                    <Calendar size={14} className="text-[#0d5d3a] dark:text-[#10b981]" /> {new Date(s.date).toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })}
-                  </div>
-                  <div className="flex items-center gap-2 text-[#4a7c5d] dark:text-gray-400 text-sm font-medium">
-                    <Clock size={14} className="text-[#0d5d3a] dark:text-[#10b981]" /> {new Date(s.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                  <div className="flex items-center gap-2 text-[#4a7c5d] dark:text-gray-400 text-sm font-medium">
-                    <IndianRupee size={14} className="text-[#0d5d3a] dark:text-[#10b981]" /> {s.amountPaid} Paid
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                  <button 
-                    disabled={!isJoinable(new Date(s.date))}
-                    onClick={() => setActiveVideoSession(s._id)}
-                    className="flex-1 py-2.5 rounded-xl font-bold bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white shadow-md hover:bg-[#0a4a2e] disabled:opacity-50 disabled:cursor-not-allowed transition"
-                  >
-                    {isJoinable(new Date(s.date)) ? 'Join Call' : 'Wait...'}
-                  </button>
-                  <button 
-                    onClick={() => setCancelSessionId(s._id)}
-                    className="px-4 py-2.5 rounded-xl font-bold bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20 transition"
-                  >
-                    Cancel
-                  </button>
-                </div>
+          {/* UPCOMING */}
+          <div className="mb-10">
+            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#0a2617', marginBottom: 14 }}>Upcoming Sessions</h3>
+            {upcoming.length === 0 ? (
+              <div style={{ background: 'rgba(13,93,58,0.04)', border: '1.5px solid rgba(13,93,58,0.12)', borderRadius: 16, padding: '40px 20px', textAlign: 'center' }}>
+                <Calendar style={{ width: 40, height: 40, color: 'rgba(13,93,58,0.25)', margin: '0 auto 10px' }} />
+                <p style={{ color: '#4a7c5d', fontWeight: 500, fontSize: 13 }}>No upcoming sessions scheduled.</p>
               </div>
-            ))}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {upcoming.map(s => (
+                  <div key={s._id} className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm p-5 flex flex-col">
+                    <div className="mb-3">
+                      <span className="text-[10px] font-bold bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] px-2.5 py-1 rounded-full">
+                        {formatCountdown(new Date(s.date))}
+                      </span>
+                      <h4 className="font-bold text-[#0a2617] dark:text-white mt-2 text-base">{s.therapistName}</h4>
+                    </div>
+                    <div className="flex flex-col gap-1.5 text-xs text-[#4a7c5d] dark:text-gray-400 mb-4">
+                      <div className="flex items-center gap-2"><Calendar size={12}/> {new Date(s.date).toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                      <div className="flex items-center gap-2"><Clock size={12}/> {new Date(s.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
+                      <div className="flex items-center gap-2"><IndianRupee size={12}/> {s.amountPaid} Paid</div>
+                    </div>
+                    <div className="flex gap-2 mt-auto">
+                      <button disabled={!isJoinable(new Date(s.date))} onClick={() => setActiveVideoSession(s._id)}
+                        className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                          isJoinable(new Date(s.date))
+                            ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white hover:bg-[#0a4a2e] shadow-md'
+                            : 'bg-[#0d5d3a]/10 text-[#0d5d3a] opacity-60 cursor-not-allowed'
+                        }`}>
+                        {isJoinable(new Date(s.date)) ? 'Join Call' : 'Wait...'}
+                      </button>
+                      <button onClick={() => setCancelSessionId(s._id)}
+                        className="px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-500/20 transition border border-red-100 dark:border-red-500/20">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      </>
+        </>
       )}
 
       {sessionTab === 'past' && (

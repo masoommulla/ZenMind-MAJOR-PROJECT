@@ -65,10 +65,10 @@ export default function Hero({ onGetStarted }: HeroProps) {
   };
 
   return (
-    <section className="relative min-h-[88vh] sm:min-h-screen flex items-center justify-center overflow-hidden bg-white dark:bg-[#050505] pt-14 sm:pt-16 transition-colors duration-300">
+    <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-white dark:bg-[#050505] pt-14 sm:pt-16 transition-colors duration-300">
       <div className="absolute inset-y-0 right-0 hidden lg:block w-1/2 z-0 overflow-hidden">
         <video
-          className="absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover pointer-events-none opacity-100 dark:opacity-60"
+          className="absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] object-cover pointer-events-none opacity-100 dark:opacity-70"
           style={{
             transform: 'translateZ(0)',
             backfaceVisibility: 'hidden',
@@ -84,10 +84,11 @@ export default function Hero({ onGetStarted }: HeroProps) {
           <source src={heroVideo} type="video/mp4" />
         </video>
         <div
-          className="absolute inset-0 pointer-events-none bg-gradient-to-r from-white via-white/20 to-transparent dark:from-[#050505] dark:via-[#050505]/20 dark:to-transparent"
+          className="absolute inset-0 pointer-events-none bg-gradient-to-r from-white/60 via-transparent to-transparent dark:from-[#050505]/60 dark:via-transparent dark:to-transparent"
           aria-hidden="true"
         />
       </div>
+
       <div
         ref={(el) => (circleRefs.current[0] = el)}
         className="absolute top-20 left-10 w-64 h-64 bg-[#0d5d3a]/5 dark:bg-[#10b981]/10 rounded-full blur-3xl z-[1] lg:hidden"
@@ -104,7 +105,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
         style={{ willChange: 'transform', contain: 'layout' }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 lg:py-16 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 lg:py-8 relative z-10">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -119,7 +120,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
 
             <motion.h1
               variants={itemVariants}
-              className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-[#0a2617] dark:text-white leading-tight max-w-none lg:max-w-[22ch]"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#0a2617] dark:text-white leading-tight max-w-none lg:max-w-[22ch]"
               style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800 }}
             >
               Empowering{' '}
@@ -137,23 +138,50 @@ export default function Hero({ onGetStarted }: HeroProps) {
             </motion.p>
 
             <motion.div variants={itemVariants} className="flex flex-wrap gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(13, 93, 58, 0.2)' }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 onClick={onGetStarted}
-                className="px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] text-white rounded-full flex items-center gap-2 shadow-lg"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontFamily: 'inherit',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                  fontSize: '17px',
+                  padding: '0.8em 1.3em 0.8em 0.9em',
+                  color: 'white',
+                  background: 'linear-gradient(to right, #0a2617, #0d5d3a, #1a8a5a)',
+                  border: 'none',
+                  letterSpacing: '0.05em',
+                  borderRadius: '16px',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={e => {
+                  const btn = e.currentTarget as HTMLButtonElement;
+                  const svg = btn.querySelector('svg') as SVGElement | null;
+                  const span = btn.querySelector('span') as HTMLSpanElement | null;
+                  if (svg) (svg as HTMLElement).style.transform = 'translateX(5px) rotate(90deg)';
+                  if (span) span.style.transform = 'translateX(7px)';
+                }}
+                onMouseLeave={e => {
+                  const btn = e.currentTarget as HTMLButtonElement;
+                  const svg = btn.querySelector('svg') as SVGElement | null;
+                  const span = btn.querySelector('span') as HTMLSpanElement | null;
+                  if (svg) (svg as HTMLElement).style.transform = 'rotate(30deg)';
+                  if (span) span.style.transform = 'translateX(0)';
+                }}
               >
-                <span className="font-medium">Start Your Journey</span>
-                <ArrowRight className="w-5 h-5" />
-              </motion.button>
+                <svg height={24} width={24} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '3px', transform: 'rotate(30deg)', transition: 'transform 0.5s cubic-bezier(0.76, 0, 0.24, 1)' }}>
+                  <path d="M0 0h24v24H0z" fill="none" />
+                  <path d="M5 13c0-5.088 2.903-9.436 7-11.182C16.097 3.564 19 7.912 19 13c0 .823-.076 1.626-.22 2.403l1.94 1.832a.5.5 0 0 1 .095.603l-2.495 4.575a.5.5 0 0 1-.793.114l-2.234-2.234a1 1 0 0 0-.707-.293H9.414a1 1 0 0 0-.707.293l-2.234 2.234a.5.5 0 0 1-.793-.114l-2.495-4.575a.5.5 0 0 1 .095-.603l1.94-1.832C5.077 14.626 5 13.823 5 13zm1.476 6.696l.817-.817A3 3 0 0 1 9.414 18h5.172a3 3 0 0 1 2.121.879l.817.817.982-1.8-1.1-1.04a2 2 0 0 1-.593-1.82c.124-.664.187-1.345.187-2.036 0-3.87-1.995-7.3-5-8.96C8.995 5.7 7 9.13 7 13c0 .691.063 1.372.187 2.037a2 2 0 0 1-.593 1.82l-1.1 1.039.982 1.8zM12 13a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" fill="currentColor" />
+                </svg>
+                <span style={{ transition: 'transform 0.5s cubic-bezier(0.76, 0, 0.24, 1)' }}>Start Your Journey</span>
+              </button>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 sm:px-8 py-3.5 sm:py-4 bg-white dark:bg-transparent text-[#0d5d3a] dark:text-[#10b981] rounded-full border-2 border-[#0d5d3a] dark:border-[#10b981] font-medium"
+              <button
+                className="px-6 sm:px-8 py-3.5 sm:py-4 bg-white text-[#0d5d3a] rounded-full border-2 border-[#0d5d3a] font-semibold text-sm sm:text-base hover:bg-[#f0fbf4] transition-all hover:-translate-y-0.5 active:translate-y-0"
               >
                 Learn More
-              </motion.button>
+              </button>
             </motion.div>
 
             <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3 sm:gap-6 pt-2 sm:pt-4 min-h-[80px]">
