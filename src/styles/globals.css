@@ -277,27 +277,49 @@
   100% { transform: translate(-100%, -100%) translate3d(0, 0, 0); }
 }
 
-/* ── Resource card blob — dark mode aware ── */
+/* ── Animated rotating border (shared: ResourceHub, PeerCircles, CommunityWall) ── */
+@keyframes zen-border-rotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.zen-anim-border {
+  position: relative;
+  overflow: hidden;
+  padding: 2px;
+}
+.zen-anim-border::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, #0d5d3a, #10b981, #34d399, #6ee7b7, #34d399, #10b981, #0d5d3a);
+  animation: zen-border-rotate 4s linear infinite;
+  z-index: 0;
+}
+.dark .zen-anim-border::before {
+  background: conic-gradient(from 0deg, #065f46, #10b981, #34d399, #6ee7b7, #34d399, #10b981, #065f46);
+}
+.zen-anim-border-content {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  width: 100%;
+  height: 100%;
+}
+.dark .zen-anim-border-content {
+  background: #111111;
+}
+
+/* ── Legacy resource card (kept for any other usage) ── */
 .zen-resource-card {
-  box-shadow: 20px 20px 60px #d4d4d4, -20px -20px 60px #ffffff;
-  background: #f0f0f0;
+  background: #ffffff;
 }
 .dark .zen-resource-card {
-  box-shadow: 0 4px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.06);
-  background: #0e0e14;
+  background: #111111;
 }
-.zen-resource-glass {
-  background: rgba(255,255,255,0.93);
-  outline: 2px solid rgba(255,255,255,0.9);
-}
-.dark .zen-resource-glass {
-  background: rgba(15,15,22,0.88);
-  outline: 1px solid rgba(255,255,255,0.10);
-}
-.dark .zen-resource-glass .zen-rcard-title  { color: #e2e8f0; }
-.dark .zen-resource-glass .zen-rcard-views  { color: #6aad8a; }
-.dark .zen-resource-glass .zen-rcard-tag    { background: rgba(13,93,58,0.35); color: #6ee7b7; }
-.dark .zen-resource-glass .zen-rcard-heart  { color: #9ca3af; }
 
 /* ── Dashboard — Doodle Theme ── */
 :root {

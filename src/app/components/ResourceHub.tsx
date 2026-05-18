@@ -252,13 +252,6 @@ function ResourceCard({
 }) {
   const isExternal = resource.type === 'link';
 
-  const blobColors: Record<ResourceType, string> = {
-    video: 'radial-gradient(circle, #10b981, #0d5d3a)',
-    audio: 'radial-gradient(circle, #8b5cf6, #6d28d9)',
-    image: 'radial-gradient(circle, #3b82f6, #1d4ed8)',
-    link:  'radial-gradient(circle, #f59e0b, #b45309)',
-  };
-
   const handleAction = () => {
     if (isExternal) {
       window.open(resource.url, '_blank', 'noopener,noreferrer');
@@ -269,72 +262,60 @@ function ResourceCard({
   };
 
   return (
-    <motion.div layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-      className="zen-resource-card"
-      style={{ position: 'relative', borderRadius: 14, zIndex: 1, overflow: 'hidden',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        minHeight: 220, cursor: 'pointer',
-      }}
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="zen-anim-border cursor-pointer"
+      style={{ borderRadius: 16 }}
       onClick={handleAction}
     >
-      {/* Bouncing blob */}
-      <div style={{
-        position: 'absolute', zIndex: 1, top: '50%', left: '50%',
-        width: 140, height: 140, borderRadius: '50%',
-        background: blobColors[resource.type],
-        opacity: 0.9, filter: 'blur(14px)',
-        animation: 'zen-blob-bounce 5s infinite ease',
-      }} />
-
-      {/* Frosted glass panel */}
-      <div className="zen-resource-glass" style={{
-        position: 'absolute', top: 5, left: 5,
-        width: 'calc(100% - 10px)', height: 'calc(100% - 10px)',
-        zIndex: 2, backdropFilter: 'blur(24px)', borderRadius: 10,
-        overflow: 'hidden',
-        display: 'flex', flexDirection: 'column', padding: '14px 12px',
-      }}>
-        {/* Top row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${typeColor(resource.type)}`}>
-            <TypeIcon t={resource.type} className="w-3 h-3" /> {typeLabel(resource.type)}
+      <div className="zen-anim-border-content flex flex-col" style={{ borderRadius: 14, minHeight: 220 }}>
+        {/* Thumbnail */}
+        <div className="relative flex-shrink-0 overflow-hidden" style={{ height: 100, borderRadius: '14px 14px 0 0' }}>
+          <CardThumbnail r={resource} />
+          <span className={`absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-sm ${typeColor(resource.type)}`}>
+            <TypeIcon t={resource.type} className="w-2.5 h-2.5" /> {typeLabel(resource.type)}
           </span>
-          <button onClick={e => { e.stopPropagation(); onToggleFav(resource._id); }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}>
-            <Heart className={`zen-rcard-heart w-4 h-4 ${isFav ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+          <button
+            onClick={e => { e.stopPropagation(); onToggleFav(resource._id); }}
+            className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-white/90 dark:bg-black/50 shadow"
+          >
+            <Heart className={`w-3 h-3 ${isFav ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
           </button>
         </div>
 
-        {/* Title */}
-        <h3 className="zen-rcard-title" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, color: '#0a2617',
-          lineHeight: 1.35, marginBottom: 6, flex: 1,
-          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}>
-          {resource.title}
-        </h3>
+        {/* Content */}
+        <div className="flex flex-col flex-1 p-3">
+          <h3
+            className="font-bold text-[#0a2617] dark:text-white text-xs leading-snug mb-2 flex-1"
+            style={{ fontFamily: 'Syne, sans-serif', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' } as React.CSSProperties}
+          >
+            {resource.title}
+          </h3>
 
-        {/* Tags */}
-        {resource.tags.length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 8 }}>
-            {resource.tags.slice(0, 3).map(tag => (
-              <span key={tag} className="zen-rcard-tag px-1.5 py-0.5 rounded-full bg-[#f0fbf4] text-[#0d5d3a] text-[9px] font-semibold">{tag}</span>
-            ))}
+          {resource.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {resource.tags.slice(0, 2).map(tag => (
+                <span key={tag} className="px-1.5 py-0.5 rounded-full bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] text-[9px] font-semibold">{tag}</span>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center gap-1 text-[#4a7c5d] dark:text-gray-500 text-[10px] mb-2">
+            <Eye className="w-3 h-3" /> {resource.views || 0} views
           </div>
-        )}
 
-        {/* Views */}
-        <div className="zen-rcard-views" style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4a7c5d', fontSize: 11, marginBottom: 8 }}>
-          <Eye className="w-3 h-3" /> {resource.views || 0} views
+          <button
+            onClick={e => { e.stopPropagation(); handleAction(); }}
+            className="w-full py-1.5 rounded-lg bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white font-bold text-[10px] flex items-center justify-center gap-1.5 hover:opacity-90 transition"
+          >
+            {isExternal
+              ? <><ExternalLink className="w-3 h-3" /> Open Link</>
+              : <><Play className="w-3 h-3 fill-white" /> {resource.type === 'image' ? 'View' : 'Play'}</>
+            }
+          </button>
         </div>
-
-        {/* Action button */}
-        <button onClick={e => { e.stopPropagation(); handleAction(); }}
-          style={{ width: '100%', padding: '6px 0', borderRadius: 6,
-            background: 'linear-gradient(135deg, #0d5d3a, #1a8a5a)', color: '#fff',
-            border: 'none', fontWeight: 700, fontSize: 11, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-          }}>
-          {isExternal ? <><ExternalLink className="w-3 h-3" /> Open Link</> : <><Play className="w-3 h-3 fill-white" /> {resource.type === 'image' ? 'View' : 'Play'}</>}
-        </button>
       </div>
     </motion.div>
   );

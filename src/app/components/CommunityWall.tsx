@@ -27,67 +27,58 @@ const CATEGORIES = [
   { key: 'trauma',        label: 'Trauma',        emoji: '🌿' },
 ];
 
-const CATEGORY_GRADIENT: Record<string, string> = {
-  anxiety:       'from-amber-500/10 to-amber-600/05',
-  depression:    'from-blue-500/10 to-blue-600/05',
-  stress:        'from-orange-500/10 to-orange-600/05',
-  exam_pressure: 'from-violet-500/10 to-violet-600/05',
-  bullying:      'from-red-500/10 to-red-600/05',
-  loneliness:    'from-sky-500/10 to-sky-600/05',
-  family_issues: 'from-rose-500/10 to-rose-600/05',
-  self_esteem:   'from-pink-500/10 to-pink-600/05',
-  trauma:        'from-gray-500/10 to-gray-600/05',
-  other:         'from-[#0d5d3a]/10 to-[#10b981]/05',
-};
+
+
 
 
 
 function StoryCard({ story, onLike, onOpen }: { story: Story; onLike: (id: string) => void; onOpen: (s: Story) => void }) {
   const cat = CATEGORIES.find(c => c.key === story.category);
-  const grad = CATEGORY_GRADIENT[story.category] || CATEGORY_GRADIENT.other;
   const MAX_CHARS = 200;
   const truncated = story.story.length > MAX_CHARS;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`relative rounded-3xl border border-[#0d5d3a]/08 dark:border-white/08 bg-gradient-to-br ${grad} bg-white dark:bg-[#111111] p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full`}
-    >
-      {cat && cat.key !== 'all' && (
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 dark:bg-white/10 border border-[#0d5d3a]/08 dark:border-white/10 text-xs font-semibold text-[#0d5d3a] dark:text-[#10b981] mb-3 w-fit">
-          <span>{cat.emoji}</span>
-          <span>{cat.label}</span>
-        </div>
-      )}
-      <p className="text-sm text-[#0a2617] dark:text-gray-200 leading-relaxed mb-3 flex-1">
-        &quot;{truncated ? story.story.slice(0, MAX_CHARS) + '…' : story.story}&quot;
-      </p>
-      <div className="flex items-center justify-between mt-auto">
-        <div className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-500">
-          — {story.isAnonymous ? 'Anonymous' : story.author}
-        </div>
-        <div className="flex items-center gap-2">
-          {truncated && (
-            <button onClick={() => onOpen(story)}
-              className="text-[10px] font-bold text-[#0d5d3a] dark:text-[#10b981] hover:underline">
-              Read more
+    <div className="zen-anim-border h-full" style={{ borderRadius: 24 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="zen-anim-border-content p-5 flex flex-col h-full" style={{ borderRadius: 22 }}
+      >
+        {cat && cat.key !== 'all' && (
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/80 dark:bg-white/10 border border-[#0d5d3a]/08 dark:border-white/10 text-xs font-semibold text-[#0d5d3a] dark:text-[#10b981] mb-3 w-fit">
+            <span>{cat.emoji}</span>
+            <span>{cat.label}</span>
+          </div>
+        )}
+        <p className="text-sm text-[#0a2617] dark:text-gray-200 leading-relaxed mb-3 flex-1">
+          &quot;{truncated ? story.story.slice(0, MAX_CHARS) + '…' : story.story}&quot;
+        </p>
+        <div className="flex items-center justify-between mt-auto">
+          <div className="text-xs font-semibold text-[#4a7c5d] dark:text-gray-500">
+            — {story.isAnonymous ? 'Anonymous' : story.author}
+          </div>
+          <div className="flex items-center gap-2">
+            {truncated && (
+              <button onClick={() => onOpen(story)}
+                className="text-[10px] font-bold text-[#0d5d3a] dark:text-[#10b981] hover:underline">
+                Read more
+              </button>
+            )}
+            <button
+              onClick={() => onLike(story._id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                story.liked
+                  ? 'bg-red-500 text-white shadow-md shadow-red-500/30'
+                  : 'bg-white dark:bg-white/10 text-[#4a7c5d] dark:text-gray-400 border border-[#0d5d3a]/08 dark:border-white/10 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20'
+              }`}
+            >
+              <Heart className={`w-3.5 h-3.5 ${story.liked ? 'fill-white' : ''}`} />
+              {story.likes}
             </button>
-          )}
-          <button
-            onClick={() => onLike(story._id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-              story.liked
-                ? 'bg-red-500 text-white shadow-md shadow-red-500/30'
-                : 'bg-white dark:bg-white/10 text-[#4a7c5d] dark:text-gray-400 border border-[#0d5d3a]/08 dark:border-white/10 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20'
-            }`}
-          >
-            <Heart className={`w-3.5 h-3.5 ${story.liked ? 'fill-white' : ''}`} />
-            {story.likes}
-          </button>
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
 

@@ -26,53 +26,55 @@ function CircleCard({ circle, onJoin, onOpen, joining }: {
   onOpen: (c: Circle) => void; joining: string | null;
 }) {
   return (
-    <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-[#111111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm hover:shadow-md transition-all p-5 flex flex-col">
-      <div className="flex items-start gap-3 mb-3">
-        <div style={{
-          width: 44, height: 44, borderRadius: 14, flexShrink: 0, fontSize: 20,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: `linear-gradient(135deg, ${circle.gradientFrom}, ${circle.gradientTo})`,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-        }}>{circle.icon}</div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-[#0a2617] dark:text-white text-sm leading-snug mb-1"
-            style={{ fontFamily: 'Syne, sans-serif' }}>{circle.name}</h3>
-          <div className="flex gap-3 text-[10px] text-[#4a7c5d] dark:text-gray-400 font-medium">
-            <span className="flex items-center gap-1"><Users className="w-3 h-3" />{circle.memberCount} members</span>
-            <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" />{circle.messageCount}</span>
+    <div className="zen-anim-border" style={{ borderRadius: 24 }}>
+      <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+        className="zen-anim-border-content rounded-3xl p-5 flex flex-col" style={{ borderRadius: 22 }}>
+        <div className="flex items-start gap-3 mb-3">
+          <div style={{
+            width: 44, height: 44, borderRadius: 14, flexShrink: 0, fontSize: 20,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: `linear-gradient(135deg, ${circle.gradientFrom}, ${circle.gradientTo})`,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          }}>{circle.icon}</div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-[#0a2617] dark:text-white text-sm leading-snug mb-1"
+              style={{ fontFamily: 'Syne, sans-serif' }}>{circle.name}</h3>
+            <div className="flex gap-3 text-[10px] text-[#4a7c5d] dark:text-gray-400 font-medium">
+              <span className="flex items-center gap-1"><Users className="w-3 h-3" />{circle.memberCount} members</span>
+              <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" />{circle.messageCount}</span>
+            </div>
           </div>
+          {circle.isJoined && (
+            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0">
+              <UserCheck className="w-2.5 h-2.5" /> Joined
+            </span>
+          )}
         </div>
-        {circle.isJoined && (
-          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0">
-            <UserCheck className="w-2.5 h-2.5" /> Joined
-          </span>
-        )}
-      </div>
-      <p className="text-xs text-[#4a7c5d] dark:text-gray-400 leading-relaxed mb-4 line-clamp-2 flex-1">
-        {circle.description}
-      </p>
-      <div className="flex gap-2 mt-auto">
-        <button onClick={() => onJoin(circle._id)} disabled={joining === circle._id}
-          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-            circle.isJoined
-              ? 'bg-[#0d5d3a]/08 dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] border border-[#0d5d3a]/20'
-              : 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white hover:bg-[#0a4a2e] shadow-md'
-          } disabled:opacity-50`}>
-          {joining === circle._id ? <Loader2 className="w-3 h-3 animate-spin" />
-            : circle.isJoined ? <><UserCheck className="w-3 h-3" /> Joined</>
-            : <><UserPlus className="w-3 h-3" /> Join</>}
-        </button>
-        <button onClick={() => onOpen(circle)}
-            style={{
-              flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer',
-              background: 'rgba(13,93,58,0.06)', border: '1.5px solid rgba(13,93,58,0.18)',
-              color: '#0d5d3a', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-            }}>
+        <p className="text-xs text-[#4a7c5d] dark:text-gray-400 leading-relaxed mb-4 line-clamp-2 flex-1">
+          {circle.description}
+        </p>
+        <div className="flex gap-2 mt-auto">
+          <button onClick={() => onJoin(circle._id)} disabled={joining === circle._id}
+            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              circle.isJoined
+                ? 'bg-[#0d5d3a]/08 dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] border border-[#0d5d3a]/20'
+                : 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white hover:bg-[#0a4a2e] shadow-md'
+            } disabled:opacity-50`}>
+            {joining === circle._id ? <Loader2 className="w-3 h-3 animate-spin" />
+              : circle.isJoined ? <><UserCheck className="w-3 h-3" /> Joined</>
+              : <><UserPlus className="w-3 h-3" /> Join</>}
+          </button>
+          <button onClick={() => onOpen(circle)}
+              style={{
+                flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                background: 'rgba(13,93,58,0.06)', border: '1.5px solid rgba(13,93,58,0.18)',
+                color: '#0d5d3a', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+              }}>
             <MessageSquare className="w-3 h-3" /> Open
           </button>
         </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
 
