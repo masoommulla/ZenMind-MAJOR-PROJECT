@@ -280,13 +280,19 @@ router.get('/client/:userId/wellness-snapshot', requireTherapist, async (req, re
     // Let's just return what we have. If we need to pull UserProgram, we'll try to do it safely.
     let activePrograms = [];
     try {
-      const UserProgram = (await import('../models/UserProgram.js')).default;
-      activePrograms = await UserProgram.find({ userId: user._id, status: 'in-progress' })
+      const { ProgramEnrollment } = await import('../models/WellnessProgram.js');
+      activePrograms = await ProgramEnrollment.find({ userId: user._id, isCompleted: false })
         .populate('programId', 'title category')
-        .select('progress completedDays lastCompletedAt')
+        .select('currentDay completedDays')
         .lean();
+      
+      // format to match frontend expected structure: { programId: { title, category }, progress }
+      activePrograms = activePrograms.map(en => ({
+        programId: en.programId,
+        progress: en.currentDay,
+      }));
     } catch (e) {
-      // UserProgram might not exist, silently ignore
+      console.error(e);
     }
 
     return res.json({

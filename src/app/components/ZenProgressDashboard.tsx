@@ -8,6 +8,7 @@ import {
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import { apiFetch } from '../api/client';
 import MoodCheckIn from './MoodCheckIn';
+import WeeklyInsightsBanner from './WeeklyInsightsBanner';
 import {
   TrendingUp, MessageCircle, Flame, Heart, BarChart3,
   Calendar, RefreshCw, Smile, PlusCircle
@@ -262,6 +263,11 @@ export default function ZenProgressDashboard() {
       {error && (
         <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">{error}</div>
       )}
+
+      {/* Weekly Insights Banner */}
+      <div className="-mx-1 sm:-mx-1 mb-2">
+        <WeeklyInsightsBanner />
+      </div>
 
       {/* Empty state */}
       {isEmpty ? (

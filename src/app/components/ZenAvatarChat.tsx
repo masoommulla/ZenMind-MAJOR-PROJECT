@@ -5,7 +5,6 @@ import { apiFetch } from '../api/client';
 import ZenTalkingHead from './ZenTalkingHead';
 import ZenChatSidebar from './ZenChatSidebar';
 import MoodCheckIn from './MoodCheckIn';
-import WeeklyInsightsBanner from './WeeklyInsightsBanner';
 
 type MessageAction = 'STORY_BUTTONS' | 'POST_STORY' | 'THERAPY_BUTTON' | 'CRISIS' | null;
 type Message = { role: 'user' | 'assistant'; content: string; id: string; action?: MessageAction };
@@ -367,20 +366,20 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
       <div className="flex flex-col lg:flex-row gap-4 flex-1 min-w-0 overflow-hidden">
 
       {/* MOBILE avatar strip */}
-      <div className="flex lg:hidden gap-3 flex-shrink-0">
-        <div className="w-36 h-44 rounded-2xl overflow-hidden flex-shrink-0 shadow-xl relative">
+      <div className="flex lg:hidden gap-3 flex-shrink-0 items-center bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 rounded-3xl p-3 shadow-sm">
+        <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 shadow-inner relative border-2 border-[#10b981]/30">
           <ZenTalkingHead speaking={speaking} text={lastBotText} />
-          <div className="absolute bottom-1.5 left-0 right-0 text-center">
-            <div className={`inline-block w-1.5 h-1.5 rounded-full ${avatarState === 'idle' ? 'bg-[#10b981]/50' : 'bg-[#10b981] animate-pulse'}`} />
-          </div>
         </div>
-        <div className="flex-1 h-44 rounded-2xl bg-white dark:bg-[#111111] border border-[#0d5d3a]/10 dark:border-white/10 shadow-xl overflow-hidden flex flex-col">
-          <div className="text-[10px] font-semibold text-[#4a7c5d] dark:text-gray-400 px-3 pt-2 capitalize">{avatarState === 'idle' ? 'Ready' : avatarState + '...'}</div>
-          <div className="flex-1"><WaveVisualizer active={speaking || listening} /></div>
+        <div className="flex-1 min-w-0">
+           <div className="text-sm font-bold text-[#0a2617] dark:text-white" style={{ fontFamily: 'Syne,sans-serif' }}>Zeni</div>
+           <div className="text-xs text-[#4a7c5d] dark:text-gray-400 capitalize flex items-center gap-1.5">
+             <div className={`w-1.5 h-1.5 rounded-full ${avatarState === 'idle' ? 'bg-[#10b981]/50' : 'bg-[#10b981] animate-pulse'}`} />
+             {avatarState === 'idle' ? 'Ready to listen' : avatarState + '...'}
+           </div>
         </div>
-        <div className="flex flex-col gap-1.5 flex-shrink-0">
-          <button onClick={() => { if (voiceOn) SS?.cancel(); setVoiceOn(v => !v); }} className={`w-10 h-10 rounded-xl flex items-center justify-center border transition ${voiceOn ? 'bg-[#0d5d3a] text-white border-[#0d5d3a]' : 'bg-white dark:bg-[#1a1a1a] text-[#4a7c5d] border-[#0d5d3a]/15'}`}>{voiceOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}</button>
-          <button onClick={clearChat} className="w-10 h-10 rounded-xl flex items-center justify-center border border-[#0d5d3a]/15 dark:border-white/10 bg-white dark:bg-[#1a1a1a] text-[#4a7c5d]"><RotateCcw className="w-4 h-4" /></button>
+        <div className="flex gap-2 flex-shrink-0">
+          <button onClick={() => { if (voiceOn) SS?.cancel(); setVoiceOn(v => !v); }} className={`w-10 h-10 rounded-full flex items-center justify-center border transition shadow-sm ${voiceOn ? 'bg-[#0d5d3a] text-white border-[#0d5d3a]' : 'bg-[#f0fbf4] dark:bg-[#1a1a1a] text-[#4a7c5d] border-[#0d5d3a]/15'}`}>{voiceOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}</button>
+          <button onClick={clearChat} className="w-10 h-10 rounded-full flex items-center justify-center border border-[#0d5d3a]/15 dark:border-white/10 bg-[#f0fbf4] dark:bg-[#1a1a1a] text-[#4a7c5d] shadow-sm"><RotateCcw className="w-4 h-4" /></button>
         </div>
       </div>
 
@@ -431,8 +430,6 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
           </div>
           <div className="ml-auto text-xs text-[#4a7c5d] dark:text-gray-500 bg-[#f0fbf4] dark:bg-white/5 px-2 py-1 rounded-full">{messages.length} message{messages.length !== 1 ? 's' : ''}</div>
         </div>
-        
-        <WeeklyInsightsBanner onPreFillChat={(text) => setInput(text)} />
 
         <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4">
           {messages.map(msg => (

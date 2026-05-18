@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { X, TrendingUp, Target, Dumbbell, AlertCircle, Heart } from 'lucide-react';
+import { X, TrendingUp, Target, Dumbbell, AlertCircle, Heart, MessageCircle } from 'lucide-react';
 import { apiFetch } from '../api/client';
 
 type ClientWellnessSnapshotProps = {

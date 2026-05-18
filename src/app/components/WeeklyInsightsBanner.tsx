@@ -22,7 +22,7 @@ type WeeklyInsight = {
   generatedAt: string;
 };
 
-export default function WeeklyInsightsBanner({ onPreFillChat }: { onPreFillChat: (text: string) => void }) {
+export default function WeeklyInsightsBanner({ onPreFillChat }: { onPreFillChat?: (text: string) => void }) {
   const [insights, setInsights] = useState<WeeklyInsight[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -222,17 +222,19 @@ export default function WeeklyInsightsBanner({ onPreFillChat }: { onPreFillChat:
                           )}
 
                           {/* CTA */}
-                          <div className="mt-4 pt-3 flex justify-end">
-                            <button
-                              onClick={() => {
-                                onPreFillChat(`About my insights for the week of ${formatDate(insight.weekOf)}: `);
-                                setIsOpen(false);
-                              }}
-                              className="text-xs font-bold px-4 py-2 rounded-xl bg-[#0d5d3a] text-white hover:bg-[#0a4a2e] transition shadow-sm"
-                            >
-                              Ask Zeni about this
-                            </button>
-                          </div>
+                          {onPreFillChat && (
+                            <div className="mt-4 pt-3 flex justify-end">
+                              <button
+                                onClick={() => {
+                                  onPreFillChat(`About my insights for the week of ${formatDate(insight.weekOf)}: `);
+                                  setIsOpen(false);
+                                }}
+                                className="text-xs font-bold px-4 py-2 rounded-xl bg-[#0d5d3a] text-white hover:bg-[#0a4a2e] transition shadow-sm"
+                              >
+                                Ask Zeni about this
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     )}
