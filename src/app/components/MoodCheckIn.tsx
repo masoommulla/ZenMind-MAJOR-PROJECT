@@ -9,16 +9,16 @@ type Props = {
 };
 
 const MOOD_LABELS = [
-  { score: 1,  emoji: '', label: 'Terrible',  color: '#dc2626' },
-  { score: 2,  emoji: '', label: 'Very Bad',   color: '#ea580c' },
-  { score: 3,  emoji: '', label: 'Bad',        color: '#f97316' },
-  { score: 4,  emoji: '', label: 'Low',        color: '#eab308' },
-  { score: 5,  emoji: '', label: 'Neutral',    color: '#84cc16' },
-  { score: 6,  emoji: '', label: 'Okay',       color: '#22c55e' },
-  { score: 7,  emoji: '', label: 'Good',       color: '#10b981' },
-  { score: 8,  emoji: '', label: 'Great',      color: '#0d9488' },
-  { score: 9,  emoji: '', label: 'Excellent',  color: '#0891b2' },
-  { score: 10, emoji: '', label: 'Amazing!',   color: '#0d5d3a' },
+  { score: 1,  emoji: '😭', label: 'Terrible',  color: '#dc2626' },
+  { score: 2,  emoji: '😢', label: 'Very Bad',   color: '#ea580c' },
+  { score: 3,  emoji: '😞', label: 'Bad',        color: '#f97316' },
+  { score: 4,  emoji: '😟', label: 'Low',        color: '#eab308' },
+  { score: 5,  emoji: '😐', label: 'Neutral',    color: '#84cc16' },
+  { score: 6,  emoji: '🙂', label: 'Okay',       color: '#22c55e' },
+  { score: 7,  emoji: '😊', label: 'Good',       color: '#10b981' },
+  { score: 8,  emoji: '😄', label: 'Great',      color: '#0d9488' },
+  { score: 9,  emoji: '😁', label: 'Excellent',  color: '#0891b2' },
+  { score: 10, emoji: '🤩', label: 'Amazing!',   color: '#0d5d3a' },
 ];
 
 export default function MoodCheckIn({ onClose, onSaved }: Props) {

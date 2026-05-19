@@ -98,6 +98,8 @@ app.use('/api/admin-analytics', adminAnalyticsRoute);
 import insightsRoute from './routes/insights.js';
 import { generateInsightForUser } from './routes/insights.js';
 app.use('/api/insights', insightsRoute);
+import storeRoute from './routes/store.js';
+app.use('/api/store', storeRoute);
 import { Job } from './models/Job.js';
 
 
@@ -489,6 +491,60 @@ if (jobCount === 0) {
     await new Job(jobData).save();
   }
   console.log('Default Jobs seeded (6 positions)');
+}
+
+// Seed Wellness Store
+import StoreAsset from './models/StoreAsset.js';
+const storeCount = await StoreAsset.countDocuments();
+if (storeCount === 0) {
+  await StoreAsset.insertMany([
+    {
+      title: '7-Day Anxiety Journal Template',
+      description: 'A structured daily journaling template with prompts designed to help you identify anxiety triggers, track your mood, and build self-awareness over 7 days.',
+      fileMime: 'application/pdf',
+      fileName: '7-day-anxiety-journal.pdf',
+      price: 0,
+      category: 'Anxiety',
+      fileData: '',
+    },
+    {
+      title: 'Sleep Hygiene Checklist',
+      description: 'A science-backed 20-point evening checklist to help you wind down, limit screen exposure, and prepare your body and mind for deep, restorative sleep.',
+      fileMime: 'application/pdf',
+      fileName: 'sleep-hygiene-checklist.pdf',
+      price: 0,
+      category: 'Sleep',
+      fileData: '',
+    },
+    {
+      title: 'Guided Meditation Script: Morning Reset',
+      description: 'A soothing 10-minute morning meditation script to set a positive intention for your day, calm the nervous system, and cultivate presence before the world demands your attention.',
+      fileMime: 'application/pdf',
+      fileName: 'morning-reset-meditation.pdf',
+      price: 0,
+      category: 'Mindfulness',
+      fileData: '',
+    },
+    {
+      title: 'Affirmation Card Pack — 30 Cards',
+      description: 'A beautifully designed pack of 30 printable affirmation cards covering self-worth, resilience, focus, and compassion. Print, cut, and place where you need them most.',
+      fileMime: 'application/pdf',
+      fileName: 'affirmation-cards-30.pdf',
+      price: 49,
+      category: 'Self-Esteem',
+      fileData: '',
+    },
+    {
+      title: 'Deep Sleep Story: The Quiet Forest',
+      description: 'A calming bedtime story audio script read at a gentle pace, designed to slow racing thoughts and guide you into a deep, peaceful sleep within minutes.',
+      fileMime: 'application/pdf',
+      fileName: 'deep-sleep-story-quiet-forest.pdf',
+      price: 29,
+      category: 'Sleep',
+      fileData: '',
+    },
+  ]);
+  console.log('Default Wellness Store seeded (5 items)');
 }
 
 const server = http.createServer(app);

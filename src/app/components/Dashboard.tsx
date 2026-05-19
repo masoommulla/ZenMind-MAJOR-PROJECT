@@ -4,7 +4,7 @@ import {
   MessageCircle, Settings, BookMarked, BarChart2,
   PanelLeftOpen, PanelLeftClose, Eye, EyeOff, LogOut, Menu, X, Stethoscope,
   Calendar, Clock, Trash2, CheckSquare, IndianRupee, Star, Save,
-  Library, BookHeart, Users2, Target, Globe2, Dumbbell, Info, Upload
+  Library, BookHeart, Users2, Target, Globe2, Dumbbell, Info, Upload, ShoppingBag
 } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import ThemeToggle from './ThemeToggle';
@@ -21,6 +21,7 @@ import PeerCircles from './PeerCircles';
 import WellnessGoalTracker from './WellnessGoalTracker';
 import ReadingListsUser from './ReadingListsUser';
 import WellnessProgramsUser from './WellnessProgramsUser';
+import WellnessStore from './WellnessStore';
 import NotificationCenter from './NotificationCenter';
 import SessionPrepCard from './SessionPrepCard';
 import PostSessionModal from './PostSessionModal';
@@ -42,12 +43,12 @@ type Me = {
   shareProgressWithTherapist?: boolean;
 };
 
-type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources' | 'journal' | 'circles' | 'goals' | 'reading' | 'programs';
+type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources' | 'journal' | 'circles' | 'goals' | 'reading' | 'programs' | 'store';
 
 const TAB_ICONS: Record<TabKey, string> = {
   aichat: '', therapy: '🩺', settings: '️', sessions: '', chat: '',
   progress: '', community: '', resources: '', journal: '',
-  circles: '', goals: '', reading: '', programs: '',
+  circles: '', goals: '', reading: '', programs: '', store: '🛍️',
 };
 
 const NAV_ITEMS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
@@ -56,6 +57,7 @@ const NAV_ITEMS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'resources',  label: 'Resources',          icon: <Library       className="w-5 h-5 flex-shrink-0" /> },
   { key: 'reading',    label: 'Reading Lists',      icon: <BookMarked    className="w-5 h-5 flex-shrink-0" /> },
   { key: 'programs',   label: 'Wellness Programs',  icon: <Dumbbell      className="w-5 h-5 flex-shrink-0" /> },
+  { key: 'store',      label: 'Store',              icon: <ShoppingBag   className="w-5 h-5 flex-shrink-0" /> },
   { key: 'journal',    label: 'Mood Journal',       icon: <BookHeart     className="w-5 h-5 flex-shrink-0" /> },
   { key: 'circles',    label: 'Peer Circles',       icon: <Users2        className="w-5 h-5 flex-shrink-0" /> },
   { key: 'goals',      label: 'My Goals',           icon: <Target        className="w-5 h-5 flex-shrink-0" /> },
@@ -325,6 +327,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
                      tab === 'circles'   ? 'Peer Circles' :
                      tab === 'goals'     ? 'My Goals' :
                      tab === 'programs'  ? 'Wellness Programs' :
+                     tab === 'store'     ? 'Wellness Store' :
                      tab === 'settings'  ? 'Settings' :
                      loading ? 'Loading…' : `Welcome, ${me?.name?.split(' ')[0] || 'there'}!`}
                   </span>
@@ -342,6 +345,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
                    tab === 'circles'   ? 'Safe group spaces to share & support' :
                    tab === 'goals'     ? 'Build daily habits & streaks' :
                    tab === 'programs'  ? 'Science-backed day-by-day programs' :
+                   tab === 'store'     ? 'Download free & premium wellness resources' :
                    tab === 'settings'  ? 'Manage your account & preferences' :
                    'Your personal wellness dashboard'}
                 </div>
@@ -431,6 +435,10 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
                 onDetailClose={() => setProgramDetailOpen(false)}
                 closeDetailSignal={closeProgramSignal}
               />
+            </div>
+          ) : tab === 'store' ? (
+            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+              <WellnessStore />
             </div>
           ) : tab === 'settings' ? (
             <div className="flex-1 overflow-y-auto">
