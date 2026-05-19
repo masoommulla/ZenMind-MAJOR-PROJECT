@@ -337,22 +337,22 @@ export default function WellnessProgramsUser({
       )}
 
       {/* ── STICKY CONTROLS ── */}
-      <div className="zen-controls-bar" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', gap: 4 }}>
+      <div className="zen-controls-bar flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 sm:gap-0 p-4 sm:p-0">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           {(['browse', 'my'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
-              className={`zen-tab-pill ${tab === t ? 'active' : ''}`}>
+              className={`zen-tab-pill flex-1 sm:flex-none justify-center ${tab === t ? 'active' : ''}`}>
               {t === 'browse' ? <><Search size={12} /> Browse All</> : <><BookOpen size={12} /> My Programs ({myEnrollments.length})</>}
             </button>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 20, background: 'rgba(13,93,58,0.07)', border: '1.5px solid rgba(13,93,58,0.15)', fontSize: 11 }}>
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-start sm:justify-end">
+          <div className="flex-1 sm:flex-none justify-center" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 20, background: 'rgba(13,93,58,0.07)', border: '1.5px solid rgba(13,93,58,0.15)', fontSize: 11 }}>
             <Zap size={12} style={{ color: '#0d5d3a' }} />
             <span style={{ fontWeight: 700, color: '#0a2617' }}>{programs.length}</span>
             <span style={{ color: '#4a7c5d' }}>Available</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 20, background: 'rgba(16,185,129,0.07)', border: '1.5px solid rgba(16,185,129,0.18)', fontSize: 11 }}>
+          <div className="flex-1 sm:flex-none justify-center" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 20, background: 'rgba(16,185,129,0.07)', border: '1.5px solid rgba(16,185,129,0.18)', fontSize: 11 }}>
             <TrendingUp size={12} style={{ color: '#10b981' }} />
             <span style={{ fontWeight: 700, color: '#0a2617' }}>{myEnrollments.length}</span>
             <span style={{ color: '#4a7c5d' }}>Enrolled</span>
@@ -366,18 +366,18 @@ export default function WellnessProgramsUser({
         <>
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
-            <div className="relative flex-1 sm:max-w-xs">
+            <div className="relative flex-1 sm:max-w-xs w-full">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4a7c5d] dark:text-gray-400" />
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search programs..."
                 className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-[#0d5d3a]/25 text-sm text-[#0a2617] dark:text-white" />
             </div>
             <select value={catFilter} onChange={e => setCatFilter(e.target.value)}
-              className="px-4 py-2.5 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl outline-none text-sm font-semibold text-[#0a2617] dark:text-white cursor-pointer">
+              className="w-full sm:w-auto px-4 py-2.5 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl outline-none text-sm font-semibold text-[#0a2617] dark:text-white cursor-pointer">
               <option value="all">All Categories</option>
               {Object.entries(CATEGORY_META).map(([k, v]) => <option key={k} value={k}>{v.icon} {v.label}</option>)}
             </select>
             <select value={diffFilter} onChange={e => setDiffFilter(e.target.value)}
-              className="px-4 py-2.5 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl outline-none text-sm font-semibold text-[#0a2617] dark:text-white cursor-pointer">
+              className="w-full sm:w-auto px-4 py-2.5 bg-white dark:bg-[#111111] border border-[#0d5d3a]/15 dark:border-white/10 rounded-xl outline-none text-sm font-semibold text-[#0a2617] dark:text-white cursor-pointer">
               <option value="all">All Levels</option>
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
