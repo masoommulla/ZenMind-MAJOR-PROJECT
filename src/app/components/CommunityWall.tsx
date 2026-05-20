@@ -200,7 +200,7 @@ function SubmitModal({ onClose, onSubmitted }: { onClose: () => void; onSubmitte
   );
 }
 
-export default function CommunityWall() {
+export default function CommunityWall({ userTier = 'free', onUpgradeClick }: { userTier?: string, onUpgradeClick?: () => void }) {
   const [stories, setStories]   = useState<Story[]>([]);
   const [category, setCategory] = useState('all');
   const [loading, setLoading]   = useState(true);
@@ -246,10 +246,17 @@ export default function CommunityWall() {
             </button>
           ))}
         </div>
-        <button onClick={() => setShowSubmit(true)}
-          style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, border: 'none', background: 'linear-gradient(135deg,#0d5d3a,#1a8a5a)', color: 'white', fontSize: 12, fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(13,93,58,0.3)' }}>
-          <Share2 className="w-3.5 h-3.5" /> Share Story
-        </button>
+        {userTier !== 'free' ? (
+          <button onClick={() => setShowSubmit(true)}
+            style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, border: 'none', background: 'linear-gradient(135deg,#0d5d3a,#1a8a5a)', color: 'white', fontSize: 12, fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(13,93,58,0.3)' }}>
+            <Share2 className="w-3.5 h-3.5" /> Share Story
+          </button>
+        ) : (
+          <button onClick={onUpgradeClick}
+            style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, border: 'none', background: 'linear-gradient(135deg,#7f8c8d,#95a5a6)', color: 'white', fontSize: 12, fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+            <Share2 className="w-3.5 h-3.5" /> Share Story (Silver+)
+          </button>
+        )}
       </div>
 
       {/* ── SCROLLABLE CARDS ── */}

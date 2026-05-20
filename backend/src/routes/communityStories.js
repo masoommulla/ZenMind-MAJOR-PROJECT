@@ -49,9 +49,15 @@ router.post('/', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Invalid category' });
     }
 
-    // Fetch user name for author field
-    const user = await User.findById(req.user.id).select('name').lean();
-    const authorName = user?.name || 'ZenMind User';
+    // Fetch user name and tier for author field and limits
+    const user = await User.findById(req.user.id).select('name subscriptionTier').lean();
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+    
+    if (!user.subscriptionTier || user.subscriptionTier === 'free') {
+      return res.status(403).json({ error: 'Free tier users cannot post stories. Please upgrade to share your story.' });
+    }
+
+    const authorName = user.name || 'ZenMind User';
 
     const newStory = await Story.create({
       story: story.trim(),

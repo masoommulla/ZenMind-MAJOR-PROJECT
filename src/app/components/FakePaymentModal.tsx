@@ -32,7 +32,7 @@ export default function FakePaymentModal({ onClose, onSuccess, initialSelectedTi
     
     try {
       // Mock API call to update tier
-      await apiFetch('/user/set-tier', { method: 'POST', body: JSON.stringify({ tier: selected }) });
+      await apiFetch('/me/set-tier', { method: 'POST', body: JSON.stringify({ tier: selected }) });
       setSuccess(true);
       setTimeout(() => {
         onSuccess(selected);

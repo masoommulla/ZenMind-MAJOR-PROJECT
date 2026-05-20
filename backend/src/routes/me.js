@@ -21,6 +21,9 @@ router.get('/', requireAuth, async (req, res) => {
     avatar:         user.avatar?.data ? { mime: user.avatar.mime, data: user.avatar.data } : null,
     onboardingDone: user.onboardingDone ?? false,
     shareProgressWithTherapist: user.shareProgressWithTherapist ?? false,
+    subscriptionTier: user.subscriptionTier || 'free',
+    aiCreditsRemaining: user.aiCreditsRemaining || 0,
+    freeTherapyQuota: user.freeTherapyQuota || 0,
   });
 });
 
@@ -74,7 +77,10 @@ router.put('/', requireAuth, async (req, res) => {
     phone:  user.phone,
     age:    user.age,
     gender: user.gender,
-    avatar: user.avatar?.data ? { mime: user.avatar.mime, data: user.avatar.data } : null
+    avatar: user.avatar?.data ? { mime: user.avatar.mime, data: user.avatar.data } : null,
+    subscriptionTier: user.subscriptionTier || 'free',
+    aiCreditsRemaining: user.aiCreditsRemaining || 0,
+    freeTherapyQuota: user.freeTherapyQuota || 0,
   });
 });
 
@@ -154,6 +160,41 @@ router.patch('/share-progress', requireAuth, async (req, res) => {
     await user.save();
     
     return res.json({ ok: true, shareProgressWithTherapist: user.shareProgressWithTherapist });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── POST /me/set-tier ── */
+router.post('/set-tier', requireAuth, async (req, res) => {
+  try {
+    const { tier } = req.body;
+    const allowed = ['free', 'silver', 'gold', 'platinum'];
+    if (!allowed.includes(tier)) return res.status(400).json({ error: 'Invalid tier' });
+    
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    user.subscriptionTier = tier;
+    
+    // Set AI credits based on tier
+    // Free: 40/mo, Silver: 150/week -> 600/mo, Gold: 250/week -> 1000/mo, Platinum: unlimited
+    const creditsMap = { free: 40, silver: 600, gold: 1000, platinum: 999999999 };
+    user.aiCreditsRemaining = creditsMap[tier];
+    
+    // Set Therapy quota based on tier
+    // Free: 0, Silver: 0, Gold: 1, Platinum: 2
+    const quotaMap = { free: 0, silver: 0, gold: 1, platinum: 2 };
+    user.freeTherapyQuota = quotaMap[tier];
+    
+    // Custom billing date reset (1 month from now)
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    user.subscriptionBillingDate = nextMonth;
+    
+    await user.save();
+    
+    return res.json({ ok: true, tier: user.subscriptionTier, aiCreditsRemaining: user.aiCreditsRemaining, freeTherapyQuota: user.freeTherapyQuota });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
