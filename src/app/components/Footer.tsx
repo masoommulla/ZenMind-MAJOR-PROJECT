@@ -3,7 +3,7 @@ import { Heart, Instagram, Twitter, Facebook, Linkedin, Mail } from 'lucide-reac
 import logo from '../../../asset/logo.png';
 
 const footerLinks = {
-  Product: ['Features', 'AI Chatbot', 'Therapy', 'Pricing', 'FAQ'],
+  Product: ['Features', 'AI Chatbot', 'Therapy', 'Peer Circles', 'Wellness Store', 'Wellness Programs', 'Pricing', 'FAQ'],
   Company: ['About Us', 'Careers', 'Blog', 'Press', 'Partners'],
   Resources: ['Help Center', 'Privacy Policy', 'Terms of Service', 'Crisis Support', 'Community'],
   Support: ['Contact Us', 'Documentation', 'Safety Guidelines', 'Report Issue', 'Feedback'],

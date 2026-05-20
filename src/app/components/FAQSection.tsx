@@ -35,6 +35,18 @@ const faqs = [
     q: 'How do Peer Support Circles work?',
     a: 'Peer Circles are moderated group chat rooms around specific themes (anxiety, academics, family, etc.). They are text-based, real-time, and anonymous by default. A trained moderator oversees every circle to ensure safety.',
   },
+  {
+    q: 'What is the Wellness Store?',
+    a: 'The Wellness Store offers a variety of digital assets to support your mental health journey. You can find both free resources and premium content, including guided meditations, cognitive behavioral workbooks, and exclusive therapeutic exercises.',
+  },
+  {
+    q: 'What are Wellness Programs?',
+    a: 'Wellness Programs are structured courses designed by mental health professionals to tackle specific challenges like test anxiety or social skills. You can join a program, track your progress, and complete actionable milestones at your own pace.',
+  },
+  {
+    q: 'How does the new pricing structure work?',
+    a: 'Our core platform remains free, including limited AI chat credits and basic journaling. If you need more support, you can upgrade to our Platinum tier, which unlocks unlimited AI chat, full access to premium Wellness Store assets, and advanced Wellness Programs.',
+  },
 ];
 
 export default function FAQSection({ onGetStarted }: { onGetStarted?: () => void }) {
