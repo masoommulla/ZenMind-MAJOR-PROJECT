@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ShoppingBag, Download, Lock, CheckCircle, Search, Filter,
-  Tag, FileText, Sparkles, RefreshCw, X, IndianRupee, Package
+  FileText, RefreshCw, X, IndianRupee, Package, CreditCard
 } from 'lucide-react';
 import { apiFetch } from '../api/client';
 
@@ -55,7 +55,11 @@ export default function WellnessStore() {
   const [search, setSearch]         = useState('');
   const [categoryFilter, setCat]    = useState('All');
   const [downloading, setDL]        = useState<string | null>(null);
-  const [paying, setPaying]         = useState<string | null>(null);
+  const [fakePayAsset, setFakePay]  = useState<StoreAsset | null>(null);
+  const [fakePayBusy, setFakePayBusy] = useState(false);
+  const [cardNum, setCardNum]       = useState('');
+  const [cardExp, setCardExp]       = useState('');
+  const [cardCvv, setCvv]           = useState('');
   const [toast, setToast]           = useState<{ msg: string; ok: boolean } | null>(null);
 
   const showToast = (msg: string, ok = true) => {
@@ -116,56 +120,21 @@ export default function WellnessStore() {
     }
   };
 
-  const handleRazorpayPurchase = async (asset: StoreAsset) => {
-    if (paying) return;
-    setPaying(asset._id);
-    try {
-      const orderRes = await apiFetch<any>(`/store/${asset._id}/purchase`, { method: 'POST', body: '{}' });
-
-      if (!(window as any).Razorpay) {
-        // Lazy-load Razorpay SDK if not already present
-        await new Promise<void>((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src   = 'https://checkout.razorpay.com/v1/checkout.js';
-          script.onload = () => resolve();
-          script.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
-          document.head.appendChild(script);
-        });
-      }
-
-      const rzp = new (window as any).Razorpay({
-        key:         orderRes.keyId,
-        amount:      orderRes.order.amount,
-        currency:    orderRes.order.currency,
-        order_id:    orderRes.order.id,
-        name:        'ZenMind Wellness Store',
-        description: asset.title,
-        theme:       { color: '#0d5d3a' },
-        handler: async (response: any) => {
-          try {
-            await apiFetch(`/store/${asset._id}/verify`, {
-              method: 'POST',
-              body: JSON.stringify({
-                razorpay_order_id:   response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature:  response.razorpay_signature,
-              }),
-            });
-            showToast(`"${asset.title}" unlocked!`);
-            load();
-          } catch (e: any) {
-            showToast(e.message || 'Payment verification failed', false);
-          } finally {
-            setPaying(null);
-          }
-        },
-        modal: { ondismiss: () => setPaying(null) },
-      });
-      rzp.open();
-    } catch (e: any) {
-      showToast(e.message || 'Payment failed', false);
-      setPaying(null);
+  const handleFakePayment = async () => {
+    if (!fakePayAsset) return;
+    if (!cardNum.trim() || !cardExp.trim() || !cardCvv.trim()) {
+      showToast('Please fill in all card details', false); return;
     }
+    setFakePayBusy(true);
+    // Simulate processing delay
+    await new Promise(r => setTimeout(r, 1800));
+    setFakePayBusy(false);
+    setFakePay(null);
+    setCardNum(''); setCardExp(''); setCvv('');
+    showToast(`"${fakePayAsset.title}" unlocked! (demo payment)`);
+    // Mark as owned locally so UI updates
+    setAssets(prev => prev.map(a => a._id === fakePayAsset._id ? { ...a, owned: true } : a));
+    setMyAssets(prev => [...prev, { ...fakePayAsset, owned: true }]);
   };
 
   // Derive category list from all assets
@@ -186,9 +155,7 @@ export default function WellnessStore() {
           <motion.div
             initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
             className={`fixed top-4 right-4 z-[200] flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl text-sm font-bold ${
-              toast.ok
-                ? 'bg-[#0d5d3a] text-white'
-                : 'bg-red-600 text-white'
+              toast.ok ? 'bg-[#0d5d3a] text-white' : 'bg-red-600 text-white'
             }`}
           >
             {toast.ok ? <CheckCircle className="w-4 h-4 shrink-0" /> : <X className="w-4 h-4 shrink-0" />}
@@ -197,67 +164,139 @@ export default function WellnessStore() {
         )}
       </AnimatePresence>
 
-      {/* ── Header ── */}
-      <div className="flex-shrink-0 px-4 sm:px-6 pt-5 pb-4">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0d5d3a] to-[#10b981] flex items-center justify-center shadow-lg shadow-[#0d5d3a]/20">
-            <ShoppingBag className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h2 className="text-xl font-black text-[#0a2617] dark:text-white" style={{ fontFamily: 'Syne, sans-serif' }}>
-              Wellness Store
-            </h2>
-            <p className="text-xs text-[#4a7c5d] dark:text-gray-400 font-medium">
-              Downloadable resources to support your mental wellness journey
-            </p>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-1 bg-[#f0fbf4] dark:bg-white/5 p-1 rounded-2xl w-fit mb-4 border border-[#0d5d3a]/10 dark:border-white/10">
-          {([['all', 'All Items', ShoppingBag], ['mine', 'My Downloads', Download]] as const).map(([key, label, Icon]) => (
-            <button
-              key={key}
-              onClick={() => setTab(key as Tab)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                tab === key
-                  ? 'bg-[#0d5d3a] text-white shadow-md'
-                  : 'text-[#4a7c5d] dark:text-gray-400 hover:text-[#0d5d3a] dark:hover:text-gray-200'
-              }`}
+      {/* ── Fake Payment Modal ── */}
+      <AnimatePresence>
+        {fakePayAsset && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => { if (!fakePayBusy) { setFakePay(null); setCardNum(''); setCardExp(''); setCvv(''); } }}
+          >
+            <motion.div
+              initial={{ scale: 0.92, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.92, y: 20 }}
+              className="bg-white dark:bg-[#111] rounded-3xl shadow-2xl border border-[#0d5d3a]/10 dark:border-white/10 w-full max-w-sm p-6"
+              onClick={e => e.stopPropagation()}
             >
-              <Icon className="w-3.5 h-3.5" />
-              {label}
-              {key === 'mine' && myAssets.length > 0 && (
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${tab === 'mine' ? 'bg-white/20' : 'bg-[#0d5d3a]/10 text-[#0d5d3a] dark:text-[#10b981]'}`}>
-                  {myAssets.length}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+              {/* Modal header */}
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#0d5d3a] to-[#10b981] flex items-center justify-center">
+                    <CreditCard className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-black text-[#0a2617] dark:text-white" style={{ fontFamily: 'Syne, sans-serif' }}>Secure Checkout</div>
+                    <div className="text-xs text-[#4a7c5d] dark:text-gray-400">Demo payment — no real charge</div>
+                  </div>
+                </div>
+                {!fakePayBusy && (
+                  <button onClick={() => { setFakePay(null); setCardNum(''); setCardExp(''); setCvv(''); }} className="p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 transition">
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
 
-        {/* Search + Category filter */}
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a7c5d] dark:text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search resources…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/12 dark:border-white/10 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#0d5d3a]/20 dark:focus:ring-[#1a8a5a]/40 text-[#0a2617] dark:text-white placeholder:text-[#4a7c5d]/50 dark:placeholder:text-gray-500"
-            />
+              {/* Order summary */}
+              <div className="bg-[#f0fbf4] dark:bg-[#0d5d3a]/10 rounded-2xl px-4 py-3 mb-5 border border-[#0d5d3a]/10 dark:border-[#0d5d3a]/30">
+                <div className="text-xs text-[#4a7c5d] dark:text-gray-400 font-semibold mb-0.5">Purchasing</div>
+                <div className="text-sm font-black text-[#0a2617] dark:text-white">{fakePayAsset.title}</div>
+                <div className="flex items-center gap-0.5 text-lg font-black text-[#0d5d3a] dark:text-[#10b981] mt-1">
+                  <IndianRupee className="w-4 h-4" />{fakePayAsset.price}
+                </div>
+              </div>
+
+              {/* Card fields */}
+              <div className="space-y-3 mb-5">
+                <div>
+                  <label className="text-xs font-bold text-[#0a2617] dark:text-gray-300 block mb-1.5">Card Number</label>
+                  <input
+                    value={cardNum} onChange={e => setCardNum(e.target.value.replace(/\D/g,'').slice(0,16))}
+                    placeholder="1234 5678 9012 3456"
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/12 dark:border-white/10 text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/20"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-[#0a2617] dark:text-gray-300 block mb-1.5">Expiry</label>
+                    <input
+                      value={cardExp} onChange={e => setCardExp(e.target.value.slice(0,5))}
+                      placeholder="MM/YY"
+                      className="w-full px-3 py-2.5 rounded-xl bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/12 dark:border-white/10 text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-[#0a2617] dark:text-gray-300 block mb-1.5">CVV</label>
+                    <input
+                      value={cardCvv} onChange={e => setCvv(e.target.value.replace(/\D/g,'').slice(0,3))}
+                      placeholder="123" type="password"
+                      className="w-full px-3 py-2.5 rounded-xl bg-[#fbfdfb] dark:bg-[#1a1a1a] border border-[#0d5d3a]/12 dark:border-white/10 text-sm text-[#0a2617] dark:text-white outline-none focus:ring-2 focus:ring-[#0d5d3a]/20"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleFakePayment}
+                disabled={fakePayBusy}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] hover:from-[#0a4a2e] text-white text-sm font-black transition-all shadow-lg shadow-[#0d5d3a]/20 disabled:opacity-60"
+              >
+                {fakePayBusy
+                  ? <><RefreshCw className="w-4 h-4 animate-spin" /> Processing…</>
+                  : <><CreditCard className="w-4 h-4" /> Pay ₹{fakePayAsset.price}</>}
+              </button>
+              <p className="text-center text-[10px] text-[#4a7c5d] dark:text-gray-500 mt-3">This is a demo checkout. No real payment is made.</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Toolbar: tabs + filter on one row, search below ── */}
+      <div className="flex-shrink-0 px-4 sm:px-6 pt-4 pb-3 space-y-2">
+        {/* Row 1: tabs + filter dropdown */}
+        <div className="flex items-center gap-2">
+          {/* Tab pills */}
+          <div className="flex gap-1 bg-[#f0fbf4] dark:bg-white/5 p-1 rounded-2xl border border-[#0d5d3a]/10 dark:border-white/10 flex-shrink-0">
+            {([['all', 'All Items', ShoppingBag], ['mine', 'My Downloads', Download]] as const).map(([key, label, Icon]) => (
+              <button
+                key={key}
+                onClick={() => setTab(key as Tab)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  tab === key ? 'bg-[#0d5d3a] text-white shadow-md' : 'text-[#4a7c5d] dark:text-gray-400 hover:text-[#0d5d3a] dark:hover:text-gray-200'
+                }`}
+              >
+                <Icon className="w-3 h-3" />
+                <span className="hidden xs:inline sm:inline">{label}</span>
+                <span className="xs:hidden sm:hidden">{key === 'all' ? 'All' : 'Mine'}</span>
+                {key === 'mine' && myAssets.length > 0 && (
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${tab === 'mine' ? 'bg-white/20' : 'bg-[#0d5d3a]/10 text-[#0d5d3a] dark:text-[#10b981]'}`}>
+                    {myAssets.length}
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a7c5d] dark:text-gray-400" />
+
+          {/* Category filter — grows to fill remaining space */}
+          <div className="relative flex-1">
             <select
               value={categoryFilter}
               onChange={e => setCat(e.target.value)}
-              className="pl-9 pr-4 py-2.5 bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/12 dark:border-white/10 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#0d5d3a]/20 text-[#0a2617] dark:text-white cursor-pointer appearance-none"
+              className="w-full pl-3 pr-3 py-2 bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/12 dark:border-white/10 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#0d5d3a]/20 text-[#0a2617] dark:text-white cursor-pointer"
             >
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
+        </div>
+
+        {/* Row 2: search bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a7c5d] dark:text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search resources…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/12 dark:border-white/10 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#0d5d3a]/20 dark:focus:ring-[#1a8a5a]/40 text-[#0a2617] dark:text-white placeholder:text-[#4a7c5d]/50 dark:placeholder:text-gray-500"
+          />
         </div>
       </div>
 
@@ -287,9 +326,8 @@ export default function WellnessStore() {
                   asset={asset}
                   index={idx}
                   downloading={downloading === asset._id}
-                  paying={paying === asset._id}
                   onDownload={() => handleDownload(asset)}
-                  onPurchase={() => handleRazorpayPurchase(asset)}
+                  onPurchase={() => setFakePay(asset)}
                 />
               ))}
             </AnimatePresence>
@@ -302,12 +340,11 @@ export default function WellnessStore() {
 
 /* ── Individual Store Card ── */
 function StoreCard({
-  asset, index, downloading, paying, onDownload, onPurchase
+  asset, index, downloading, onDownload, onPurchase
 }: {
   asset: StoreAsset;
   index: number;
   downloading: boolean;
-  paying: boolean;
   onDownload: () => void;
   onPurchase: () => void;
 }) {
@@ -397,12 +434,9 @@ function StoreCard({
         ) : (
           <button
             onClick={onPurchase}
-            disabled={paying}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-bold transition-all shadow-lg shadow-amber-500/20 disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-bold transition-all shadow-lg shadow-amber-500/20"
           >
-            {paying
-              ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Processing…</>
-              : <><Lock className="w-3.5 h-3.5" /> Unlock for ₹{asset.price}</>}
+            <Lock className="w-3.5 h-3.5" /> Unlock for ₹{asset.price}
           </button>
         )}
       </div>
