@@ -476,6 +476,18 @@ export default function ProductPage({ page, onClose }: { page: string; onClose: 
                 {
                   q: "How long does a refund take to process?",
                   a: "Once a cancellation occurs, the refund is initiated automatically from our end. It typically takes 5-7 business days for the funds to reflect in your original payment method, depending on your bank's processing times."
+                },
+                {
+                  q: "How does the new pricing structure work?",
+                  a: "Our core platform remains free, including limited AI chat credits and basic journaling. If you need more support, you can upgrade to our Premium tiers like ZenPlatinum, which unlocks unlimited AI chat, full access to premium Wellness Store assets, free therapy sessions, and advanced Wellness Programs."
+                },
+                {
+                  q: "What is the Wellness Store?",
+                  a: "The Wellness Store offers a variety of digital assets to support your mental health journey. You can find both free resources and premium content, including guided meditations, cognitive behavioral workbooks, and exclusive therapeutic exercises."
+                },
+                {
+                  q: "What are Wellness Programs?",
+                  a: "Wellness Programs are structured courses designed by mental health professionals to tackle specific challenges like test anxiety or social skills. You can join a program, track your progress, and complete actionable milestones at your own pace."
                 }
               ].map((faq, i) => (
                 <FAQItem key={i} q={faq.q} a={faq.a} />
