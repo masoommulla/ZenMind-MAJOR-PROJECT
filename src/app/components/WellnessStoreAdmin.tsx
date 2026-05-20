@@ -313,16 +313,8 @@ export default function WellnessStoreAdmin() {
         )}
       </AnimatePresence>
 
-      {/* Asset Table */}
+      {/* Asset Table — horizontally scrollable on mobile */}
       <div className="bg-white dark:bg-[#111] rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 shadow-sm overflow-hidden">
-        <div className="grid grid-cols-12 gap-2 px-5 py-3 border-b border-[#0d5d3a]/10 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a] text-[10px] font-black uppercase tracking-widest text-[#4a7c5d] dark:text-gray-400">
-          <div className="col-span-5">Asset</div>
-          <div className="col-span-2 text-center">Category</div>
-          <div className="col-span-2 text-center">Price</div>
-          <div className="col-span-1 text-center">DLs</div>
-          <div className="col-span-2 text-right">Actions</div>
-        </div>
-
         {loading ? (
           <div className="flex items-center justify-center py-16 gap-3 text-[#4a7c5d] font-bold">
             <RefreshCw className="w-4 h-4 animate-spin" /> Loading…
@@ -333,62 +325,82 @@ export default function WellnessStoreAdmin() {
             <p className="text-[#4a7c5d] dark:text-gray-400 text-sm font-semibold">No assets yet. Upload one above.</p>
           </div>
         ) : (
-          <div className="divide-y divide-[#0d5d3a]/5 dark:divide-white/5">
-            {assets.map(asset => (
-              <div key={asset._id} className="grid grid-cols-12 gap-2 items-center px-5 py-4 hover:bg-[#f7fbf8] dark:hover:bg-white/[0.02] transition">
-                {/* Asset info */}
-                <div className="col-span-5 flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-4 h-4 text-[#0d5d3a] dark:text-[#10b981]" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-sm font-bold text-[#0a2617] dark:text-white truncate">{asset.title}</div>
-                    <div className="text-xs text-[#4a7c5d] dark:text-gray-400 truncate">{asset.fileName || 'No file'}</div>
-                  </div>
-                </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] border-collapse">
+              {/* Table header */}
+              <thead>
+                <tr className="border-b border-[#0d5d3a]/10 dark:border-white/10 bg-[#fbfdfb] dark:bg-[#1a1a1a]">
+                  <th className="text-left text-[10px] font-black uppercase tracking-widest text-[#4a7c5d] dark:text-gray-400 px-5 py-3 w-[40%]">Asset</th>
+                  <th className="text-center text-[10px] font-black uppercase tracking-widest text-[#4a7c5d] dark:text-gray-400 px-3 py-3 w-[18%]">Category</th>
+                  <th className="text-center text-[10px] font-black uppercase tracking-widest text-[#4a7c5d] dark:text-gray-400 px-3 py-3 w-[14%]">Price</th>
+                  <th className="text-center text-[10px] font-black uppercase tracking-widest text-[#4a7c5d] dark:text-gray-400 px-3 py-3 w-[10%]">DLs</th>
+                  <th className="text-right text-[10px] font-black uppercase tracking-widest text-[#4a7c5d] dark:text-gray-400 px-5 py-3 w-[18%]">Actions</th>
+                </tr>
+              </thead>
 
-                {/* Category */}
-                <div className="col-span-2 text-center">
-                  <span className="text-[10px] font-bold bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] px-2 py-1 rounded-full">
-                    {asset.category}
-                  </span>
-                </div>
+              {/* Table body */}
+              <tbody className="divide-y divide-[#0d5d3a]/5 dark:divide-white/5">
+                {assets.map(asset => (
+                  <tr key={asset._id} className="hover:bg-[#f7fbf8] dark:hover:bg-white/[0.02] transition">
+                    {/* Asset info */}
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-4 h-4 text-[#0d5d3a] dark:text-[#10b981]" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-bold text-[#0a2617] dark:text-white truncate max-w-[180px]">{asset.title}</div>
+                          <div className="text-xs text-[#4a7c5d] dark:text-gray-400 truncate max-w-[180px]">{asset.fileName || 'No file'}</div>
+                        </div>
+                      </div>
+                    </td>
 
-                {/* Price */}
-                <div className="col-span-2 text-center">
-                  {asset.price === 0 ? (
-                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Free</span>
-                  ) : (
-                    <span className="flex items-center justify-center gap-0.5 text-xs font-bold text-[#0a2617] dark:text-white">
-                      <IndianRupee className="w-3 h-3" />{asset.price}
-                    </span>
-                  )}
-                </div>
+                    {/* Category */}
+                    <td className="px-3 py-4 text-center">
+                      <span className="inline-block text-[10px] font-bold bg-[#f0fbf4] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] px-2.5 py-1 rounded-full whitespace-nowrap">
+                        {asset.category}
+                      </span>
+                    </td>
 
-                {/* Downloads */}
-                <div className="col-span-1 text-center text-sm font-bold text-[#4a7c5d] dark:text-gray-400">
-                  {asset.downloads}
-                </div>
+                    {/* Price */}
+                    <td className="px-3 py-4 text-center">
+                      {asset.price === 0 ? (
+                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Free</span>
+                      ) : (
+                        <span className="inline-flex items-center justify-center gap-0.5 text-xs font-bold text-[#0a2617] dark:text-white whitespace-nowrap">
+                          <IndianRupee className="w-3 h-3 flex-shrink-0" />{asset.price}
+                        </span>
+                      )}
+                    </td>
 
-                {/* Actions */}
-                <div className="col-span-2 flex items-center justify-end gap-2">
-                  <button
-                    onClick={() => openEdit(asset)}
-                    className="p-2 rounded-xl hover:bg-[#f0fbf4] dark:hover:bg-[#0d5d3a]/20 text-[#4a7c5d] dark:text-gray-400 hover:text-[#0d5d3a] dark:hover:text-[#10b981] transition"
-                    title="Edit"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setDelId(asset._id)}
-                    className="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-[#4a7c5d] dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+                    {/* Downloads */}
+                    <td className="px-3 py-4 text-center">
+                      <span className="text-sm font-bold text-[#4a7c5d] dark:text-gray-400">{asset.downloads}</span>
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-5 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => openEdit(asset)}
+                          className="p-2 rounded-xl hover:bg-[#f0fbf4] dark:hover:bg-[#0d5d3a]/20 text-[#4a7c5d] dark:text-gray-400 hover:text-[#0d5d3a] dark:hover:text-[#10b981] transition"
+                          title="Edit"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setDelId(asset._id)}
+                          className="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-[#4a7c5d] dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
