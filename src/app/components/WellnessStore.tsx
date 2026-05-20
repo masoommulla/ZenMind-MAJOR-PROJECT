@@ -4,8 +4,7 @@ import {
   ShoppingBag, Download, Lock, CheckCircle, Search, Filter,
   FileText, RefreshCw, X, IndianRupee, Package, CreditCard
 } from 'lucide-react';
-import AssetViewerModal from '../components/AssetViewerModal';
-  const [viewAsset, setViewAsset] = useState<StoreAsset | null>(null);
+import { apiFetch } from '../api/client';
 import AssetViewerModal from '../components/AssetViewerModal';
 
 type StoreAsset = {
@@ -63,6 +62,7 @@ export default function WellnessStore() {
   const [cardExp, setCardExp]       = useState('');
   const [cardCvv, setCvv]           = useState('');
   const [toast, setToast]           = useState<{ msg: string; ok: boolean } | null>(null);
+  const [viewAsset, setViewAsset]   = useState<StoreAsset | null>(null);
 
   const showToast = (msg: string, ok = true) => {
     setToast({ msg, ok });
@@ -337,6 +337,14 @@ export default function WellnessStore() {
           </div>
         )}
       </div>
+
+      {/* ── Asset Viewer Modal ── */}
+      {viewAsset && (
+        <AssetViewerModal
+          asset={viewAsset}
+          onClose={() => setViewAsset(null)}
+        />
+      )}
     </div>
   );
 }
