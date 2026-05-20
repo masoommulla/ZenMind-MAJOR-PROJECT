@@ -337,7 +337,7 @@ export default function WellnessProgramsUser({
       )}
 
       {/* ── STICKY CONTROLS ── */}
-      <div className="zen-controls-bar flex flex-wrap items-center justify-center gap-3 p-4 sm:p-0 sm:pb-4">
+      <div className="zen-controls-bar flex-wrap items-center justify-center gap-3 p-4 sm:p-0 sm:pb-4" style={{ flexDirection: 'row' }}>
         {(['browse', 'my'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`zen-tab-pill justify-center ${tab === t ? 'active' : ''}`}>
