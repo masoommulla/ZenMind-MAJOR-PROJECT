@@ -12,13 +12,13 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
     <div className="border-b border-gray-200 dark:border-white/10 last:border-0">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-6 flex justify-between items-center text-left group"
+        className="w-full py-4 flex justify-between items-center text-left group gap-4"
       >
-        <span className={`text-lg sm:text-xl font-bold transition-colors ${isOpen ? 'text-[#0d5d3a] dark:text-[#10b981]' : 'text-[#0a2617] dark:text-white group-hover:text-[#0d5d3a] dark:group-hover:text-[#10b981]'}`}>
+        <span className={`text-base sm:text-lg font-bold transition-colors ${isOpen ? 'text-[#0d5d3a] dark:text-[#10b981]' : 'text-[#0a2617] dark:text-white group-hover:text-[#0d5d3a] dark:group-hover:text-[#10b981]'}`}>
           {q}
         </span>
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isOpen ? 'bg-[#e6f4ea] dark:bg-[#10b981]/20' : 'bg-gray-100 dark:bg-white/5 group-hover:bg-gray-200 dark:group-hover:bg-white/10'}`}>
-          <ChevronDown size={20} className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#0d5d3a] dark:text-[#10b981]' : 'text-gray-500 dark:text-gray-400'}`} />
+        <div className={`w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center transition-colors ${isOpen ? 'bg-[#e6f4ea] dark:bg-[#10b981]/20' : 'bg-gray-100 dark:bg-white/5 group-hover:bg-gray-200 dark:group-hover:bg-white/10'}`}>
+          <ChevronDown size={18} className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#0d5d3a] dark:text-[#10b981]' : 'text-gray-500 dark:text-gray-400'}`} />
         </div>
       </button>
       <AnimatePresence>
@@ -29,7 +29,7 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <p className="pb-8 text-[#4a7c5d] dark:text-gray-400 leading-relaxed text-base sm:text-lg max-w-4xl">
+            <p className="pb-5 pt-2 text-[#4a7c5d] dark:text-gray-400 leading-relaxed text-sm sm:text-base max-w-4xl">
               {a}
             </p>
           </motion.div>
@@ -142,42 +142,8 @@ const SupportForm = ({ type, title, subtitle }: { type: 'contact' | 'report'; ti
 };
 
 const FAQTab = () => {
-  const fallbackFaqs = [
-    {
-      q: "How do I know the therapists are qualified?",
-      a: "Every therapist undergoes a stringent vetting process by the ZenMind administration. We manually verify medical licenses, educational backgrounds, and clinic details before they are allowed on the platform. We ensure you are speaking with a certified professional."
-    },
-    {
-      q: "What happens if I miss my session?",
-      a: "We have a strict 10-minute grace period rule. If you do not join the video room within 10 minutes of the scheduled start time, the session is automatically cancelled and is subject to our late cancellation policy (which yields a 70% refund)."
-    },
-    {
-      q: "What if the therapist doesn't show up?",
-      a: "In the rare event that a therapist fails to join the room within the 10-minute grace period, the system will automatically cancel the session and you will be issued a 100% refund immediately."
-    },
-    {
-      q: "How secure is my data and video call?",
-      a: "Extremely secure. All video calls use WebRTC with end-to-end encryption. We do not record or store your video sessions. Furthermore, your chat logs with the AI companion are encrypted and anonymized to ensure complete privacy."
-    },
-    {
-      q: "How long does a refund take to process?",
-      a: "Once a cancellation occurs, the refund is initiated automatically from our end. It typically takes 5-7 business days for the funds to reflect in your original payment method, depending on your bank's processing times."
-    },
-    {
-      q: "How does the new pricing structure work?",
-      a: "Our core platform remains free, including limited AI chat credits and basic journaling. If you need more support, you can upgrade to our Premium tiers like ZenPlatinum, which unlocks unlimited AI chat, full access to premium Wellness Store assets, free therapy sessions, and advanced Wellness Programs."
-    },
-    {
-      q: "What is the Wellness Store?",
-      a: "The Wellness Store offers a variety of digital assets to support your mental health journey. You can find both free resources and premium content, including guided meditations, cognitive behavioral workbooks, and exclusive therapeutic exercises."
-    },
-    {
-      q: "What are Wellness Programs?",
-      a: "Wellness Programs are structured courses designed by mental health professionals to tackle specific challenges like test anxiety or social skills. You can join a program, track your progress, and complete actionable milestones at your own pace."
-    }
-  ];
-
-  const [faqs, setFaqs] = useState(fallbackFaqs);
+  const [faqs, setFaqs] = useState<{ q: string; a: string }[]>([]);
+  const [loading, setLoading] = useState(true);
 
   React.useEffect(() => {
     apiFetch<any>('/faqs')

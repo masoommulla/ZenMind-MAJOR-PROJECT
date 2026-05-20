@@ -3,58 +3,12 @@ import { motion, useInView, AnimatePresence } from 'motion/react';
 import { Plus, Minus, HelpCircle } from 'lucide-react';
 import { apiFetch } from '../api/client';
 
-const fallbackFaqs = [
-  {
-    q: 'Is ZenMind free to use?',
-    a: 'Yes — the core platform including the AI chat companion, mood journal, peer circles, wellness goals, and reading lists are completely free. Live therapy sessions with professionals are available as affordable add-ons.',
-  },
-  {
-    q: 'Is my data private and secure?',
-    a: 'Absolutely. All your data is encrypted end-to-end. Your journal entries, mood logs, and chat history are private by default — no one else can see them. You can post anonymously in Peer Circles too. We are HIPAA-aligned in our data practices.',
-  },
-  {
-    q: 'Do I need to be a certain age to use ZenMind?',
-    a: 'ZenMind is designed primarily for adolescents aged 13–21. Users under 18 may need parental consent depending on their region. Our therapists are specially trained in adolescent mental health.',
-  },
-  {
-    q: 'How does the AI therapist matching work?',
-    a: 'Our 5-minute quiz assesses your needs, preferences, language, budget, and session style. The algorithm matches you with 3 best-fit verified therapists from our vetted network. You can switch anytime — no questions asked.',
-  },
-  {
-    q: 'Are the therapists real, licensed professionals?',
-    a: 'Yes. Every therapist on ZenMind is a licensed mental health professional verified by our team. They hold degrees in psychology, counseling, or social work and have experience specifically with adolescent clients.',
-  },
-  {
-    q: 'What if I am in a crisis right now?',
-    a: 'If you are in immediate danger, please call emergency services (112 in India) or Tele-MANAS at 14416. ZenMind is not a crisis service but our AI will always direct you to the right resources the moment you flag distress.',
-  },
-  {
-    q: 'Can I use ZenMind without talking to a therapist?',
-    a: 'Completely. Many users never book a therapy session and still see huge improvements through the AI chat, journal, wellness programs, peer circles, and goal tracker. Human therapy is always optional.',
-  },
-  {
-    q: 'How do Peer Support Circles work?',
-    a: 'Peer Circles are moderated group chat rooms around specific themes (anxiety, academics, family, etc.). They are text-based, real-time, and anonymous by default. A trained moderator oversees every circle to ensure safety.',
-  },
-  {
-    q: 'What is the Wellness Store?',
-    a: 'The Wellness Store offers a variety of digital assets to support your mental health journey. You can find both free resources and premium content, including guided meditations, cognitive behavioral workbooks, and exclusive therapeutic exercises.',
-  },
-  {
-    q: 'What are Wellness Programs?',
-    a: 'Wellness Programs are structured courses designed by mental health professionals to tackle specific challenges like test anxiety or social skills. You can join a program, track your progress, and complete actionable milestones at your own pace.',
-  },
-  {
-    q: 'How does the new pricing structure work?',
-    a: 'Our core platform remains free, including limited AI chat credits and basic journaling. If you need more support, you can upgrade to our Platinum tier, which unlocks unlimited AI chat, full access to premium Wellness Store assets, and advanced Wellness Programs.',
-  },
-];
 
 export default function FAQSection({ onGetStarted }: { onGetStarted?: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
-  const [open, setOpen] = useState<number | null>(0);
-  const [faqs, setFaqs] = useState(fallbackFaqs);
+  const [open, setOpen] = useState<number | null>(null);
+  const [faqs, setFaqs] = useState<{q: string, a: string}[]>([]);
 
   useEffect(() => {
     apiFetch<any>('/faqs')
