@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { MessageCircle, BookOpen, Users, Shield, Zap, LineChart } from 'lucide-react';
+import { MessageCircle, BookOpen, Users, Shield, Zap, LineChart, HeartHandshake, PenLine, ShoppingBag, Activity } from 'lucide-react';
 
 const features = [
   {
@@ -39,6 +39,30 @@ const features = [
     title: 'Weekly & Monthly Analysis',
     description: 'Track trends in mood, habits, and progress with clear weekly and monthly wellness analysis.',
     video: '/asset/page2/graph.mp4',
+  },
+  {
+    icon: HeartHandshake,
+    title: 'Peer Circle',
+    description: 'Connect with a supportive community to share experiences and grow together in a safe space.',
+    video: '/asset/page2/peer.mp4',
+  },
+  {
+    icon: PenLine,
+    title: 'Mood Journaling',
+    description: 'Express your feelings through mood journaling and receive personalized, actionable AI suggestions.',
+    video: '/asset/page2/moodjournaling.mp4',
+  },
+  {
+    icon: ShoppingBag,
+    title: 'Wellness Store',
+    description: 'Explore our wellness store for both free and premium digital assets to support your journey.',
+    video: '/asset/page2/store.mp4',
+  },
+  {
+    icon: Activity,
+    title: 'Wellness Programs',
+    description: 'Join, participate in, and complete specialized wellness programs tailored for your mental health.',
+    video: '/asset/page2/wellness.mp4',
   },
 ];
 
