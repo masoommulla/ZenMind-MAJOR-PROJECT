@@ -62,7 +62,7 @@ export default function AssetViewerModal({ asset, onClose }: Props) {
 
         if (asset.fileMime === 'application/pdf') {
           const arrayBuffer = await blob.arrayBuffer();
-          const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+          const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
           const pdf = await loadingTask.promise;
           setPdfDoc(pdf);
           const num = pdf.numPages;

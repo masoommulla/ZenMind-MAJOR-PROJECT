@@ -40,7 +40,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(cookieParser());
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '50mb' }));
 
 import path from 'path';
 import { fileURLToPath } from 'url';
