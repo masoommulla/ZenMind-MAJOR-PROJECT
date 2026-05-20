@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Mic, MicOff, Send, Volume2, VolumeX, RotateCcw, ExternalLink, Sparkles } from 'lucide-react';
+import { Mic, MicOff, Send, Volume2, VolumeX, RotateCcw, Sparkles } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import ZenTalkingHead from './ZenTalkingHead';
 import ZenChatSidebar from './ZenChatSidebar';
@@ -127,19 +127,15 @@ function MessageBubble({ msg, onStoryYes, onStoryNo, onFeelingGood, onConnectRea
   const isBot = msg.role === 'assistant';
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className={`flex gap-2.5 ${isBot ? 'flex-row' : 'flex-row-reverse'}`}>
-      <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 ${isBot ? 'bg-gradient-to-br from-[#0d5d3a] to-[#10b981] text-white' : 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white'}`}>
+      className={`flex gap-4 ${isBot ? 'flex-row' : 'flex-row-reverse'}`}>
+      <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 ${isBot ? 'bg-gradient-to-br from-[#0d5d3a] to-[#10b981] text-white' : 'bg-[#0d5d3a] dark:bg-[#1a1a1a] text-white'}`}>
         {isBot ? 'Zi' : 'U'}
       </div>
       <div className={`max-w-[75%] flex flex-col gap-1 ${isBot ? 'items-start' : 'items-end'}`}>
         <div className={`text-[11px] font-semibold ${isBot ? 'text-[#0d5d3a] dark:text-[#10b981]' : 'text-[#4a7c5d] dark:text-gray-400'}`}>
           {isBot ? 'Zeni' : 'You'}
         </div>
-        <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${isBot
-          ? 'bg-[#f7fbf8] dark:bg-[#1a1a1a] text-[#0a2617] dark:text-gray-100 border border-[#0d5d3a]/08 dark:border-white/08 rounded-tl-sm'
-          : 'bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] text-white rounded-tr-sm shadow-lg shadow-[#0d5d3a]/15'}`}>
-          {stripActionTags(msg.content)}
-        </div>
+        <div className="text-sm leading-relaxed whitespace-pre-wrap">{stripActionTags(msg.content)}</div>
 
         {/* Story Yes/No buttons — offer phase only */}
         {isBot && msg.action === 'STORY_BUTTONS' && (
@@ -424,7 +420,7 @@ export default function ZenAvatarChat({ onNavigateToTherapy, me, onUpgradeClick 
         </div>
 
         <div className="flex gap-2 flex-shrink-0">
-          <button onClick={() => { if (voiceOn) SS?.cancel(); setVoiceOn(v => !v); }} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-semibold border transition-all ${voiceOn ? 'bg-[#0d5d3a] dark:bg-[#1a8a5a] text-white border-[#0d5d3a]' : 'bg-white dark:bg-[#1a1a1a] text-[#4a7c5d] border-[#0d5d3a]/15 dark:border-white/10'}`}>
+          <button onClick={() => { if (voiceOn) SS?.cancel(); setVoiceOn(v => !v); }} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-semibold border transition-all ${voiceOn ? 'bg-[#0d5d3a] dark:bg-[#1a1a1a] text-white border-[#0d5d3a]' : 'bg-white dark:bg-[#1a1a1a] text-[#4a7c5d] border-[#0d5d3a]/15 dark:border-white/10'}`}>
             {voiceOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             {voiceOn ? 'Voice On' : 'Voice Off'}
           </button>
@@ -436,11 +432,10 @@ export default function ZenAvatarChat({ onNavigateToTherapy, me, onUpgradeClick 
 
       {/* RIGHT: conversation */}
       <div className="flex-1 flex flex-col min-w-0 rounded-3xl border border-[#0d5d3a]/10 dark:border-white/10 bg-white dark:bg-[#111111] shadow-sm overflow-hidden">
-        <div className="hidden sm:flex flex-shrink-0 px-5 py-3 border-b border-[#0d5d3a]/08 dark:border-white/08 items-center gap-3">
+        <div className="hidden">
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#0d5d3a] to-[#10b981] flex items-center justify-center text-white text-xs font-bold">Zi</div>
           <div>
-            <div className="text-sm font-bold text-[#0a2617] dark:text-white" style={{ fontFamily: 'Syne,sans-serif' }}>Conversation with Zeni</div>
-            <div className="text-xs text-[#4a7c5d] dark:text-gray-400">Your private, safe space </div>
+            <div></div>
           </div>
           <div className="ml-auto flex items-center gap-2">
             {me?.subscriptionTier !== 'platinum' && (
@@ -452,7 +447,7 @@ export default function ZenAvatarChat({ onNavigateToTherapy, me, onUpgradeClick 
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-8">
           {messages.map(msg => (
             <MessageBubble key={msg.id} msg={msg}
               onStoryYes={handleStoryYes}
@@ -489,35 +484,7 @@ export default function ZenAvatarChat({ onNavigateToTherapy, me, onUpgradeClick 
           <div ref={chatEndRef} />
         </div>
 
-        <div className="flex-shrink-0 px-4 sm:px-5 py-4">
-          <div className="zen-chat-box">
-            <div className="zen-chat-inner">
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                {SR && (
-                  <button id="zen-mic-btn" onMouseDown={startListening} onMouseUp={stopListening} onTouchStart={startListening} onTouchEnd={stopListening} disabled={loading}
-                    style={{ flexShrink: 0, marginLeft: 8, color: listening ? '#ff4444' : 'rgba(167,243,208,0.5)', background: 'transparent', border: 'none', cursor: 'pointer', transition: 'color 0.3s', display: 'flex' }}
-                    title="Hold to speak"
-                  >
-                    {listening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                  </button>
-                )}
-                <input id="zen-text-input" value={input} onChange={e => setInput(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(input); } }}
-                  disabled={loading}
-                  placeholder={listening ? 'Listening...' : 'Share how you\'re feeling... ˚'}
-                  className="zen-chat-textarea"
-                  style={{ height: 44, flex: 1 }}
-                />
-              </div>
-              <div className="zen-chat-options">
-                <div className="zen-chat-btns">
-                  <button title="Attach" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width={18} height={18} viewBox="0 0 24 24"><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8v8a5 5 0 1 0 10 0V6.5a3.5 3.5 0 1 0-7 0V15a2 2 0 0 0 4 0V8" /></svg>
-                  </button>
-                  <button title="Language" type="button">
-                    <svg viewBox="0 0 24 24" height={18} width={18} xmlns="http://www.w3.org/2000/svg"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10m-2.29-2.333A17.9 17.9 0 0 1 8.027 13H4.062a8.01 8.01 0 0 0 5.648 6.667M10.03 13c.151 2.439.848 4.73 1.97 6.752A15.9 15.9 0 0 0 13.97 13zm9.908 0h-3.965a17.9 17.9 0 0 1-1.683 6.667A8.01 8.01 0 0 0 19.938 13M4.062 11h3.965A17.9 17.9 0 0 1 9.71 4.333A8.01 8.01 0 0 0 4.062 11m5.969 0h3.938A15.9 15.9 0 0 0 12 4.248A15.9 15.9 0 0 0 10.03 11m4.259-6.667A17.9 17.9 0 0 1 15.973 11h3.965a8.01 8.01 0 0 0-5.648-6.667" fill="currentColor" /></svg>
-                  </button>
-                </div>
+        <div className="flex-shrink-0 px-4 sm:px-5 py-2 mt-auto">
                 <button id="zen-send-btn" className="zen-chat-submit" onClick={() => handleSend(input)} disabled={!input.trim() || loading} title="Send">
                   <i>
                     <svg viewBox="0 0 512 512" width={16} height={16}><path fill="currentColor" d="M473 39.05a24 24 0 0 0-25.5-5.46L47.47 185h-.08a24 24 0 0 0 1 45.16l.41.13l137.3 58.63a16 16 0 0 0 15.54-3.59L422 80a7.07 7.07 0 0 1 10 10L226.66 310.26a16 16 0 0 0-3.59 15.54l58.65 137.38c.06.2.12.38.19.57c3.2 9.27 11.3 15.81 21.09 16.25h1a24.63 24.63 0 0 0 23-15.46L478.39 64.62A24 24 0 0 0 473 39.05" /></svg>
