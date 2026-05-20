@@ -485,20 +485,26 @@ export default function ZenAvatarChat({ onNavigateToTherapy, me, onUpgradeClick 
         </div>
 
         <div className="flex-shrink-0 px-4 sm:px-5 py-2 mt-auto">
-                <button id="zen-send-btn" className="zen-chat-submit" onClick={() => handleSend(input)} disabled={!input.trim() || loading} title="Send">
-                  <i>
-                    <svg viewBox="0 0 512 512" width={16} height={16}><path fill="currentColor" d="M473 39.05a24 24 0 0 0-25.5-5.46L47.47 185h-.08a24 24 0 0 0 1 45.16l.41.13l137.3 58.63a16 16 0 0 0 15.54-3.59L422 80a7.07 7.07 0 0 1 10 10L226.66 310.26a16 16 0 0 0-3.59 15.54l58.65 137.38c.06.2.12.38.19.57c3.2 9.27 11.3 15.81 21.09 16.25h1a24.63 24.63 0 0 0 23-15.46L478.39 64.62A24 24 0 0 0 473 39.05" /></svg>
-                  </i>
-                </button>
-              </div>
-            </div>
+          <div className="relative flex items-center bg-white dark:bg-[#1a1a1a] rounded-2xl border border-[#0d5d3a]/15 dark:border-white/10 shadow-sm p-1">
+            <input 
+              type="text" 
+              value={input} 
+              onChange={e => setInput(e.target.value)} 
+              onKeyDown={e => { if (e.key === 'Enter') handleSend(input); }} 
+              placeholder="Message Zeni..." 
+              className="flex-1 bg-transparent border-0 focus:ring-0 px-4 py-2 text-sm outline-none text-[#0a2617] dark:text-white"
+            />
+            <button id="zen-send-btn" className="zen-chat-submit flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:from-[#0a4a2e] hover:to-[#0d5d3a] transition shadow-md" onClick={() => handleSend(input)} disabled={!input.trim() || loading} title="Send">
+              <svg viewBox="0 0 512 512" width={16} height={16}><path fill="currentColor" d="M473 39.05a24 24 0 0 0-25.5-5.46L47.47 185h-.08a24 24 0 0 0 1 45.16l.41.13l137.3 58.63a16 16 0 0 0 15.54-3.59L422 80a7.07 7.07 0 0 1 10 10L226.66 310.26a16 16 0 0 0-3.59 15.54l58.65 137.38c.06.2.12.38.19.57c3.2 9.27 11.3 15.81 21.09 16.25h1a24.63 24.63 0 0 0 23-15.46L478.39 64.62A24 24 0 0 0 473 39.05" /></svg>
+            </button>
           </div>
-          <div className="zen-chat-tags">
-            <span onClick={() => handleSend('How can I manage my anxiety?')}>Anxiety Help</span>
-            <span onClick={() => handleSend('Tell me a story')}>Story Mode</span>
-            <span onClick={() => handleSend('I want to talk to a therapist')}>Talk to Therapist</span>
+          
+          <div className="zen-chat-tags mt-3 flex gap-2 justify-center flex-wrap">
+            <span className="cursor-pointer text-[11px] font-medium text-[#4a7c5d] bg-[#f0fbf4] hover:bg-[#e6f4ea] dark:bg-white/5 dark:hover:bg-white/10 px-3 py-1.5 rounded-full transition" onClick={() => handleSend('How can I manage my anxiety?')}>Anxiety Help</span>
+            <span className="cursor-pointer text-[11px] font-medium text-[#4a7c5d] bg-[#f0fbf4] hover:bg-[#e6f4ea] dark:bg-white/5 dark:hover:bg-white/10 px-3 py-1.5 rounded-full transition" onClick={() => handleSend('Tell me a story')}>Story Mode</span>
+            <span className="cursor-pointer text-[11px] font-medium text-[#4a7c5d] bg-[#f0fbf4] hover:bg-[#e6f4ea] dark:bg-white/5 dark:hover:bg-white/10 px-3 py-1.5 rounded-full transition" onClick={() => handleSend('I want to talk to a therapist')}>Talk to Therapist</span>
           </div>
-          <p className="text-center text-[10px] text-gray-600 mt-1">
+          <p className="text-center text-[10px] text-gray-500 mt-2">
             Zeni is an AI companion, not a substitute for professional therapy. In crisis? iCall: 9152987821
           </p>
         </div>
