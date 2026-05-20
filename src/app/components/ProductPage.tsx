@@ -345,9 +345,9 @@ export default function ProductPage({ page, onClose }: { page: string; onClose: 
                 <div className="text-3xl font-black text-[#0d5d3a] dark:text-[#10b981] mb-1">₹0</div>
                 <div className="text-sm text-[#4a7c5d] dark:text-gray-400 mb-6">Free forever</div>
                 <ul className="space-y-3 mb-8">
-                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 10 AI Chat credits / mo</li>
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 10 AI Chat credits per week (≈40/mo)</li>
                   <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> Basic mood tracking</li>
-                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> Community access</li>
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> Community access (view only)</li>
                 </ul>
               </div>
 
@@ -360,10 +360,12 @@ export default function ProductPage({ page, onClose }: { page: string; onClose: 
                 </div>
                 <div className="text-xs text-[#4a7c5d] dark:text-gray-400 mb-6">or ₹1,799/yr</div>
                 <ul className="space-y-3 mb-8">
-                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 100 AI Chat credits / mo</li>
-                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> Unlimited mood tracking</li>
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 150 AI Chat credits / mo</li>
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> Therapy Hub access</li>
                   <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 2 Wellness Programs</li>
-                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 10% Store Discount</li>
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 5 Peer Circles</li>
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> Community story sharing</li>
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 5% Store Discount</li>
                 </ul>
               </div>
 
@@ -379,9 +381,12 @@ export default function ProductPage({ page, onClose }: { page: string; onClose: 
                 </div>
                 <div className="text-xs text-white/80 mb-6">or ₹4,499/yr</div>
                 <ul className="space-y-3 mb-8">
-                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> 1 Free Therapy Session / mo</li>
-                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> 500 AI Chat credits / mo</li>
-                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> All Wellness Programs</li>
+                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> 250 AI Chat credits / mo</li>
+                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> Unlimited Peer Circles</li>
+                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> Mood Journaling</li>
+                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> Up to 10 Wellness Programs</li>
+                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> Up to 10 Reading Lists</li>
+                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> Therapy Hub access</li>
                   <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> 20% Store Discount</li>
                 </ul>
               </div>
