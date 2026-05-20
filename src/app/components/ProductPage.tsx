@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, Sparkles, BrainCircuit, HeartHandshake, ShieldCheck, 
-  Calendar, FileText, Lock, Clock, IndianRupee, HelpCircle, ChevronDown, Activity, Users, Shield, Send, AlertTriangle, FileCode
+  Calendar, FileText, Lock, Clock, IndianRupee, HelpCircle, ChevronDown, Activity, Users, Shield, Send, AlertTriangle, FileCode, CheckCircle
 } from 'lucide-react';
 import { apiFetch } from '../api/client';
 
