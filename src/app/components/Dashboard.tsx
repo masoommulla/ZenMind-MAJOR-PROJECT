@@ -466,9 +466,9 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
             <div className="flex flex-col h-full overflow-hidden">
               <RequireTier 
                 userTier={me?.subscriptionTier || 'free'} 
-                minTier="silver" 
-                fallbackMessage="My Progress Dashboard is available for Silver, Gold, and Platinum members. Upgrade to track your progress and insights."
-                onUpgradeClick={() => { setUpgradeTarget('silver'); setShowPaymentModal(true); }}
+                minTier="platinum" 
+                fallbackMessage="My Progress Dashboard is available for Platinum members only. Upgrade to access your progress insights."
+                onUpgradeClick={() => { setUpgradeTarget('platinum'); setShowPaymentModal(true); }}
               >
                 <div className="flex-1 overflow-hidden flex flex-col min-h-0">
                   <ZenProgressDashboard />

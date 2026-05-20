@@ -118,8 +118,8 @@ router.post('/', requireAuth, async (req, res) => {
     return res.status(404).json({ error: 'User not found' });
   }
   
-  if (user.subscriptionTier !== 'platinum' && user.aiCreditsRemaining <= 0) {
-    return res.status(403).json({ error: 'You have run out of AI Chat credits. Please upgrade your plan.' });
+  if (user.subscriptionTier !== 'platinum' && user.aiWeeklyCredits <= 0) {
+    return res.status(403).json({ error: 'You have run out of AI Chat credits for this week. Please upgrade your plan.' });
   }
 
   const apiKey = process.env.AI_API_KEY;
@@ -346,9 +346,8 @@ When asked to share a story, tell a brief, realistic, first-person style story o
       ]).catch(e => console.error('[ZenChat] Save assistant msg error:', e.message));
     }
 
-    // Decrement credits for non-platinum users
     if (user.subscriptionTier !== 'platinum') {
-      await User.findByIdAndUpdate(user._id, { $inc: { aiCreditsRemaining: -1 } });
+      await User.findByIdAndUpdate(user._id, { $inc: { aiWeeklyCredits: -1 } });
     }
 
     return res.json({ reply, sessionId });

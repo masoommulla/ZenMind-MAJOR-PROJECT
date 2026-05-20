@@ -28,11 +28,11 @@ const userSchema = new mongoose.Schema(
     // Subscription & monetization fields
     subscriptionTier: { type: String, enum: ['free','silver','gold','platinum'], default: 'free' },
     aiCreditsRemaining: { type: Number, default: 0 },
-    freeTherapySessionsUsed: { type: Number, default: 0 },
-    freeTherapyQuota: { type: Number, default: 0 }
-  },
-  { timestamps: true }
-);
+    aiWeeklyCredits: { type: Number, default: 0 }, // remaining credits for current week
+    lastCreditReset: { type: Date, default: null }, // timestamp of last weekly reset
+    subscriptionExpiresAt: { type: Date, default: null }, // subscription end datetime
+
+
 
 export default mongoose.model('User', userSchema);
 
