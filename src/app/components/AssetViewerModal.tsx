@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import * as pdfjsLib from 'pdfjs-dist';
 import 'pdfjs-dist/web/pdf_viewer.css';
 
-// officeparser import – runs in browser (partial support)
-import { parseOfficeAsync } from 'officeparser';
+// officeparser import – removed as it causes browser crashes due to Node.js dependencies
+// import { parseOfficeAsync } from 'officeparser';
 
 type Asset = {
   _id: string;
@@ -60,11 +60,8 @@ export default function AssetViewerModal({ asset, onClose }: Props) {
           }
           setPages(pageArr);
         } else {
-          // For DOCX, PPTX, XLSX, ODT, etc., use officeparser to extract text
-          const response = await fetch(asset.fileUrl);
-          const blob = await response.blob();
-          const text = await parseOfficeAsync(blob);
-          setOfficeText(text);
+          // For DOCX, PPTX, XLSX, ODT, etc., officeparser was removed due to browser incompatibility
+          setOfficeText('Preview is not available for this file type. Please download the file to view it.');
         }
         setLoading(false);
       } catch (e: any) {
