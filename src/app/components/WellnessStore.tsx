@@ -428,19 +428,21 @@ function StoreCard({
           <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${catStyle.bg} ${catStyle.text} ${catStyle.border}`}>
             {asset.category}
           </span>
-          {isFree ? (
-            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-[#0d5d3a]/10 text-[#0d5d3a] dark:text-[#10b981] border border-[#0d5d3a]/20">
-              Free
-            </span>
-          ) : (
-            <div className="flex flex-col items-end">
-              {hasDiscount && (
-                <span className="text-[10px] line-through text-gray-400 font-bold mb-0.5">₹{asset.price}</span>
-              )}
-              <span className="flex items-center gap-0.5 text-xs font-black text-[#0a2617] dark:text-white bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/15 dark:border-white/10 px-2.5 py-1 rounded-full shadow-sm">
-                <IndianRupee className="w-3 h-3" />{finalPrice}
+          {!isOwned && (
+            isFree ? (
+              <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-[#0d5d3a]/10 text-[#0d5d3a] dark:text-[#10b981] border border-[#0d5d3a]/20">
+                Free
               </span>
-            </div>
+            ) : (
+              <div className="flex flex-col items-end">
+                {hasDiscount && (
+                  <span className="text-[10px] line-through text-gray-400 font-bold mb-0.5">₹{asset.price}</span>
+                )}
+                <span className="flex items-center gap-0.5 text-xs font-black text-[#0a2617] dark:text-white bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/15 dark:border-white/10 px-2.5 py-1 rounded-full shadow-sm">
+                  <IndianRupee className="w-3 h-3" />{finalPrice}
+                </span>
+              </div>
+            )
           )}
         </div>
 
