@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, Sparkles, BrainCircuit, HeartHandshake, ShieldCheck, 
-  Calendar, FileText, Lock, Clock, IndianRupee, HelpCircle, ChevronDown, Activity, Users, Shield, Send, AlertTriangle, FileCode, CheckCircle
+  Calendar, FileText, Lock, Clock, IndianRupee, HelpCircle, ChevronDown, Activity, Users, Shield, Send, AlertTriangle, FileCode, CheckCircle, ShoppingBag, PenLine
 } from 'lucide-react';
 import { apiFetch } from '../api/client';
 
@@ -208,6 +208,39 @@ export default function ProductPage({ page, onClose }: { page: string; onClose: 
                     We built ZenMind on a foundation of absolute privacy. Your therapy videos are never recorded, and your AI chat logs are encrypted. Your data belongs to you.
                   </p>
                  </div>
+              </div>
+
+              {/* Feature 5 */}
+              <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 shadow-sm hover:shadow-xl transition-all duration-300 group">
+                <div className="w-14 h-14 bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                  <Users size={28} />
+                </div>
+                <h3 className="text-xl font-bold text-[#0a2617] dark:text-white mb-3">Peer Circles</h3>
+                <p className="text-[#4a7c5d] dark:text-gray-400">
+                  Join safe, moderated group spaces to share experiences and connect with others who understand what you are going through.
+                </p>
+              </div>
+
+              {/* Feature 6 */}
+              <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 shadow-sm hover:shadow-xl transition-all duration-300 group">
+                <div className="w-14 h-14 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                  <ShoppingBag size={28} />
+                </div>
+                <h3 className="text-xl font-bold text-[#0a2617] dark:text-white mb-3">Wellness Store</h3>
+                <p className="text-[#4a7c5d] dark:text-gray-400">
+                  Access a curated collection of free and premium digital assets including guided meditations and worksheets.
+                </p>
+              </div>
+
+              {/* Feature 7 */}
+              <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 shadow-sm hover:shadow-xl transition-all duration-300 group">
+                <div className="w-14 h-14 bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                  <Calendar size={28} />
+                </div>
+                <h3 className="text-xl font-bold text-[#0a2617] dark:text-white mb-3">Wellness Programs</h3>
+                <p className="text-[#4a7c5d] dark:text-gray-400">
+                  Participate in structured, step-by-step programs designed by professionals to tackle specific challenges like anxiety and stress.
+                </p>
               </div>
             </div>
           </div>
