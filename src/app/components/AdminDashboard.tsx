@@ -9,6 +9,7 @@ import { apiFetch } from '../api/client';
 import logo from '../../../asset/logo.png';
 
 import ThemeToggle from './ThemeToggle';
+import AdminSidebarNav from './AdminSidebarNav';
 
 import TherapistsManagement from './TherapistsManagement';
 
@@ -41,7 +42,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'faqs' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox' | 'crisis' | 'notifications' | 'session_insights' | 'analytics' | 'store'>('users');
 
-  const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => {
+  const saved = localStorage.getItem('admin_sidebar_expanded');
+  return saved ? saved === 'true' : true;
+});
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -50,11 +54,13 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
 
   useEffect(() => {
+  apiFetch('/admin/me').then((res: any) => setAdminUsername(res.username)).catch(() => {});
+}, []);
 
-    apiFetch('/admin/me').then((res: any) => setAdminUsername(res.username)).catch(() => {});
-
-  }, []);
-
+// Persist sidebar expanded state
+useEffect(() => {
+  localStorage.setItem('admin_sidebar_expanded', String(sidebarExpanded));
+}, [sidebarExpanded]);
 
 
   const navTo = (tab: 'users' | 'therapists' | 'content' | 'faqs' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox' | 'crisis' | 'notifications' | 'session_insights' | 'analytics' | 'store') => {
@@ -87,49 +93,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1">
-
-        <NavItem icon={Activity} label="Analytics" active={activeTab === 'analytics'} onClick={() => navTo('analytics')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={Users} label="Members Directory" active={activeTab === 'users'} onClick={() => navTo('users')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={Stethoscope} label="Therapists Directory" active={activeTab === 'therapists'} onClick={() => navTo('therapists')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={FileText} label="Content Mgmt" active={activeTab === 'content'} onClick={() => navTo('content')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={HelpCircle} label="FAQs Management" active={activeTab === 'faqs'} onClick={() => navTo('faqs')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={MessageSquare} label="Peer Circles" active={activeTab === 'circles'} onClick={() => navTo('circles')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={Shield} label="Flagged Content" active={activeTab === 'flagged'} onClick={() => navTo('flagged')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={BookOpen} label="Reading Lists" active={activeTab === 'reading'} onClick={() => navTo('reading')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={Brain} label="Wellness Programs" active={activeTab === 'programs'} onClick={() => navTo('programs')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={ShoppingBag} label="Wellness Store" active={activeTab === 'store'} onClick={() => navTo('store')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={Brain} label="Quiz Questions" active={activeTab === 'quiz'} onClick={() => navTo('quiz')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={LifeBuoy} label="Support Tickets" active={activeTab === 'support'} onClick={() => navTo('support')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={ShieldAlert} label="Therapist Inbox" active={activeTab === 'therapist_inbox'} onClick={() => navTo('therapist_inbox')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={AlertTriangle} label="Crisis Monitor" active={activeTab === 'crisis'} onClick={() => navTo('crisis')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={Bell} label="Notifications" active={activeTab === 'notifications'} onClick={() => navTo('notifications')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={TrendingUp} label="Session Insights" active={activeTab === 'session_insights'} onClick={() => navTo('session_insights')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={UserCircle} label="Team Members" active={activeTab === 'team'} onClick={() => navTo('team')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={Briefcase} label="Job Postings" active={activeTab === 'jobs'} onClick={() => navTo('jobs')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={Users} label="Applications" active={activeTab === 'applications'} onClick={() => navTo('applications')} expanded={mobile || sidebarExpanded} />
-
-        <NavItem icon={Settings} label="Settings" active={activeTab === 'settings'} onClick={() => navTo('settings')} expanded={mobile || sidebarExpanded} />
-
-      </nav>
+      <AdminSidebarNav
+          tab={activeTab}
+          navigateToTab={navTo}
+          collapsed={!sidebarExpanded}
+          setCollapsed={(c) => setSidebarExpanded(!c)}
+        />
 
       <div className="p-3 border-t border-[#0d5d3a]/10 dark:border-white/10">
 
