@@ -24,7 +24,12 @@ const userSchema = new mongoose.Schema(
       stressLevel:  { type: Number, default: null },  // 1–5
       completedAt:  { type: Date, default: null },
     },
-    shareProgressWithTherapist: { type: Boolean, default: false }
+    shareProgressWithTherapist: { type: Boolean, default: false },
+    // Subscription & monetization fields
+    subscriptionTier: { type: String, enum: ['free','silver','gold','platinum'], default: 'free' },
+    aiCreditsRemaining: { type: Number, default: 0 },
+    freeTherapySessionsUsed: { type: Number, default: 0 },
+    freeTherapyQuota: { type: Number, default: 0 }
   },
   { timestamps: true }
 );

@@ -328,22 +328,78 @@ export default function ProductPage({ page, onClose }: { page: string; onClose: 
 
       case 'Pricing':
         return (
-          <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
-            <div className="relative">
-              <div className="absolute inset-0 bg-[#0d5d3a]/20 dark:bg-[#10b981]/20 blur-3xl rounded-full" />
-              <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 p-12 rounded-[3rem] shadow-2xl relative z-10 max-w-xl w-full">
-                <div className="w-20 h-20 bg-[#e6f4ea] dark:bg-[#0d5d3a]/30 text-[#0d5d3a] dark:text-[#10b981] rounded-full flex items-center justify-center mx-auto mb-8">
-                  <IndianRupee size={36} />
+          <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 py-12">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl sm:text-5xl font-black text-[#0a2617] dark:text-white mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>
+                Simple, transparent pricing
+              </h2>
+              <p className="text-[#4a7c5d] dark:text-gray-400 text-lg">
+                Choose the plan that best fits your wellness journey.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl w-full">
+              {/* Free Tier */}
+              <div className="bg-white dark:bg-[#111] border border-[#0d5d3a]/10 dark:border-white/10 p-8 rounded-[2rem] shadow-sm hover:shadow-xl transition-all">
+                <h3 className="text-2xl font-bold text-[#0a2617] dark:text-white mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>ZenFree</h3>
+                <div className="text-3xl font-black text-[#0d5d3a] dark:text-[#10b981] mb-1">₹0</div>
+                <div className="text-sm text-[#4a7c5d] dark:text-gray-400 mb-6">Free forever</div>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 10 AI Chat credits / mo</li>
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> Basic mood tracking</li>
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> Community access</li>
+                </ul>
+              </div>
+
+              {/* Silver Tier */}
+              <div className="bg-white dark:bg-[#111] border border-[#0d5d3a]/20 dark:border-[#10b981]/20 p-8 rounded-[2rem] shadow-md hover:shadow-xl transition-all">
+                <h3 className="text-2xl font-bold text-[#0a2617] dark:text-white mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>ZenSilver</h3>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <div className="text-3xl font-black text-[#0d5d3a] dark:text-[#10b981]">₹199</div>
+                  <div className="text-sm text-[#4a7c5d] dark:text-gray-400">/mo</div>
                 </div>
-                <h2 className="text-4xl sm:text-5xl font-black text-[#0a2617] dark:text-white mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
-                  Pricing Plans
-                </h2>
-                <div className="inline-block px-4 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 font-bold text-sm mb-6 uppercase tracking-widest">
-                  Coming Soon
+                <div className="text-xs text-[#4a7c5d] dark:text-gray-400 mb-6">or ₹1,799/yr</div>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 100 AI Chat credits / mo</li>
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> Unlimited mood tracking</li>
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 2 Wellness Programs</li>
+                  <li className="flex items-center gap-2 text-sm text-[#0a2617] dark:text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 10% Store Discount</li>
+                </ul>
+              </div>
+
+              {/* Gold Tier */}
+              <div className="bg-gradient-to-b from-[#0d5d3a] to-[#1a8a5a] p-8 rounded-[2rem] shadow-xl transform md:-translate-y-4 relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                  Most Popular
                 </div>
-                <p className="text-[#4a7c5d] dark:text-gray-400 text-lg leading-relaxed">
-                  We are finalizing our transparent, accessible pricing structures to ensure world-class mental health support is affordable for everyone.
-                </p>
+                <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>ZenGold</h3>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <div className="text-3xl font-black text-white">₹499</div>
+                  <div className="text-sm text-white/80">/mo</div>
+                </div>
+                <div className="text-xs text-white/80 mb-6">or ₹4,499/yr</div>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> 1 Free Therapy Session / mo</li>
+                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> 500 AI Chat credits / mo</li>
+                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> All Wellness Programs</li>
+                  <li className="flex items-center gap-2 text-sm text-white"><CheckCircle size={16} className="text-yellow-400" /> 20% Store Discount</li>
+                </ul>
+              </div>
+
+              {/* Platinum Tier */}
+              <div className="bg-[#1a1a1a] dark:bg-[#050505] border border-gray-800 p-8 rounded-[2rem] shadow-lg hover:shadow-xl transition-all">
+                <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>ZenPlatinum</h3>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <div className="text-3xl font-black text-white">₹999</div>
+                  <div className="text-sm text-gray-400">/mo</div>
+                </div>
+                <div className="text-xs text-gray-400 mb-6">or ₹8,999/yr</div>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-2 text-sm text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 2 Free Therapy Sessions / mo</li>
+                  <li className="flex items-center gap-2 text-sm text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> Unlimited AI Chat</li>
+                  <li className="flex items-center gap-2 text-sm text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> Direct Therapist Chat</li>
+                  <li className="flex items-center gap-2 text-sm text-gray-300"><CheckCircle size={16} className="text-[#10b981]" /> 30% Store Discount</li>
+                </ul>
               </div>
             </div>
           </div>

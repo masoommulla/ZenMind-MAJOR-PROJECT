@@ -25,6 +25,8 @@ import WellnessStore from './WellnessStore';
 import NotificationCenter from './NotificationCenter';
 import SessionPrepCard from './SessionPrepCard';
 import PostSessionModal from './PostSessionModal';
+import RequireTier from './RequireTier';
+import FakePaymentModal from './FakePaymentModal';
 
 type DashboardProps = {
   onLogout: () => void;
@@ -41,6 +43,10 @@ type Me = {
   gender: string;
   avatar: { mime: string; data: string } | null;
   shareProgressWithTherapist?: boolean;
+  subscriptionTier?: 'free' | 'silver' | 'gold' | 'platinum';
+  aiCreditsRemaining?: number;
+  freeTherapySessionsUsed?: number;
+  freeTherapyQuota?: number;
 };
 
 type TabKey = 'aichat' | 'therapy' | 'settings' | 'sessions' | 'chat' | 'progress' | 'community' | 'resources' | 'journal' | 'circles' | 'goals' | 'reading' | 'programs' | 'store';
@@ -81,6 +87,10 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
   const [programDetailOpen, setProgramDetailOpen] = useState(false);
   const [closeProgramSignal, setCloseProgramSignal] = useState(0);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  
+  // Monetization
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [upgradeTarget, setUpgradeTarget] = useState<'silver' | 'gold' | 'platinum'>('gold');
 
   // Push initial history entry when dashboard mounts
   useEffect(() => { history.pushState({ zmDash: true }, ''); }, []);
@@ -139,6 +149,13 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
     if (!me?.avatar?.data) return null;
     return `data:${me.avatar.mime};base64,${me.avatar.data}`;
   }, [me?.avatar?.data, me?.avatar?.mime]);
+
+  const handlePaymentSuccess = async (tier: string) => {
+    setShowPaymentModal(false);
+    // Refresh user data to get new tier
+    const updated = await apiFetch<Me>('/me');
+    setMe(updated);
+  };
 
   const initials = me?.name
     ? me.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
@@ -370,16 +387,23 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
 
           {tab === 'therapy' ? (
             <div className="flex flex-col h-full overflow-hidden">
-              {/* Pre-session prep card — only shows when session < 24h */}
-              <div className="flex-shrink-0 px-4 sm:px-6 pt-4">
-                <SessionPrepCard />
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <TherapyHub
-                  onSessionBooked={() => setTab('sessions')}
-                  onStartChat={(t) => { setChatTherapist(t); setTab('chat'); }}
-                />
-              </div>
+              <RequireTier 
+                userTier={me?.subscriptionTier || 'free'} 
+                minTier="gold" 
+                fallbackMessage="Therapy Hub is available for Gold and Platinum members. Upgrade to connect with professional therapists."
+                onUpgradeClick={() => { setUpgradeTarget('gold'); setShowPaymentModal(true); }}
+              >
+                {/* Pre-session prep card — only shows when session < 24h */}
+                <div className="flex-shrink-0 px-4 sm:px-6 pt-4">
+                  <SessionPrepCard />
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <TherapyHub
+                    onSessionBooked={() => setTab('sessions')}
+                    onStartChat={(t) => { setChatTherapist(t); setTab('chat'); }}
+                  />
+                </div>
+              </RequireTier>
             </div>
           ) : tab === 'sessions' ? (
             <div className="flex-1 overflow-y-auto">
@@ -395,7 +419,11 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
             </div>
           ) : tab === 'aichat' ? (
             <div className="flex-1 overflow-hidden flex flex-col min-h-0 px-4 sm:px-6 py-4">
-              <AiChatPanel onNavigateToTherapy={() => setTab('therapy')} />
+              <AiChatPanel 
+                onNavigateToTherapy={() => setTab('therapy')} 
+                me={me}
+                onUpgradeClick={() => { setUpgradeTarget('silver'); setShowPaymentModal(true); }}
+              />
             </div>
           ) : tab === 'progress' ? (
             <div className="flex-1 overflow-hidden flex flex-col min-h-0">
@@ -438,7 +466,10 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
             </div>
           ) : tab === 'store' ? (
             <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-              <WellnessStore />
+              <WellnessStore 
+                userTier={me?.subscriptionTier || 'free'}
+                onUpgradeClick={() => { setUpgradeTarget('silver'); setShowPaymentModal(true); }}
+              />
             </div>
           ) : tab === 'settings' ? (
             <div className="flex-1 overflow-y-auto">
@@ -505,15 +536,26 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Payment Modal */}
+      <AnimatePresence>
+        {showPaymentModal && (
+          <FakePaymentModal
+            initialSelectedTier={upgradeTarget}
+            onClose={() => setShowPaymentModal(false)}
+            onSuccess={handlePaymentSuccess}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
 /* AI CHAT */
-function AiChatPanel({ onNavigateToTherapy }: { onNavigateToTherapy?: () => void }) {
+function AiChatPanel({ onNavigateToTherapy, me, onUpgradeClick }: { onNavigateToTherapy?: () => void, me: any, onUpgradeClick?: () => void }) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="h-full">
-      <ZenAvatarChat onNavigateToTherapy={onNavigateToTherapy} />
+      <ZenAvatarChat onNavigateToTherapy={onNavigateToTherapy} me={me} onUpgradeClick={onUpgradeClick} />
     </motion.div>
   );
 }

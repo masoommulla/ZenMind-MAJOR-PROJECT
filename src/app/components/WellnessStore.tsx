@@ -48,7 +48,7 @@ const CARD_GRADIENTS: Record<string, string> = {
 const getCardGradient = (cat: string) =>
   CARD_GRADIENTS[cat] ?? 'from-gray-50 to-slate-50 dark:from-gray-900/10 dark:to-slate-900/10';
 
-export default function WellnessStore() {
+export default function WellnessStore({ userTier = 'free', onUpgradeClick }: { userTier?: string, onUpgradeClick?: () => void }) {
   const [assets, setAssets]         = useState<StoreAsset[]>([]);
   const [myAssets, setMyAssets]     = useState<StoreAsset[]>([]);
   const [loading, setLoading]       = useState(true);
@@ -333,6 +333,7 @@ export default function WellnessStore() {
                   onDownload={() => handleDownload(asset)}
                   onPurchase={() => setFakePay(asset)}
                   onView={() => setViewAsset(asset)}
+                  userTier={userTier}
                 />
               ))}
             </AnimatePresence>
@@ -366,11 +367,25 @@ function StoreCard({
   onDownload: () => void;
   onPurchase: () => void;
   onView: () => void;
+  userTier: string;
 }) {
   const catStyle = getCategoryStyle(asset.category);
   const gradient = getCardGradient(asset.category);
   const isFree   = asset.price === 0;
   const isOwned  = asset.owned;
+
+  // Calculate discount
+  const getDiscountedPrice = (price: number, tier: string) => {
+    if (price === 0) return 0;
+    let discountPercent = 0;
+    if (tier === 'silver') discountPercent = 0.10;
+    if (tier === 'gold') discountPercent = 0.20;
+    if (tier === 'platinum') discountPercent = 0.30;
+    return Math.floor(price * (1 - discountPercent));
+  };
+
+  const finalPrice = getDiscountedPrice(asset.price, userTier);
+  const hasDiscount = finalPrice < asset.price && finalPrice > 0;
 
   return (
     <motion.div
@@ -397,9 +412,14 @@ function StoreCard({
               Free
             </span>
           ) : (
-            <span className="flex items-center gap-0.5 text-xs font-black text-[#0a2617] dark:text-white bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/15 dark:border-white/10 px-2.5 py-1 rounded-full shadow-sm">
-              <IndianRupee className="w-3 h-3" />{asset.price}
-            </span>
+            <div className="flex flex-col items-end">
+              {hasDiscount && (
+                <span className="text-[10px] line-through text-gray-400 font-bold mb-0.5">₹{asset.price}</span>
+              )}
+              <span className="flex items-center gap-0.5 text-xs font-black text-[#0a2617] dark:text-white bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/15 dark:border-white/10 px-2.5 py-1 rounded-full shadow-sm">
+                <IndianRupee className="w-3 h-3" />{finalPrice}
+              </span>
+            </div>
           )}
         </div>
 
@@ -456,7 +476,7 @@ function StoreCard({
             onClick={onPurchase}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-bold transition-all shadow-lg shadow-amber-500/20"
           >
-            <Lock className="w-3.5 h-3.5" /> Unlock for ₹{asset.price}
+            <Lock className="w-3.5 h-3.5" /> Unlock for ₹{finalPrice}
           </button>
         )}
       </div>

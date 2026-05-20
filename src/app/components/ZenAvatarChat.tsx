@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Mic, MicOff, Send, Volume2, VolumeX, RotateCcw, ExternalLink } from 'lucide-react';
+import { Mic, MicOff, Send, Volume2, VolumeX, RotateCcw, ExternalLink, Sparkles } from 'lucide-react';
 import { apiFetch } from '../api/client';
 import ZenTalkingHead from './ZenTalkingHead';
 import ZenChatSidebar from './ZenChatSidebar';
@@ -187,7 +187,7 @@ function MessageBubble({ msg, onStoryYes, onStoryNo, onFeelingGood, onConnectRea
 }
 
 /* ── Main Component ────────────────────────────────────────── */
-export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToTherapy?: () => void }) {
+export default function ZenAvatarChat({ onNavigateToTherapy, me, onUpgradeClick }: { onNavigateToTherapy?: () => void, me?: any, onUpgradeClick?: () => void }) {
   const [messages, setMessages]       = useState<Message[]>([]);
   const [input, setInput]             = useState('');
   const [loading, setLoading]         = useState(false);
@@ -280,6 +280,13 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
 
   const handleSend = useCallback(async (text: string) => {
     const t = text.trim(); if (!t || loading) return;
+    
+    // Check credits before sending
+    if (me?.subscriptionTier !== 'platinum' && me?.aiCreditsRemaining <= 0) {
+      setError('You have run out of AI Chat credits. Please upgrade your plan to continue.');
+      return;
+    }
+
     setInput(''); setError(null);
     const userMsg: Message = { role: 'user', content: t, id: uid() };
     setMessages(prev => [...prev, userMsg]);
@@ -428,7 +435,14 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
             <div className="text-sm font-bold text-[#0a2617] dark:text-white" style={{ fontFamily: 'Syne,sans-serif' }}>Conversation with Zeni</div>
             <div className="text-xs text-[#4a7c5d] dark:text-gray-400">Your private, safe space </div>
           </div>
-          <div className="ml-auto text-xs text-[#4a7c5d] dark:text-gray-500 bg-[#f0fbf4] dark:bg-white/5 px-2 py-1 rounded-full">{messages.length} message{messages.length !== 1 ? 's' : ''}</div>
+          <div className="ml-auto flex items-center gap-2">
+            {me?.subscriptionTier !== 'platinum' && (
+              <div className="text-xs font-bold text-[#0d5d3a] dark:text-[#10b981] bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 px-2.5 py-1 rounded-full flex items-center gap-1 border border-[#0d5d3a]/20">
+                <Sparkles size={12} /> {me?.aiCreditsRemaining} Credits Left
+              </div>
+            )}
+            <div className="text-xs text-[#4a7c5d] dark:text-gray-500 bg-[#f0fbf4] dark:bg-white/5 px-2 py-1 rounded-full">{messages.length} message{messages.length !== 1 ? 's' : ''}</div>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-4">
@@ -455,8 +469,13 @@ export default function ZenAvatarChat({ onNavigateToTherapy }: { onNavigateToThe
           </AnimatePresence>
           <AnimatePresence>
             {error && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-                {error}
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/20 px-4 py-4 text-sm text-red-600 dark:text-red-400 flex flex-col items-center justify-center text-center gap-3">
+                <div className="font-bold">{error}</div>
+                {error.includes('credits') && onUpgradeClick && (
+                  <button onClick={onUpgradeClick} className="px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold rounded-xl shadow-md transition-all flex items-center gap-2">
+                    <Sparkles size={16} /> Upgrade Plan
+                  </button>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

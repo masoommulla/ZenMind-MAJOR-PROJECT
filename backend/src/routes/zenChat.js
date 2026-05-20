@@ -4,6 +4,7 @@ import { requireAuth } from '../middleware/auth.js';
 import ZenSession from '../models/ZenSession.js';
 import ZenMessage from '../models/ZenMessage.js';
 import CrisisLog from '../models/CrisisLog.js';
+import User from '../models/User.js';
 
 const router = Router();
 
@@ -109,6 +110,16 @@ router.post('/', requireAuth, async (req, res) => {
 
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'messages array required' });
+  }
+
+  // Check user tier and credits
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  
+  if (user.subscriptionTier !== 'platinum' && user.aiCreditsRemaining <= 0) {
+    return res.status(403).json({ error: 'You have run out of AI Chat credits. Please upgrade your plan.' });
   }
 
   const apiKey = process.env.AI_API_KEY;
@@ -333,6 +344,11 @@ When asked to share a story, tell a brief, realistic, first-person style story o
           $inc: { messageCount: 2 }, // user + assistant
         }),
       ]).catch(e => console.error('[ZenChat] Save assistant msg error:', e.message));
+    }
+
+    // Decrement credits for non-platinum users
+    if (user.subscriptionTier !== 'platinum') {
+      await User.findByIdAndUpdate(user._id, { $inc: { aiCreditsRemaining: -1 } });
     }
 
     return res.json({ reply, sessionId });
