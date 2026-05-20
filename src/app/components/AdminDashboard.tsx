@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { motion, AnimatePresence } from 'motion/react';
 
-import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye, Video, Music, Image as ImageIcon, Link2, Upload as UploadIcon, BookOpen, MessageSquare, Brain, ToggleLeft, ToggleRight, UserCircle, Briefcase, ShieldAlert, TrendingUp, TrendingDown, Minus, Bell, Send, RefreshCw, ShoppingBag, HelpCircle } from 'lucide-react';
+import { ChevronDown, Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye, Video, Music, Image as ImageIcon, Link2, Upload as UploadIcon, BookOpen, MessageSquare, Brain, ToggleLeft, ToggleRight, UserCircle, Briefcase, ShieldAlert, TrendingUp, TrendingDown, Minus, Bell, Send, RefreshCw, ShoppingBag, HelpCircle } from 'lucide-react';
 
 import { apiFetch } from '../api/client';
 
@@ -31,6 +31,69 @@ import AdminAnalytics from './AdminAnalytics';
 import WellnessStoreAdmin from './WellnessStoreAdmin';
 import AdminFAQManager from './AdminFAQManager';
 
+
+
+
+const ADMIN_NAV_GROUPS = [
+  {
+    title: 'User Management',
+    icon: <Users size={20} className="shrink-0" />,
+    items: [
+      { key: 'users', label: 'Members Directory', icon: <Users size={20} className="shrink-0" /> },
+      { key: 'therapists', label: 'Therapists Directory', icon: <Stethoscope size={20} className="shrink-0" /> },
+      { key: 'team', label: 'Team Members', icon: <UserCircle size={20} className="shrink-0" /> },
+    ]
+  },
+  {
+    title: 'Content & Assets',
+    icon: <FileText size={20} className="shrink-0" />,
+    items: [
+      { key: 'content', label: 'Content Mgmt', icon: <FileText size={20} className="shrink-0" /> },
+      { key: 'programs', label: 'Wellness Programs', icon: <Brain size={20} className="shrink-0" /> },
+      { key: 'store', label: 'Wellness Store', icon: <ShoppingBag size={20} className="shrink-0" /> },
+      { key: 'reading', label: 'Reading Lists', icon: <BookOpen size={20} className="shrink-0" /> },
+      { key: 'faqs', label: 'FAQs Management', icon: <HelpCircle size={20} className="shrink-0" /> },
+      { key: 'quiz', label: 'Quiz Questions', icon: <Brain size={20} className="shrink-0" /> },
+    ]
+  },
+  {
+    title: 'Support & Safety',
+    icon: <ShieldAlert size={20} className="shrink-0" />,
+    items: [
+      { key: 'crisis', label: 'Crisis Monitor', icon: <AlertTriangle size={20} className="shrink-0" /> },
+      { key: 'flagged', label: 'Flagged Content', icon: <Shield size={20} className="shrink-0" /> },
+      { key: 'support', label: 'Support Tickets', icon: <LifeBuoy size={20} className="shrink-0" /> },
+      { key: 'therapist_inbox', label: 'Therapist Inbox', icon: <ShieldAlert size={20} className="shrink-0" /> },
+    ]
+  },
+  {
+    title: 'Data & Analytics',
+    icon: <Activity size={20} className="shrink-0" />,
+    items: [
+      { key: 'analytics', label: 'Analytics', icon: <Activity size={20} className="shrink-0" /> },
+      { key: 'session_insights', label: 'Session Insights', icon: <TrendingUp size={20} className="shrink-0" /> },
+      { key: 'notifications', label: 'Notifications', icon: <Bell size={20} className="shrink-0" /> },
+    ]
+  },
+  {
+    title: 'Recruitment',
+    icon: <Briefcase size={20} className="shrink-0" />,
+    items: [
+      { key: 'jobs', label: 'Job Postings', icon: <Briefcase size={20} className="shrink-0" /> },
+      { key: 'applications', label: 'Applications', icon: <Users size={20} className="shrink-0" /> },
+    ]
+  },
+  { key: 'circles', label: 'Peer Circles', icon: <MessageSquare size={20} className="shrink-0" /> },
+  { key: 'settings', label: 'Settings', icon: <Settings size={20} className="shrink-0" /> },
+];
+
+function AdminSidebarNav({ activeTab, navTo, expanded, setSidebarExpanded }: any) {
+  const [expandedGroup, setExpandedGroup] = React.useState<string | null>(null);
+  
+  return (
+    <AdminSidebarNav activeTab={activeTab} navTo={navTo} expanded={mobile || sidebarExpanded} setSidebarExpanded={!mobile ? setSidebarExpanded : undefined} />
+  )
+}
 
 
 type AdminDashboardProps = { onLogout: () => void };
