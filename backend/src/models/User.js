@@ -5,13 +5,13 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   phone: { type: String, required: true, unique: true, trim: true },
   age: { type: Number, required: true, min: 1, max: 120 },
-  gender: { type: String, enum: ['male','female','other'], required: true },
+  gender: { type: String, enum: ['male', 'female', 'other'], required: true },
   passwordHash: { type: String, required: true },
   isSuspended: { type: Boolean, default: false },
   suspendedUntil: { type: Date, default: null }, // null = permanent when isSuspended=true
   avatar: {
     mime: { type: String },
-    data: { type: String } // base64 (no local storage)
+    data: { type: String }, // base64 (no local storage)
   },
   isOnline: { type: Boolean, default: false },
   lastSeen: { type: Date, default: Date.now },
@@ -24,12 +24,22 @@ const userSchema = new mongoose.Schema({
     completedAt: { type: Date, default: null },
   },
   shareProgressWithTherapist: { type: Boolean, default: false },
-  // Subscription & monetization fields
-  subscriptionTier: { type: String, enum: ['free','silver','gold','platinum'], default: 'free' },
-  aiCreditsRemaining: { type: Number, default: 0 },
-  aiWeeklyCredits: { type: Number, default: 0 }, // remaining credits for current week
-  lastCreditReset: { type: Date, default: null }, // timestamp of last weekly reset
-  subscriptionExpiresAt: { type: Date, default: null }, // subscription end datetime
+
+  // ── Subscription & AI credit fields ─────────────────────────────────────
+  subscriptionTier: {
+    type: String,
+    enum: ['free', 'silver', 'gold', 'platinum'],
+    default: 'free',
+  },
+  // Remaining AI response credits for the current week.
+  // Platinum users: stored as -1 (unlimited). Others: counted down from weekly limit.
+  aiWeeklyCredits: { type: Number, default: 10 }, // 10 = free tier initial credits
+  // Last time weekly credits were topped up (IST-based Sunday midnight)
+  lastCreditReset: { type: Date, default: null },
+  // Last time the monthly expiry check ran (used to detect month boundary)
+  lastMonthReset: { type: Date, default: null },
+  // When the paid subscription expires (IST end-of-month midnight)
+  subscriptionExpiresAt: { type: Date, default: null },
 });
 
 export default mongoose.model('User', userSchema);

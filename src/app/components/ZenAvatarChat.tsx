@@ -197,6 +197,9 @@ export default function ZenAvatarChat({ onNavigateToTherapy, me, onUpgradeClick 
   const [avatarState, setAvatarState] = useState<'idle'|'listening'|'thinking'|'speaking'>('idle');
   const [lastBotText, setLastBotText] = useState('');
   const [error, setError]             = useState<string | null>(null);
+  
+  const [localCredits, setLocalCredits] = useState(me?.aiCreditsRemaining ?? 0);
+  useEffect(() => { setLocalCredits(me?.aiCreditsRemaining ?? 0); }, [me?.aiCreditsRemaining]);
 
   // Session persistence
   const [sessionId, setSessionId]     = useState<string | null>(null);
@@ -282,7 +285,7 @@ export default function ZenAvatarChat({ onNavigateToTherapy, me, onUpgradeClick 
     const t = text.trim(); if (!t || loading) return;
     
     // Check credits before sending
-    if (me?.subscriptionTier !== 'platinum' && me?.aiCreditsRemaining <= 0) {
+    if (me?.subscriptionTier !== 'platinum' && localCredits <= 0) {
       setError('You have run out of AI Chat credits. Please upgrade your plan to continue.');
       return;
     }
@@ -296,12 +299,16 @@ export default function ZenAvatarChat({ onNavigateToTherapy, me, onUpgradeClick 
       const body: any = { messages: history };
       if (sessionId) body.sessionId = sessionId;
 
-      const res = await apiFetch<{ reply: string; sessionId: string }>('/zen-chat', {
+      const res = await apiFetch<{ reply: string; sessionId: string; creditsLeft?: number }>('/zen-chat', {
         method: 'POST',
         body: JSON.stringify(body),
         timeoutMs: 28000,
       });
-      const { reply, sessionId: newSessionId } = res;
+      const { reply, sessionId: newSessionId, creditsLeft } = res;
+      
+      if (creditsLeft !== undefined && creditsLeft !== null) {
+        setLocalCredits(creditsLeft);
+      }
 
       // Store the session ID from first message onward
       if (newSessionId && !sessionId) {
@@ -438,7 +445,7 @@ export default function ZenAvatarChat({ onNavigateToTherapy, me, onUpgradeClick 
           <div className="ml-auto flex items-center gap-2">
             {me?.subscriptionTier !== 'platinum' && (
               <div className="text-xs font-bold text-[#0d5d3a] dark:text-[#10b981] bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 px-2.5 py-1 rounded-full flex items-center gap-1 border border-[#0d5d3a]/20">
-                <Sparkles size={12} /> {me?.aiCreditsRemaining} Credits Left
+                <Sparkles size={12} /> {localCredits} Credits Left
               </div>
             )}
             <div className="text-xs text-[#4a7c5d] dark:text-gray-500 bg-[#f0fbf4] dark:bg-white/5 px-2 py-1 rounded-full">{messages.length} message{messages.length !== 1 ? 's' : ''}</div>

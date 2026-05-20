@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import crypto from 'crypto';
 import { requireAuth } from '../middleware/auth.js';
+import { handleCreditReset, hasCredits, deductOneCredit } from '../middleware/planCheck.js';
 import ZenSession from '../models/ZenSession.js';
 import ZenMessage from '../models/ZenMessage.js';
 import CrisisLog from '../models/CrisisLog.js';
@@ -112,14 +113,22 @@ router.post('/', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'messages array required' });
   }
 
-  // Check user tier and credits
+  // Load user and run IST-based credit reset / subscription expiry
   const user = await User.findById(req.user.id);
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-  
-  if (user.subscriptionTier !== 'platinum' && user.aiWeeklyCredits <= 0) {
-    return res.status(403).json({ error: 'You have run out of AI Chat credits for this week. Please upgrade your plan.' });
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  await handleCreditReset(user);
+
+  // ── Detect whether this is a "welcome" call (no user message yet) ──────
+  // Zeni's opening greeting is NOT counted — only real user→AI exchanges count.
+  const latestUserMsg = [...messages].reverse().find(m => m.role === 'user');
+  const isWelcomeCall = !latestUserMsg;
+
+  // Check credits only when the user has actually sent a message
+  if (!isWelcomeCall && !hasCredits(user)) {
+    return res.status(403).json({
+      error: 'You have run out of AI Chat credits for this week. Please upgrade your plan.',
+      creditsLeft: 0,
+    });
   }
 
   const apiKey = process.env.AI_API_KEY;
@@ -152,7 +161,6 @@ router.post('/', requireAuth, async (req, res) => {
   }
 
   // ── Persist user's latest message (fire-and-forget) ─────────────────────
-  const latestUserMsg = [...messages].reverse().find(m => m.role === 'user');
   if (session && latestUserMsg) {
     ZenMessage.create({
       sessionId: session._id,
@@ -346,11 +354,18 @@ When asked to share a story, tell a brief, realistic, first-person style story o
       ]).catch(e => console.error('[ZenChat] Save assistant msg error:', e.message));
     }
 
-    if (user.subscriptionTier !== 'platinum') {
-      await User.findByIdAndUpdate(user._id, { $inc: { aiWeeklyCredits: -1 } });
+    // Deduct one credit — only for real user messages, never for the welcome call.
+    // Platinum and unlimited (-1) sentinel are handled inside deductOneCredit.
+    if (!isWelcomeCall) {
+      await deductOneCredit(user);
     }
 
-    return res.json({ reply, sessionId });
+    // Attach remaining credits in response so the frontend can update its counter
+    const updatedCredits = user.subscriptionTier === 'platinum'
+      ? null   // null = unlimited; frontend should show ∞
+      : Math.max(0, (user.aiWeeklyCredits || 0) - (isWelcomeCall ? 0 : 1));
+
+    return res.json({ reply, sessionId, creditsLeft: updatedCredits });
   } catch (err) {
     clearTimeout(aiTimeout);
     console.error('[ZenChat] Error:', err.message);

@@ -22,7 +22,7 @@ router.get('/', requireAuth, async (req, res) => {
     onboardingDone: user.onboardingDone ?? false,
     shareProgressWithTherapist: user.shareProgressWithTherapist ?? false,
     subscriptionTier: user.subscriptionTier || 'free',
-    aiCreditsRemaining: user.aiCreditsRemaining || 0,
+    aiCreditsRemaining: user.aiWeeklyCredits || 0,
     freeTherapyQuota: user.freeTherapyQuota || 0,
   });
 });
@@ -79,7 +79,7 @@ router.put('/', requireAuth, async (req, res) => {
     gender: user.gender,
     avatar: user.avatar?.data ? { mime: user.avatar.mime, data: user.avatar.data } : null,
     subscriptionTier: user.subscriptionTier || 'free',
-    aiCreditsRemaining: user.aiCreditsRemaining || 0,
+    aiCreditsRemaining: user.aiWeeklyCredits || 0,
     freeTherapyQuota: user.freeTherapyQuota || 0,
   });
 });
@@ -177,24 +177,27 @@ router.post('/set-tier', requireAuth, async (req, res) => {
 
     user.subscriptionTier = tier;
     
-    // Set AI credits based on tier
-    // Free: 40/mo, Silver: 150/week -> 600/mo, Gold: 250/week -> 1000/mo, Platinum: unlimited
-    const creditsMap = { free: 40, silver: 600, gold: 1000, platinum: 999999999 };
-    user.aiCreditsRemaining = creditsMap[tier];
+    // Set expiry to 1 month from now
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    user.subscriptionExpiresAt = nextMonth;
+    
+    // Wipe credits and force a reset so handleCreditReset does the right thing
+    user.aiWeeklyCredits = 0;
+    user.lastCreditReset = null;
+    
+    // Also run handleCreditReset manually so they immediately get their new tier's weekly credits
+    const { handleCreditReset } = await import('../middleware/planCheck.js');
+    await handleCreditReset(user);
     
     // Set Therapy quota based on tier
     // Free: 0, Silver: 0, Gold: 1, Platinum: 2
     const quotaMap = { free: 0, silver: 0, gold: 1, platinum: 2 };
     user.freeTherapyQuota = quotaMap[tier];
     
-    // Custom billing date reset (1 month from now)
-    const nextMonth = new Date();
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    user.subscriptionBillingDate = nextMonth;
-    
     await user.save();
     
-    return res.json({ ok: true, tier: user.subscriptionTier, aiCreditsRemaining: user.aiCreditsRemaining, freeTherapyQuota: user.freeTherapyQuota });
+    return res.json({ ok: true, tier: user.subscriptionTier, aiCreditsRemaining: user.aiWeeklyCredits, freeTherapyQuota: user.freeTherapyQuota });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
