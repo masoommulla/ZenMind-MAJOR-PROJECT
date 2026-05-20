@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 // pdfjs-dist imports – we load the worker dynamically
 import * as pdfjsLib from 'pdfjs-dist';
 import 'pdfjs-dist/web/pdf_viewer.css';
+import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 // officeparser import – removed as it causes browser crashes due to Node.js dependencies
 // import { parseOfficeAsync } from 'officeparser';
@@ -30,9 +31,8 @@ export default function AssetViewerModal({ asset, onClose }: Props) {
   const [pages, setPages] = useState<any[]>([]);
   const [officeText, setOfficeText] = useState<string>('');
 
-  // Configure pdfjs worker – adjust path as needed for bundler
-  // pdfjsDist provides a worker at 'pdfjs-dist/build/pdf.worker.min.js'
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  // Configure pdfjs worker using Vite's ?url syntax
+  pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
   useEffect(() => {
     if (!asset) return;
@@ -90,7 +90,7 @@ export default function AssetViewerModal({ asset, onClose }: Props) {
         onClick={() => onClose()}
       >
         <motion.div
-          className="bg-white dark:bg-[#111] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 relative"
+          className="bg-white dark:bg-[#111] rounded-2xl shadow-2xl w-[95vw] max-w-none h-[95vh] max-h-none overflow-y-auto p-6 sm:p-8 relative"
           initial={{ scale: 0.95, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.95, y: 20 }}
