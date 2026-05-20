@@ -28,14 +28,14 @@ export default function AssetViewerModal({ asset, onClose }: Props) {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6"
+        className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={() => onClose()}
       >
         <motion.div
-          className="bg-white dark:bg-[#111] rounded-2xl shadow-2xl w-full max-w-6xl h-full flex flex-col relative"
+          className="bg-white dark:bg-[#111] w-full max-w-full h-full flex flex-col relative"
           initial={{ scale: 0.95, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.95, y: 20 }}
