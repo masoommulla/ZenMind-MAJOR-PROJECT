@@ -4,7 +4,9 @@ import {
   ShoppingBag, Download, Lock, CheckCircle, Search, Filter,
   FileText, RefreshCw, X, IndianRupee, Package, CreditCard
 } from 'lucide-react';
-import { apiFetch } from '../api/client';
+import AssetViewerModal from '../components/AssetViewerModal';
+  const [viewAsset, setViewAsset] = useState<StoreAsset | null>(null);
+import AssetViewerModal from '../components/AssetViewerModal';
 
 type StoreAsset = {
   _id: string;
@@ -328,6 +330,7 @@ export default function WellnessStore() {
                   downloading={downloading === asset._id}
                   onDownload={() => handleDownload(asset)}
                   onPurchase={() => setFakePay(asset)}
+                  onView={() => setViewAsset(asset)}
                 />
               ))}
             </AnimatePresence>
@@ -340,13 +343,19 @@ export default function WellnessStore() {
 
 /* ── Individual Store Card ── */
 function StoreCard({
-  asset, index, downloading, onDownload, onPurchase
+  asset,
+  index,
+  downloading,
+  onDownload,
+  onPurchase,
+  onView,
 }: {
   asset: StoreAsset;
   index: number;
   downloading: boolean;
   onDownload: () => void;
   onPurchase: () => void;
+  onView: () => void;
 }) {
   const catStyle = getCategoryStyle(asset.category);
   const gradient = getCardGradient(asset.category);
@@ -361,7 +370,8 @@ function StoreCard({
       transition={{ delay: index * 0.04 }}
       className={`group relative flex flex-col rounded-3xl border bg-gradient-to-br ${gradient} overflow-hidden
         border-[#0d5d3a]/10 dark:border-white/8 hover:border-[#0d5d3a]/30 dark:hover:border-white/15
-        shadow-sm hover:shadow-md transition-all duration-300`}
+        shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer`}
+      onClick={onView}
     >
       {/* Top accent bar */}
       <div className="h-1 w-full bg-gradient-to-r from-[#0d5d3a] to-[#10b981] opacity-60" />
@@ -413,7 +423,7 @@ function StoreCard({
       <div className="px-5 pb-5">
         {isOwned ? (
           <button
-            onClick={onDownload}
+            onClick={e => { e.stopPropagation(); onDownload(); }}
             disabled={downloading}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-[#0d5d3a] hover:bg-[#0a4a2e] text-white text-sm font-bold transition-all shadow-lg shadow-[#0d5d3a]/20 disabled:opacity-60"
           >
