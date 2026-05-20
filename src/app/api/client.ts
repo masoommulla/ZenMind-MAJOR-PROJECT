@@ -1,6 +1,6 @@
 // In local dev: VITE_API_URL is blank → uses Vite proxy (/api → http://localhost:5000)
 // On Render (static site): VITE_API_URL is set to the backend service URL
-const API_BASE = import.meta.env.VITE_API_URL
+export const API_BASE = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api`
   : '/api';
 

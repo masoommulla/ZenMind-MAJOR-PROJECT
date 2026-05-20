@@ -62,8 +62,8 @@ router.get('/my-downloads', requireAuth, async (req, res) => {
   }
 });
 
-/* POST /api/store/:id/download  — stream download for owned / free assets */
-router.post('/:id/download', requireAuth, async (req, res) => {
+/* GET /api/store/:id/download  — stream download for owned / free assets */
+router.get('/:id/download', requireAuth, async (req, res) => {
   try {
     const asset = await StoreAsset.findById(req.params.id);
     if (!asset) return res.status(404).json({ error: 'Asset not found' });
@@ -88,10 +88,12 @@ router.post('/:id/download', requireAuth, async (req, res) => {
 
     const buf = Buffer.from(asset.fileData, 'base64');
     const safeFileName = (asset.fileName || `${asset.title}.pdf`).replace(/[^a-zA-Z0-9._\- ]/g, '_');
+    
+    const disposition = req.query.view === 'true' ? 'inline' : 'attachment';
 
     res.set('Content-Type', asset.fileMime || 'application/octet-stream');
     res.set('Content-Length', buf.length);
-    res.set('Content-Disposition', `attachment; filename="${safeFileName}"`);
+    res.set('Content-Disposition', `${disposition}; filename="${safeFileName}"`);
     res.set('Cache-Control', 'private, no-store'); // prevent hotlinking / CDN caching
     res.send(buf);
   } catch (err) {

@@ -4,7 +4,7 @@ import { cookieOpts } from '../utils/cookieOptions.js';
 
 export async function requireAuth(req, res, next) {
   try {
-    const token = req.cookies?.auth_token || null;
+    const token = req.cookies?.auth_token || req.query.token || null;
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
     const decoded = verifyJwt(token);

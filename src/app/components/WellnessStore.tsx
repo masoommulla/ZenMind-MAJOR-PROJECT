@@ -91,9 +91,9 @@ export default function WellnessStore() {
     if (downloading) return;
     setDL(asset._id);
     try {
-      const token = document.cookie.match(/token=([^;]+)/)?.[1] ?? '';
-      const res = await fetch(`/api/store/${asset._id}/download`, {
-        method: 'POST',
+      const token = document.cookie.match(/auth_token=([^;]+)/)?.[1] || document.cookie.match(/token=([^;]+)/)?.[1] || '';
+      const res = await fetch(`/api/store/${asset._id}/download?token=${token}`, {
+        method: 'GET',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         credentials: 'include',
       });
@@ -110,7 +110,9 @@ export default function WellnessStore() {
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
+      
+      // Delay revoking the object URL to allow the browser time to start the download
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
 
       // Refresh to reflect updated owned state
       load();
