@@ -19,6 +19,7 @@ type StoreAsset = {
   hasFile: boolean;
   owned: boolean;
   createdAt: string;
+  purchasedAt?: string;
 };
 
 type Tab = 'all' | 'mine';
@@ -55,6 +56,7 @@ export default function WellnessStore({ userTier = 'free', onUpgradeClick }: { u
   const [tab, setTab]               = useState<Tab>('all');
   const [search, setSearch]         = useState('');
   const [categoryFilter, setCat]    = useState('All');
+  const [sortOrder, setSortOrder]   = useState<'newest' | 'oldest'>('newest');
   const [downloading, setDL]        = useState<string | null>(null);
   const [fakePayAsset, setFakePay]  = useState<StoreAsset | null>(null);
   const [fakePayBusy, setFakePayBusy] = useState(false);
@@ -149,12 +151,18 @@ export default function WellnessStore({ userTier = 'free', onUpgradeClick }: { u
   // Derive category list from all assets
   const categories = ['All', ...Array.from(new Set(assets.map(a => a.category)))];
 
-  const displayed = (tab === 'mine' ? myAssets : assets).filter(a => {
-    const q = search.toLowerCase();
-    const matchSearch = a.title.toLowerCase().includes(q) || a.description.toLowerCase().includes(q);
-    const matchCat    = categoryFilter === 'All' || a.category === categoryFilter;
-    return matchSearch && matchCat;
-  });
+  const displayed = (tab === 'mine' ? myAssets : assets)
+    .filter(a => {
+      const q = search.toLowerCase();
+      const matchSearch = a.title.toLowerCase().includes(q) || a.description.toLowerCase().includes(q);
+      const matchCat    = categoryFilter === 'All' || a.category === categoryFilter;
+      return matchSearch && matchCat;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.purchasedAt || a.createdAt || 0).getTime();
+      const dateB = new Date(b.purchasedAt || b.createdAt || 0).getTime();
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
 
   return (
     <div className="flex flex-col h-full min-h-0 overflow-hidden">
@@ -284,14 +292,22 @@ export default function WellnessStore({ userTier = 'free', onUpgradeClick }: { u
             ))}
           </div>
 
-          {/* Category filter — grows to fill remaining space */}
-          <div className="relative flex-1">
+          {/* Filters — grows to fill remaining space */}
+          <div className="flex gap-2 flex-1">
             <select
               value={categoryFilter}
               onChange={e => setCat(e.target.value)}
               className="w-full pl-3 pr-3 py-2 bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/12 dark:border-white/10 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#0d5d3a]/20 text-[#0a2617] dark:text-white cursor-pointer"
             >
               {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select
+              value={sortOrder}
+              onChange={e => setSortOrder(e.target.value as 'newest' | 'oldest')}
+              className="w-full pl-3 pr-3 py-2 bg-white dark:bg-[#1a1a1a] border border-[#0d5d3a]/12 dark:border-white/10 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#0d5d3a]/20 text-[#0a2617] dark:text-white cursor-pointer"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
             </select>
           </div>
         </div>
