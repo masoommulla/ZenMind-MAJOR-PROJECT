@@ -218,7 +218,10 @@ export default function App() {
             onAdminLoginTrigger={() => setShowAdminLogin(true)}
             onTherapistLoginTrigger={() => setShowTherapistLogin(true)}
           />
-          <Hero onGetStarted={() => { setLoginIntent('progress'); setShowAuth(true); }} />
+          <Hero 
+            onGetStarted={() => { setLoginIntent('progress'); setShowAuth(true); }} 
+            onLearnMore={() => openOverlay(setActiveCompanyPage, 'About Us')}
+          />
           <Features />
           <HowItWorks />
           <StorySection />

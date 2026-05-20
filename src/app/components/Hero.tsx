@@ -7,9 +7,10 @@ import heroVideo from '../../../asset/video.mp4';
 
 type HeroProps = {
   onGetStarted: () => void;
+  onLearnMore?: () => void;
 };
 
-export default function Hero({ onGetStarted }: HeroProps) {
+export default function Hero({ onGetStarted, onLearnMore }: HeroProps) {
   const floatingRef = useRef<HTMLDivElement>(null);
   const circleRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [statsData, setStatsData] = useState<any>(null);
@@ -178,6 +179,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
               </button>
 
               <button
+                onClick={onLearnMore}
                 className="px-6 sm:px-8 py-3.5 sm:py-4 bg-white text-[#0d5d3a] rounded-full border-2 border-[#0d5d3a] font-semibold text-sm sm:text-base hover:bg-[#f0fbf4] transition-all hover:-translate-y-0.5 active:translate-y-0"
               >
                 Learn More
