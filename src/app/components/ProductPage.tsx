@@ -141,6 +141,74 @@ const SupportForm = ({ type, title, subtitle }: { type: 'contact' | 'report'; ti
   );
 };
 
+const FAQTab = () => {
+  const fallbackFaqs = [
+    {
+      q: "How do I know the therapists are qualified?",
+      a: "Every therapist undergoes a stringent vetting process by the ZenMind administration. We manually verify medical licenses, educational backgrounds, and clinic details before they are allowed on the platform. We ensure you are speaking with a certified professional."
+    },
+    {
+      q: "What happens if I miss my session?",
+      a: "We have a strict 10-minute grace period rule. If you do not join the video room within 10 minutes of the scheduled start time, the session is automatically cancelled and is subject to our late cancellation policy (which yields a 70% refund)."
+    },
+    {
+      q: "What if the therapist doesn't show up?",
+      a: "In the rare event that a therapist fails to join the room within the 10-minute grace period, the system will automatically cancel the session and you will be issued a 100% refund immediately."
+    },
+    {
+      q: "How secure is my data and video call?",
+      a: "Extremely secure. All video calls use WebRTC with end-to-end encryption. We do not record or store your video sessions. Furthermore, your chat logs with the AI companion are encrypted and anonymized to ensure complete privacy."
+    },
+    {
+      q: "How long does a refund take to process?",
+      a: "Once a cancellation occurs, the refund is initiated automatically from our end. It typically takes 5-7 business days for the funds to reflect in your original payment method, depending on your bank's processing times."
+    },
+    {
+      q: "How does the new pricing structure work?",
+      a: "Our core platform remains free, including limited AI chat credits and basic journaling. If you need more support, you can upgrade to our Premium tiers like ZenPlatinum, which unlocks unlimited AI chat, full access to premium Wellness Store assets, free therapy sessions, and advanced Wellness Programs."
+    },
+    {
+      q: "What is the Wellness Store?",
+      a: "The Wellness Store offers a variety of digital assets to support your mental health journey. You can find both free resources and premium content, including guided meditations, cognitive behavioral workbooks, and exclusive therapeutic exercises."
+    },
+    {
+      q: "What are Wellness Programs?",
+      a: "Wellness Programs are structured courses designed by mental health professionals to tackle specific challenges like test anxiety or social skills. You can join a program, track your progress, and complete actionable milestones at your own pace."
+    }
+  ];
+
+  const [faqs, setFaqs] = useState(fallbackFaqs);
+
+  React.useEffect(() => {
+    apiFetch<any>('/public/faqs')
+      .then(res => {
+        if (res.faqs && res.faqs.length > 0) {
+          setFaqs(res.faqs.map((f: any) => ({ q: f.question, a: f.answer })));
+        }
+      })
+      .catch(err => console.error('Failed to load FAQs:', err));
+  }, []);
+
+  return (
+    <div className="max-w-4xl mx-auto py-10">
+      <div className="text-center mb-16">
+        <h2 className="text-4xl sm:text-6xl font-black text-[#0a2617] dark:text-white mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
+          Frequently Asked <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0d5d3a] to-[#27a86a] dark:from-[#10b981] dark:to-[#34d399]">Questions.</span>
+        </h2>
+        <p className="text-[#4a7c5d] dark:text-gray-400 text-lg sm:text-xl">
+          Everything you need to know about the ZenMind platform, therapy, and billing.
+        </p>
+      </div>
+
+      <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 sm:p-10 shadow-sm">
+        {faqs.map((faq, i) => (
+          <FAQItem key={i} q={faq.q} a={faq.a} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function ProductPage({ page, onClose }: { page: string; onClose: () => void }) {
   
   const renderContent = () => {
@@ -444,57 +512,7 @@ export default function ProductPage({ page, onClose }: { page: string; onClose: 
         );
 
       case 'FAQ':
-        return (
-          <div className="max-w-4xl mx-auto py-10">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl sm:text-6xl font-black text-[#0a2617] dark:text-white mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
-                Frequently Asked <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0d5d3a] to-[#27a86a] dark:from-[#10b981] dark:to-[#34d399]">Questions.</span>
-              </h2>
-              <p className="text-[#4a7c5d] dark:text-gray-400 text-lg sm:text-xl">
-                Everything you need to know about the ZenMind platform, therapy, and billing.
-              </p>
-            </div>
-
-            <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 sm:p-10 shadow-sm">
-              {[
-                {
-                  q: "How do I know the therapists are qualified?",
-                  a: "Every therapist undergoes a stringent vetting process by the ZenMind administration. We manually verify medical licenses, educational backgrounds, and clinic details before they are allowed on the platform. We ensure you are speaking with a certified professional."
-                },
-                {
-                  q: "What happens if I miss my session?",
-                  a: "We have a strict 10-minute grace period rule. If you do not join the video room within 10 minutes of the scheduled start time, the session is automatically cancelled and is subject to our late cancellation policy (which yields a 70% refund)."
-                },
-                {
-                  q: "What if the therapist doesn't show up?",
-                  a: "In the rare event that a therapist fails to join the room within the 10-minute grace period, the system will automatically cancel the session and you will be issued a 100% refund immediately."
-                },
-                {
-                  q: "How secure is my data and video call?",
-                  a: "Extremely secure. All video calls use WebRTC with end-to-end encryption. We do not record or store your video sessions. Furthermore, your chat logs with the AI companion are encrypted and anonymized to ensure complete privacy."
-                },
-                {
-                  q: "How long does a refund take to process?",
-                  a: "Once a cancellation occurs, the refund is initiated automatically from our end. It typically takes 5-7 business days for the funds to reflect in your original payment method, depending on your bank's processing times."
-                },
-                {
-                  q: "How does the new pricing structure work?",
-                  a: "Our core platform remains free, including limited AI chat credits and basic journaling. If you need more support, you can upgrade to our Premium tiers like ZenPlatinum, which unlocks unlimited AI chat, full access to premium Wellness Store assets, free therapy sessions, and advanced Wellness Programs."
-                },
-                {
-                  q: "What is the Wellness Store?",
-                  a: "The Wellness Store offers a variety of digital assets to support your mental health journey. You can find both free resources and premium content, including guided meditations, cognitive behavioral workbooks, and exclusive therapeutic exercises."
-                },
-                {
-                  q: "What are Wellness Programs?",
-                  a: "Wellness Programs are structured courses designed by mental health professionals to tackle specific challenges like test anxiety or social skills. You can join a program, track your progress, and complete actionable milestones at your own pace."
-                }
-              ].map((faq, i) => (
-                <FAQItem key={i} q={faq.q} a={faq.a} />
-              ))}
-            </div>
-          </div>
-        );
+        return <FAQTab />;
 
       case 'Contact Us':
         return <SupportForm type="contact" title="Get in Touch" subtitle="Have a question or need assistance? Our support team is here to help." />;
