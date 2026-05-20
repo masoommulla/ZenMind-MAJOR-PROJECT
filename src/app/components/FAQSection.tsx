@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useInView, AnimatePresence } from 'motion/react';
 import { Plus, Minus, HelpCircle } from 'lucide-react';
+import { apiFetch } from '../api/client';
 
-const faqs = [
+const fallbackFaqs = [
   {
     q: 'Is ZenMind free to use?',
     a: 'Yes — the core platform including the AI chat companion, mood journal, peer circles, wellness goals, and reading lists are completely free. Live therapy sessions with professionals are available as affordable add-ons.',
@@ -53,6 +54,17 @@ export default function FAQSection({ onGetStarted }: { onGetStarted?: () => void
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [open, setOpen] = useState<number | null>(0);
+  const [faqs, setFaqs] = useState(fallbackFaqs);
+
+  useEffect(() => {
+    apiFetch<any>('/faqs')
+      .then(res => {
+        if (res.faqs && res.faqs.length > 0) {
+          setFaqs(res.faqs.map((f: any) => ({ q: f.question, a: f.answer })));
+        }
+      })
+      .catch(err => console.error('Failed to load FAQs:', err));
+  }, []);
 
   return (
     <section

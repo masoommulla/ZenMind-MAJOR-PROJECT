@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { motion, AnimatePresence } from 'motion/react';
 
-import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye, Video, Music, Image as ImageIcon, Link2, Upload as UploadIcon, BookOpen, MessageSquare, Brain, ToggleLeft, ToggleRight, UserCircle, Briefcase, ShieldAlert, TrendingUp, TrendingDown, Minus, Bell, Send, RefreshCw, ShoppingBag } from 'lucide-react';
+import { Settings, LogOut, Shield, CheckCircle, ChevronLeft, ChevronRight, Users, Search, Trash2, Clock, Activity, UserX, UserCheck, Menu, X, AlertTriangle, FileText, Plus, Edit2, Save, Stethoscope, LifeBuoy, Eye, Video, Music, Image as ImageIcon, Link2, Upload as UploadIcon, BookOpen, MessageSquare, Brain, ToggleLeft, ToggleRight, UserCircle, Briefcase, ShieldAlert, TrendingUp, TrendingDown, Minus, Bell, Send, RefreshCw, ShoppingBag, HelpCircle } from 'lucide-react';
 
 import { apiFetch } from '../api/client';
 
@@ -29,6 +29,7 @@ import SessionInsightsWidget from './SessionInsightsWidget';
 import AdminAnalytics from './AdminAnalytics';
 
 import WellnessStoreAdmin from './WellnessStoreAdmin';
+import AdminFAQManager from './AdminFAQManager';
 
 
 
@@ -38,7 +39,7 @@ type AdminDashboardProps = { onLogout: () => void };
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
-  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox' | 'crisis' | 'notifications' | 'session_insights' | 'analytics' | 'store'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'therapists' | 'content' | 'faqs' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox' | 'crisis' | 'notifications' | 'session_insights' | 'analytics' | 'store'>('users');
 
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
@@ -56,7 +57,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
 
 
-  const navTo = (tab: 'users' | 'therapists' | 'content' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox' | 'crisis' | 'notifications' | 'session_insights' | 'analytics' | 'store') => {
+  const navTo = (tab: 'users' | 'therapists' | 'content' | 'faqs' | 'support' | 'circles' | 'quiz' | 'flagged' | 'reading' | 'programs' | 'settings' | 'team' | 'jobs' | 'applications' | 'therapist_inbox' | 'crisis' | 'notifications' | 'session_insights' | 'analytics' | 'store') => {
 
     setActiveTab(tab);
 
@@ -95,6 +96,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <NavItem icon={Stethoscope} label="Therapists Directory" active={activeTab === 'therapists'} onClick={() => navTo('therapists')} expanded={mobile || sidebarExpanded} />
 
         <NavItem icon={FileText} label="Content Mgmt" active={activeTab === 'content'} onClick={() => navTo('content')} expanded={mobile || sidebarExpanded} />
+
+        <NavItem icon={HelpCircle} label="FAQs Management" active={activeTab === 'faqs'} onClick={() => navTo('faqs')} expanded={mobile || sidebarExpanded} />
 
         <NavItem icon={MessageSquare} label="Peer Circles" active={activeTab === 'circles'} onClick={() => navTo('circles')} expanded={mobile || sidebarExpanded} />
 
@@ -228,7 +231,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
             <h1 className="text-lg sm:text-2xl font-bold text-[#0a2617] dark:text-gray-100" style={{ fontFamily: 'Syne, sans-serif' }}>
 
-            {activeTab === 'analytics' ? 'Platform Analytics' : activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? 'Flagged Content' : activeTab === 'reading' ? 'Reading Lists' : activeTab === 'programs' ? 'Wellness Programs' : activeTab === 'store' ? 'Wellness Store' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : activeTab === 'team' ? 'Team Members' : activeTab === 'jobs' ? 'Job Postings' : activeTab === 'applications' ? 'Job Applications' : activeTab === 'therapist_inbox' ? 'Therapist Inbox' : activeTab === 'crisis' ? 'Crisis Monitor' : activeTab === 'notifications' ? 'Notification Center' : activeTab === 'session_insights' ? 'Session Insights' : 'Admin Settings'}
+            {activeTab === 'analytics' ? 'Platform Analytics' : activeTab === 'users' ? 'Members Directory' : activeTab === 'therapists' ? 'Therapists Directory' : activeTab === 'content' ? 'Content Management' : activeTab === 'faqs' ? 'FAQs Management' : activeTab === 'circles' ? 'Peer Circles' : activeTab === 'flagged' ? 'Flagged Content' : activeTab === 'reading' ? 'Reading Lists' : activeTab === 'programs' ? 'Wellness Programs' : activeTab === 'store' ? 'Wellness Store' : activeTab === 'quiz' ? 'Quiz Questions' : activeTab === 'support' ? 'Support Tickets' : activeTab === 'team' ? 'Team Members' : activeTab === 'jobs' ? 'Job Postings' : activeTab === 'applications' ? 'Job Applications' : activeTab === 'therapist_inbox' ? 'Therapist Inbox' : activeTab === 'crisis' ? 'Crisis Monitor' : activeTab === 'notifications' ? 'Notification Center' : activeTab === 'session_insights' ? 'Session Insights' : 'Admin Settings'}
 
             </h1>
 
@@ -273,6 +276,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             {activeTab === 'therapists' && <TherapistsManagement />}
 
             {activeTab === 'content' && <ContentManagement />}
+
+            {activeTab === 'faqs' && <AdminFAQManager />}
 
             {activeTab === 'circles' && <PeerCirclesManagement />}
 

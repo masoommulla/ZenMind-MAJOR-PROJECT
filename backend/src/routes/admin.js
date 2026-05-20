@@ -77,9 +77,11 @@ router.get('/users', requireAdmin, async (req, res) => {
   const totalUsers     = users.length;
   const suspendedCount = users.filter(u => u.isSuspended).length;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todaysMembers = users.filter(u => new Date(u.createdAt) >= today).length;
+  // Determine start of day in UTC to match stored timestamps
+  const utcStart = new Date();
+  utcStart.setUTCHours(0, 0, 0, 0);
+  // Use MongoDB aggregation for accurate count
+  const todaysMembers = await User.countDocuments({ createdAt: { $gte: utcStart } });
 
   return res.json({
     ok: true,

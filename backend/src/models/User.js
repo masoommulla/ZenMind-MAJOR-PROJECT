@@ -40,6 +40,6 @@ const userSchema = new mongoose.Schema({
   lastMonthReset: { type: Date, default: null },
   // When the paid subscription expires (IST end-of-month midnight)
   subscriptionExpiresAt: { type: Date, default: null },
-});
+}, { timestamps: true });
 
 export default mongoose.model('User', userSchema);
