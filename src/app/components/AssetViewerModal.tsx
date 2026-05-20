@@ -13,10 +13,10 @@ type Asset = {
   _id: string;
   title: string;
   description: string;
-  fileMime: string; // e.g. 'application/pdf'
-  fileUrl: string; // URL to the asset file (served by backend)
+  fileMime: string;
+  fileName?: string;
   price: number;
-  isFree: boolean;
+  owned?: boolean;
 };
 
 type Props = {
@@ -30,6 +30,7 @@ export default function AssetViewerModal({ asset, onClose }: Props) {
   const [pdfDoc, setPdfDoc] = useState<any>(null);
   const [pages, setPages] = useState<any[]>([]);
   const [officeText, setOfficeText] = useState<string>('');
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
   // Configure pdfjs worker using Vite's ?url syntax
   pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
@@ -40,10 +41,28 @@ export default function AssetViewerModal({ asset, onClose }: Props) {
     setError(null);
     setPdfDoc(null);
     setOfficeText('');
+    let activeUrl: string | null = null;
     const fetchAndRender = async () => {
       try {
+        const token = document.cookie.match(/token=([^;]+)/)?.[1] ?? '';
+        const res = await fetch(`/api/store/${asset._id}/download`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          credentials: 'include',
+        });
+        
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Failed to fetch document' }));
+          throw new Error(err.error || 'Failed to fetch document');
+        }
+        
+        const blob = await res.blob();
+        activeUrl = URL.createObjectURL(blob);
+        setBlobUrl(activeUrl);
+
         if (asset.fileMime === 'application/pdf') {
-          const loadingTask = pdfjsLib.getDocument(asset.fileUrl);
+          const arrayBuffer = await blob.arrayBuffer();
+          const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
           const pdf = await loadingTask.promise;
           setPdfDoc(pdf);
           const num = pdf.numPages;
@@ -75,6 +94,7 @@ export default function AssetViewerModal({ asset, onClose }: Props) {
     return () => {
       setPdfDoc(null);
       setPages([]);
+      if (activeUrl) URL.revokeObjectURL(activeUrl);
     };
   }, [asset]);
 
@@ -132,14 +152,13 @@ export default function AssetViewerModal({ asset, onClose }: Props) {
 
           {/* Action buttons */}
           <div className="mt-6 flex gap-3 justify-end">
-            {asset.isFree && (
-              <a href={asset.fileUrl} download className="px-4 py-2 bg-[#0d5d3a] text-white rounded hover:bg-[#0a4a2e] transition">
-                Download
+            {(asset.price === 0 || asset.owned) && blobUrl ? (
+              <a href={blobUrl} download={asset.fileName || `${asset.title}.pdf`} className="px-4 py-2 bg-[#0d5d3a] text-white rounded hover:bg-[#0a4a2e] transition">
+                Download File
               </a>
-            )}
-            {!asset.isFree && (
+            ) : (
               <button className="px-4 py-2 bg-gray-400 text-white rounded cursor-not-allowed" disabled title="Premium asset – download disabled">
-                Download (Premium)
+                Purchase to Download
               </button>
             )}
           </div>
