@@ -180,7 +180,7 @@ const FAQTab = () => {
   const [faqs, setFaqs] = useState(fallbackFaqs);
 
   React.useEffect(() => {
-    apiFetch<any>('/public/faqs')
+    apiFetch<any>('/faqs')
       .then(res => {
         if (res.faqs && res.faqs.length > 0) {
           setFaqs(res.faqs.map((f: any) => ({ q: f.question, a: f.answer })));
