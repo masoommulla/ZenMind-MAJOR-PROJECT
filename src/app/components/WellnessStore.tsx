@@ -360,6 +360,7 @@ function StoreCard({
   onDownload,
   onPurchase,
   onView,
+  userTier,
 }: {
   asset: StoreAsset;
   index: number;
