@@ -337,26 +337,20 @@ export default function WellnessProgramsUser({
       )}
 
       {/* ── STICKY CONTROLS ── */}
-      <div className="zen-controls-bar flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 sm:gap-0 p-4 sm:p-0">
-        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-          {(['browse', 'my'] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`zen-tab-pill flex-1 sm:flex-none justify-center ${tab === t ? 'active' : ''}`}>
-              {t === 'browse' ? <><Search size={12} /> Browse All</> : <><BookOpen size={12} /> My Programs ({myEnrollments.length})</>}
-            </button>
-          ))}
+      <div className="zen-controls-bar flex flex-wrap items-center justify-center gap-3 p-4 sm:p-0 sm:pb-4">
+        {(['browse', 'my'] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)}
+            className={`zen-tab-pill justify-center ${tab === t ? 'active' : ''}`}>
+            {t === 'browse' ? <><Search size={12} /> Browse All</> : <><BookOpen size={12} /> My Programs ({myEnrollments.length})</>}
+          </button>
+        ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 20, background: 'rgba(13,93,58,0.07)', border: '1.5px solid rgba(13,93,58,0.15)', fontSize: 11 }}>
+          <Zap size={12} style={{ color: '#0d5d3a' }} />
+          <span style={{ fontWeight: 700, color: '#0a2617', whiteSpace: 'nowrap' }}>{programs.length} Available</span>
         </div>
-        <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-start sm:justify-end">
-          <div className="flex-1 sm:flex-none justify-center" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 20, background: 'rgba(13,93,58,0.07)', border: '1.5px solid rgba(13,93,58,0.15)', fontSize: 11 }}>
-            <Zap size={12} style={{ color: '#0d5d3a' }} />
-            <span style={{ fontWeight: 700, color: '#0a2617' }}>{programs.length}</span>
-            <span style={{ color: '#4a7c5d' }}>Available</span>
-          </div>
-          <div className="flex-1 sm:flex-none justify-center" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 20, background: 'rgba(16,185,129,0.07)', border: '1.5px solid rgba(16,185,129,0.18)', fontSize: 11 }}>
-            <TrendingUp size={12} style={{ color: '#10b981' }} />
-            <span style={{ fontWeight: 700, color: '#0a2617' }}>{myEnrollments.length}</span>
-            <span style={{ color: '#4a7c5d' }}>Enrolled</span>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 20, background: 'rgba(16,185,129,0.07)', border: '1.5px solid rgba(16,185,129,0.18)', fontSize: 11 }}>
+          <TrendingUp size={12} style={{ color: '#10b981' }} />
+          <span style={{ fontWeight: 700, color: '#0a2617', whiteSpace: 'nowrap' }}>{myEnrollments.length} Enrolled</span>
         </div>
       </div>
 

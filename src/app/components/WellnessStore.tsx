@@ -130,15 +130,20 @@ export default function WellnessStore({ userTier = 'free', onUpgradeClick }: { u
       showToast('Please fill in all card details', false); return;
     }
     setFakePayBusy(true);
-    // Simulate processing delay
-    await new Promise(r => setTimeout(r, 1800));
-    setFakePayBusy(false);
-    setFakePay(null);
-    setCardNum(''); setCardExp(''); setCvv('');
-    showToast(`"${fakePayAsset.title}" unlocked! (demo payment)`);
-    // Mark as owned locally so UI updates
-    setAssets(prev => prev.map(a => a._id === fakePayAsset._id ? { ...a, owned: true } : a));
-    setMyAssets(prev => [...prev, { ...fakePayAsset, owned: true }]);
+    setFakePayBusy(true);
+    try {
+      await apiFetch(`/store/${fakePayAsset._id}/demo-purchase`, { method: 'POST' });
+      showToast(`"${fakePayAsset.title}" unlocked! (demo payment)`);
+      // Mark as owned locally so UI updates
+      setAssets(prev => prev.map(a => a._id === fakePayAsset._id ? { ...a, owned: true } : a));
+      setMyAssets(prev => [...prev, { ...fakePayAsset, owned: true }]);
+    } catch (err: any) {
+      showToast(err.message || 'Payment failed', false);
+    } finally {
+      setFakePayBusy(false);
+      setFakePay(null);
+      setCardNum(''); setCardExp(''); setCvv('');
+    }
   };
 
   // Derive category list from all assets
@@ -396,8 +401,7 @@ function StoreCard({
       transition={{ delay: index * 0.04 }}
       className={`group relative flex flex-col rounded-3xl border bg-gradient-to-br ${gradient} overflow-hidden
         border-[#0d5d3a]/10 dark:border-white/8 hover:border-[#0d5d3a]/30 dark:hover:border-white/15
-        shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer`}
-      onClick={onView}
+        shadow-sm hover:shadow-md transition-all duration-300`}
     >
       {/* Top accent bar */}
       <div className="h-1 w-full bg-gradient-to-r from-[#0d5d3a] to-[#10b981] opacity-60" />
@@ -452,34 +456,47 @@ function StoreCard({
 
       {/* CTA */}
       <div className="px-5 pb-5">
-        {isOwned ? (
+        <div className="flex gap-2">
+          {/* Open Button */}
           <button
-            onClick={e => { e.stopPropagation(); onDownload(); }}
-            disabled={downloading}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-[#0d5d3a] hover:bg-[#0a4a2e] text-white text-sm font-bold transition-all shadow-lg shadow-[#0d5d3a]/20 disabled:opacity-60"
+            onClick={(e) => { e.stopPropagation(); onView(); }}
+            disabled={!isOwned && !isFree}
+            title={(!isOwned && !isFree) ? 'Purchase to open' : 'Open asset'}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-white dark:bg-[#1a1a1a] text-[#0d5d3a] dark:text-[#10b981] text-sm font-bold border border-[#0d5d3a]/20 dark:border-white/10 hover:bg-[#f0fbf4] dark:hover:bg-white/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {downloading
-              ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Downloading…</>
-              : <><Download className="w-3.5 h-3.5" /> Download</>}
+            <FileText className="w-3.5 h-3.5" /> Open
           </button>
-        ) : isFree ? (
-          <button
-            onClick={onDownload}
-            disabled={downloading}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] hover:from-[#0a4a2e] text-white text-sm font-bold transition-all shadow-lg shadow-[#0d5d3a]/20 disabled:opacity-60"
-          >
-            {downloading
-              ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Downloading…</>
-              : <><Download className="w-3.5 h-3.5" /> Download Free</>}
-          </button>
-        ) : (
-          <button
-            onClick={onPurchase}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-bold transition-all shadow-lg shadow-amber-500/20"
-          >
-            <Lock className="w-3.5 h-3.5" /> Unlock for ₹{finalPrice}
-          </button>
-        )}
+          
+          {/* Download/Unlock Button */}
+          {isOwned ? (
+            <button
+              onClick={e => { e.stopPropagation(); onDownload(); }}
+              disabled={downloading}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-[#0d5d3a] hover:bg-[#0a4a2e] text-white text-sm font-bold transition-all shadow-lg shadow-[#0d5d3a]/20 disabled:opacity-60"
+            >
+              {downloading
+                ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> ...</>
+                : <><Download className="w-3.5 h-3.5" /> Download</>}
+            </button>
+          ) : isFree ? (
+            <button
+              onClick={onDownload}
+              disabled={downloading}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-gradient-to-r from-[#0d5d3a] to-[#1a8a5a] hover:from-[#0a4a2e] text-white text-sm font-bold transition-all shadow-lg shadow-[#0d5d3a]/20 disabled:opacity-60"
+            >
+              {downloading
+                ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> ...</>
+                : <><Download className="w-3.5 h-3.5" /> Download</>}
+            </button>
+          ) : (
+            <button
+              onClick={onPurchase}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-bold transition-all shadow-lg shadow-amber-500/20"
+            >
+              <Lock className="w-3.5 h-3.5" /> ₹{finalPrice}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Owned badge */}

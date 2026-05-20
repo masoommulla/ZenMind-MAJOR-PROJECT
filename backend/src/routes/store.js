@@ -145,6 +145,33 @@ router.post('/:id/purchase', requireAuth, async (req, res) => {
   }
 });
 
+/* POST /api/store/:id/demo-purchase  — unlock asset for testing without Razorpay */
+router.post('/:id/demo-purchase', requireAuth, async (req, res) => {
+  try {
+    const asset = await StoreAsset.findById(req.params.id).select('price');
+    if (!asset) return res.status(404).json({ error: 'Asset not found' });
+
+    // Grant ownership directly
+    await UserDownload.findOneAndUpdate(
+      { userId: req.user.id, assetId: asset._id },
+      {
+        userId:     req.user.id,
+        assetId:    asset._id,
+        paymentId:  `demo_pay_${Date.now()}`,
+        orderId:    `demo_order_${Date.now()}`,
+        amountPaid: asset.price,
+        purchasedAt: new Date(),
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    res.json({ ok: true, message: 'Demo payment successful. Asset unlocked!' });
+  } catch (err) {
+    console.error('[Store] demo-purchase error:', err.message);
+    res.status(500).json({ error: 'Verification failed' });
+  }
+});
+
 /* POST /api/store/:id/verify  — verify Razorpay signature & grant access */
 router.post('/:id/verify', requireAuth, async (req, res) => {
   try {
