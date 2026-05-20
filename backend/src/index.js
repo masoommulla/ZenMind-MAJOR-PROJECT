@@ -26,7 +26,12 @@ import bcrypt from 'bcryptjs';
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: false,
+  crossOriginEmbedderPolicy: false,
+  frameguard: false,
+}));
 
 const allowedOrigin = process.env.FRONTEND_URL;
 app.use(cors({
