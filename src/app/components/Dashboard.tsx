@@ -389,7 +389,7 @@ export default function Dashboard({ onLogout, prefetchedMe, initialTab }: Dashbo
             <div className="flex flex-col h-full overflow-hidden">
               <RequireTier 
                 userTier={me?.subscriptionTier || 'free'} 
-                minTier="silver" 
+                minTier="free" 
                 fallbackMessage="Therapy Hub is available for Silver, Gold, and Platinum members. Upgrade to connect with professional therapists."
                 onUpgradeClick={() => { setUpgradeTarget('silver'); setShowPaymentModal(true); }}
               >
