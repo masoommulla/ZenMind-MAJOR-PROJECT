@@ -58,7 +58,7 @@ export default function AdminSidebarNav({
   };
 
   return (
-    <div className="flex flex-col gap-1 flex-1 overflow-y-auto overflow-x-hidden">
+    <div className="flex flex-col gap-1">
       {groups.map(group => (
         <div key={group.label} className="flex flex-col gap-1">
           <button

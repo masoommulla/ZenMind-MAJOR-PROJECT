@@ -54,8 +54,8 @@ export default function TherapyHub({ onSessionBooked, onStartChat, userTier = 'f
   const filtered = useMemo(() => {
     let list = therapists.filter(t => {
       const q = search.toLowerCase();
-      const matchSearch = t.name.toLowerCase().includes(q) || t.specialization.toLowerCase().includes(q);
-      const matchSpec = specFilter === 'All Specializations' || t.specialization.toLowerCase().includes(specFilter.toLowerCase());
+      const matchSearch = (t.name || '').toLowerCase().includes(q) || (t.specialization || '').toLowerCase().includes(q);
+      const matchSpec = specFilter === 'All Specializations' || (t.specialization || '').toLowerCase().includes(specFilter.toLowerCase());
       
       const st = t.sessionType || 'online';
       const matchSession = sessionFilter === 'All Sessions' || 
@@ -75,7 +75,7 @@ export default function TherapyHub({ onSessionBooked, onStartChat, userTier = 'f
 
   // Collect unique specializations from actual data
   const specs = useMemo(() => {
-    const set = new Set<string>(therapists.map(t => t.specialization));
+    const set = new Set<string>(therapists.map(t => t.specialization).filter(Boolean));
     return ['All Specializations', ...Array.from(set)];
   }, [therapists]);
 
@@ -232,7 +232,7 @@ export default function TherapyHub({ onSessionBooked, onStartChat, userTier = 'f
                   ? <img src={getImgSrc(selectedTherapist.profilePicture)} alt={selectedTherapist.name}
                       className="w-32 h-32 rounded-full object-cover border-4 border-[#e6f4ea] dark:border-[#0d5d3a]/30 shadow-md mb-4" />
                   : <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] flex items-center justify-center text-white text-4xl font-black mb-4 border-4 border-[#e6f4ea] dark:border-[#0d5d3a]/30 shadow-md">
-                      {selectedTherapist.name.charAt(0)}
+                      {(selectedTherapist.name || 'T').charAt(0)}
                     </div>
                 }
                 <h2 className="text-2xl font-black text-[#0a2617] dark:text-white text-center leading-tight">
@@ -562,7 +562,7 @@ export default function TherapyHub({ onSessionBooked, onStartChat, userTier = 'f
                       ? <img src={getImgSrc(t.profilePicture)} alt={t.name}
                           className="w-24 h-24 rounded-full object-cover border-4 border-[#e6f4ea] dark:border-[#0d5d3a]/30 shadow-sm shrink-0" />
                       : <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] flex items-center justify-center text-white text-3xl font-black shrink-0 border-4 border-[#e6f4ea] dark:border-[#0d5d3a]/30 shadow-sm">
-                          {t.name.charAt(0)}
+                          {(t.name || 'T').charAt(0)}
                         </div>
                     }
                   </div>

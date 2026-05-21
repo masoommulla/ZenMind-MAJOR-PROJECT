@@ -153,7 +153,7 @@ function scoreTherapist(t: Therapist, answers: Record<string, string>): number {
 
   // Q5: Language (15 pts)
   const lang = answers.language || 'any';
-  const langs = (t.languages || ['English', 'Hindi']).map(l => l.toLowerCase());
+  const langs = (t.languages || ['English', 'Hindi']).map(l => (l || '').toLowerCase());
   if (lang === 'any' || lang === 'both') {
     score += 15;
   } else if (lang === 'english' && langs.some(l => l.includes('english'))) {
@@ -430,7 +430,7 @@ export default function TherapistMatchQuiz({ therapists, onClose, onSelectTherap
                           ? <img src={getImgSrc(t.profilePicture)} alt={t.name}
                               className="w-14 h-14 rounded-xl object-cover border-2 border-[#e6f4ea] dark:border-[#0d5d3a]/30 flex-shrink-0" />
                           : <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#0d5d3a] to-[#1a8a5a] flex items-center justify-center text-white text-xl font-black flex-shrink-0">
-                              {t.name.charAt(0)}
+                              {(t.name || 'T').charAt(0)}
                             </div>
                         }
 
