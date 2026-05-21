@@ -69,7 +69,7 @@ export default function TherapyHub({ onSessionBooked, onStartChat, userTier = 'f
 
       return matchSearch && matchSpec && matchSession && matchCity;
     });
-    list = [...list].sort((a, b) => costSort === 'asc' ? a.sessionCost - b.sessionCost : b.sessionCost - a.sessionCost);
+    list = [...list].sort((a, b) => costSort === 'asc' ? (a.sessionCost ?? 0) - (b.sessionCost ?? 0) : (b.sessionCost ?? 0) - (a.sessionCost ?? 0));
     return list;
   }, [therapists, search, specFilter, sessionFilter, cityFilter, costSort]);
 
@@ -249,18 +249,18 @@ export default function TherapyHub({ onSessionBooked, onStartChat, userTier = 'f
                   </div>
                   <div className="flex justify-between items-center text-sm border-b border-gray-100 dark:border-white/5 pb-2">
                     <span className="text-gray-500 flex items-center gap-2"><IndianRupee size={14}/> Per Session</span>
-                    <span className="font-bold text-[#0a2617] dark:text-white">₹{selectedTherapist.sessionCost}/{selectedTherapist.sessionTime}min</span>
+                    <span className="font-bold text-[#0a2617] dark:text-white">₹{selectedTherapist.sessionCost ?? ''}/{selectedTherapist.sessionTime ?? ''}min</span>
                   </div>
                   <div className="flex justify-between items-center text-sm border-b border-gray-100 dark:border-white/5 pb-2">
                     <span className="text-gray-500 flex items-center gap-2"><Star size={14} className="text-amber-400"/> Rating</span>
                     <span className="font-bold text-[#0a2617] dark:text-white">
-                      {selectedTherapist.ratingAverage ? selectedTherapist.ratingAverage.toFixed(1) : 'New'}{selectedTherapist.ratingAverage ? '/5.0' : ''} ({selectedTherapist.ratingCount || 0})
+                      {selectedTherapist.ratingAverage ? selectedTherapist.ratingAverage.toFixed(1) : 'New'}{selectedTherapist.ratingAverage ? '/5.0' : ''} ({selectedTherapist.ratingCount ?? 0})
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-sm pb-2">
                     <span className="text-gray-500 flex items-center gap-2"><span className="text-[10px]"></span> Languages</span>
                     <span className="font-bold text-[#0a2617] dark:text-white text-right text-xs">
-                      {selectedTherapist.languages ? selectedTherapist.languages.join(', ') : 'English, Hindi'}
+                      {(selectedTherapist.languages && selectedTherapist.languages.length > 0) ? selectedTherapist.languages.join(', ') : 'English, Hindi'}
                     </span>
                   </div>
                 </div>
@@ -299,7 +299,7 @@ export default function TherapyHub({ onSessionBooked, onStartChat, userTier = 'f
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   <span className="px-3 py-1.5 bg-[#e6f4ea] dark:bg-[#0d5d3a]/10 text-[#0d5d3a] dark:text-[#10b981] rounded-lg text-xs font-bold border border-[#0d5d3a]/20">
-                    {selectedTherapist.specialization}
+                    {selectedTherapist.specialization || ''}
                   </span>
                   {['Self Esteem', 'Relationship Issues', 'Teen Counseling'].map(tag => (
                     <span key={tag} className="px-3 py-1.5 bg-[#e6f4ea] dark:bg-[#0d5d3a]/10 text-[#0d5d3a] dark:text-[#10b981] rounded-lg text-xs font-bold border border-[#0d5d3a]/20">
@@ -575,17 +575,17 @@ export default function TherapyHub({ onSessionBooked, onStartChat, userTier = 'f
                     <div className="flex items-center justify-center gap-1.5 mt-2">
                       <Star size={13} className={`text-amber-400 ${t.ratingAverage ? 'fill-amber-400' : ''}`} />
                       <span className="text-xs font-bold text-[#0a2617] dark:text-gray-200">
-                        {t.ratingAverage ? t.ratingAverage.toFixed(1) : 'New'} <span className="text-gray-400 font-medium">({t.ratingCount || 0} reviews)</span>
+                        {t.ratingAverage ? t.ratingAverage.toFixed(1) : 'New'} <span className="text-gray-400 font-medium">({t.ratingCount ?? 0} reviews)</span>
                       </span>
                     </div>
 
                     {/* Specializations Pills */}
                     <div className="flex flex-wrap justify-center gap-2 mt-4 w-full">
                       <span className="px-3 py-1 bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] rounded-full text-[10px] font-bold">
-                        {t.specialization}
+                        <span className="text-xs font-bold text-[#0a2617] dark:text-white">{t.specialization ?? ''}</span>
                       </span>
                       {['Anxiety', 'Depression'].map(tag => (
-                        <span key={tag} className="px-3 py-1 bg-[#e6f4ea] dark:bg-[#0d5d3a]/20 text-[#0d5d3a] dark:text-[#10b981] rounded-full text-[10px] font-bold hidden sm:inline-block">
+                        <span key={tag} className="px-3 py-1.5 bg-[#e6f4ea] dark:bg-[#0d5d3a]/10 text-[#0d5d3a] dark:text-[#10b981] rounded-lg text-xs font-bold border border-[#0d5d3a]/20">
                           {tag}
                         </span>
                       ))}
