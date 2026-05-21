@@ -46,7 +46,7 @@ export default function UserChat({ therapist, onBack, me }: { therapist: any; on
         setLoading(false);
 
         // Init socket for real-time messaging only (no status tracking)
-        const socketUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '/';
+        const socketUrl = import.meta.env.VITE_SOCKET_URL ?? (window.location.hostname === 'localhost' ? 'http://localhost:5000' : undefined);
         s = io(socketUrl, { withCredentials: true });
         setSocket(s);
 

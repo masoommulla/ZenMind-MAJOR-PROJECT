@@ -43,7 +43,7 @@ export default function TherapistChatView({ therapist }: { therapist: any }) {
         setChats(res.chats || []);
         setLoading(false);
 
-        const socketUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '/';
+        const socketUrl = import.meta.env.VITE_SOCKET_URL ?? (window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin);
         s = io(socketUrl, { withCredentials: true });
         setSocket(s);
 
