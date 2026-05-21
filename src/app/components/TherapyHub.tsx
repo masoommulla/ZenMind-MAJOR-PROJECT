@@ -39,7 +39,7 @@ export default function TherapyHub({ onSessionBooked, onStartChat, userTier = 'f
   const [showAllReviews, setShowAllReviews] = useState(false);
 
   const fetchTherapists = () => {
-    apiFetch<any>('/public/therapists')
+    apiFetch<any>('/therapists')
       .then(res => setTherapists(res.therapists || []))
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
