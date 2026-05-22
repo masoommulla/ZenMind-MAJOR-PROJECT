@@ -27,6 +27,7 @@ import SessionPrepCard from './SessionPrepCard';
 import PostSessionModal from './PostSessionModal';
 import RequireTier from './RequireTier';
 import FakePaymentModal from './FakePaymentModal';
+import TherapyHub from './TherapyHub';
 
 type DashboardProps = {
   onLogout: () => void;
